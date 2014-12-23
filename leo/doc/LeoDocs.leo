@@ -213,6 +213,7 @@
 <v t="ekr.20050830074815.15"><vh>Dan Winkler 2</vh></v>
 <v t="ekr.20050830074815.16"><vh>Dan Winkler 3</vh></v>
 <v t="ekr.20131025044901.17144"><vh>Steve Litt</vh></v>
+<v t="ekr.20141210095600.11"><vh>Dave Williams</vh></v>
 </v>
 </v>
 <v t="ekr.20040414172218.4"><vh>@rst html/acknowledgements.html</vh>
@@ -1146,8 +1147,7 @@
 </v>
 </v>
 <v t="ekr.20101026082911.5536"><vh>Release notes</vh>
-<v t="ekr.20100805165051.7177" descendentVnodeUnknownAttributes="7d7100285509302e302e312e302e3071017d710258090000007374725f6174696d657103580c000000313337363431323837322e30710473550b302e302e332e312e312e3371057d71066803580c000000313337363431323838392e30710773550c302e302e31322e302e302e3771087d710958090000007374725f6174696d65710a580c000000313337363431323238302e30710b735510302e302e31322e302e302e372e302e31710c7d710d58090000007374725f6174696d65710e580c000000313337363431323238382e30710f73550b302e302e332e302e322e3371107d71116803580c000000313337363431323838382e30711273752e"
-expanded="ekr.20141120113801.61,ekr.20141120113801.191,"><vh>@file release_notes.txt</vh></v>
+<v t="ekr.20100805165051.7177" descendentVnodeUnknownAttributes="7d7100285509302e302e312e302e3071017d710258090000007374725f6174696d657103580c000000313337363431323837322e30710473550b302e302e332e312e312e3371057d71066803580c000000313337363431323838392e30710773550c302e302e31322e302e302e3771087d710958090000007374725f6174696d65710a580c000000313337363431323238302e30710b735510302e302e31322e302e302e372e302e31710c7d710d58090000007374725f6174696d65710e580c000000313337363431323238382e30710f73550b302e302e332e302e322e3371107d71116803580c000000313337363431323838382e30711273752e"><vh>@file release_notes.txt</vh></v>
 </v>
 </v>
 <v t="ekr.20141105050314.25"></v>
@@ -19925,7 +19925,7 @@ refresh-from-disk command to populate the node. Do this *before* saving the
 .leo file. If you try to save an empty @auto-org-mode node Leo will warn
 you that you are about to overwrite the file.
 
-The refresh-from-disck command creates an @auto-otl node whose **children**
+The ``refresh-from-disk`` command creates an @auto-org-mode node whose **children**
 represent the contents of the external .org file. Leo does *not* write the
 \@auto-org-mode node itself. This allows you to put Leo directives in the
 node.
@@ -23691,6 +23691,23 @@ The fix was to ic.create_top_node.
 The fix also affected other importer tests.
 </t>
 <t tx="ekr.20141203092457.18"></t>
+<t tx="ekr.20141210095600.11">I am a microbiologist mostly analysing large numbers of bacteria
+genomes for which I use almost entirely Python tools. A couple of
+years ago while working at Yale University I gave Leo go for writing
+Python and organising my notes with.
+
+Not only do I now use Leo is a central repository for scripts I write
+as I explore the data, generate plots, start analyses with third party
+applications etc., but also for storing and organising ideas for
+research and notes parsed out of PDFs of academic papers. And that's
+just for work!
+
+I have a calendar, addresses all my general PIM-type info, and notes
+for any project I'm tinkering with. In short whether I'm at work or
+play Leo is usually involved :-)
+
+Dave Williams &lt;dave@d-dub.org.uk&gt;
+</t>
 <t tx="peckj.20130813123907.6841" str_ctime="1376412039.0" str_mtime="1376412039.0" str_atime="1376414164.0">Documenting new plugins is important for users to be able understand
 and use the features they add. To that effect, there are a few
 documentation steps that should not be overlooked.

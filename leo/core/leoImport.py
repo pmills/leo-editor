@@ -21,6 +21,8 @@ except ImportError:
 import glob
 import importlib
 import os
+import re
+
 if g.isPython3:
     import io
     StringIO = io.StringIO
@@ -28,6 +30,7 @@ else:
     import StringIO
     StringIO = StringIO.StringIO
 import time
+import urllib
 #@-<< imports >>
 #@+others
 #@+node:ekr.20071127175948: ** class LeoImportCommands
@@ -605,10 +608,12 @@ class LeoImportCommands:
         if g.unitTesting:
             assert func or ext in ('.w','.xxx'),(ext,p.h)
         if func and not c.config.getBool('suppress_import_parsing',default=False):
+            s = g.toUnicode(s,encoding=self.encoding)
             s = s.replace('\r','')
             func(atAuto=atAuto,parent=p,s=s)
         else:
             # Just copy the file to the parent node.
+            s = g.toUnicode(s,encoding=self.encoding)
             s = s.replace('\r','')
             self.scanUnknownFileType(s,p,ext,atAuto=atAuto)
         if atAuto:
@@ -804,8 +809,9 @@ class LeoImportCommands:
     #@+node:ekr.20031218072017.3212: *4* ic.importFilesCommand & helper
     def importFilesCommand (self,files=None,treeType=None,redrawFlag=True):
         # Not a command.  It must *not* have an event arg.
-        c = self.c ; current = c.p
-        if not c or not current or not files: return
+        c,current = self.c,self.c.p
+        if not c or not current or not files:
+            return
         self.tab_width = self.getTabWidth()
         self.treeType = treeType
         if len(files) == 2:
@@ -815,7 +821,6 @@ class LeoImportCommands:
             p = self.createOutline(fn,current)
             if p: # createOutline may fail.
                 if not g.unitTesting: g.blue("imported",fn)
-                current = p # 2014/08/16
                 p.contract()
                 p.setDirty()
                 c.setChanged(True)
@@ -1642,7 +1647,13 @@ class RecursiveImportController:
     '''Recursively import all python files in a directory and clean the result.'''
     #@+others
     #@+node:ekr.20130823083943.12615: *3* ctor
-    def __init__ (self,c,one_file=False,theTypes=None,safe_at_file=True,use_at_edit=False):
+    def __init__ (self,c,
+        one_file=False,
+        theTypes=None,
+        safe_at_file=True,
+        use_at_edit=False,
+        use_at_nosent=False,
+    ):
         '''Ctor for RecursiveImportController class.'''
         self.c = c
         self.one_file = one_file
@@ -1650,6 +1661,7 @@ class RecursiveImportController:
         self.safe_at_file = safe_at_file
         self.theTypes = theTypes
         self.use_at_edit = use_at_edit
+        self.use_at_nosent = use_at_nosent
     #@+node:ekr.20130823083943.12597: *3* Pass 1: import_dir
     def import_dir(self,root,dir_):
         '''Import selected files from dir_, a directory.'''
@@ -1672,15 +1684,19 @@ class RecursiveImportController:
             child = root.insertAsLastChild()
             child.h = dir_
             c.selectPosition(child,enableRedrawFlag=False)
+        if trace:
+            g.trace('files2...\n%s' % '\n'.join(files2))
+            g.trace('dirs...\n%s' % '\n'.join(dirs))
         if files2:
             if self.one_file:
                 files2 = [files2[0]]
-            if self.use_at_edit:
+            if self.use_at_edit or self.use_at_nosent:
+                kind = '@edit' if self.use_at_edit else '@nosent'
                 for fn in files2:
                     parent = child or root
                     p = parent.insertAsLastChild()
                     p.h = fn.replace('\\','/')
-                    s,e = g.readFileIntoString(fn,encoding='utf-8',kind='@edit')
+                    s,e = g.readFileIntoString(fn,encoding='utf-8',kind=kind)
                     p.b = s
             else:
                 c.importCommands.importFilesCommand(files2,'@file',redrawFlag=False)
@@ -1918,7 +1934,7 @@ class RecursiveImportController:
         root = p.copy()
         self.fix_back_slashes(root.copy())
         prefix = prefix.replace('\\','/')
-        if not self.use_at_edit:
+        if not self.use_at_edit and not self.use_at_nosent:
             self.remove_empty_nodes(root.copy())
         self.minimize_headlines(root.copy().firstChild(),prefix)
         self.clear_dirty_bits(root.copy())
@@ -1946,9 +1962,7 @@ class RecursiveImportController:
                 p.h = s
     #@+node:ekr.20130823083943.12611: *4* minimize_headlines
     def minimize_headlines (self,p,prefix):
-        
         '''Create @path nodes to minimize the paths required in descendant nodes.'''
-
         trace = False and not g.unitTesting
         # This could only happen during testing.
         if p.h.startswith('@'):
@@ -1962,15 +1976,17 @@ class RecursiveImportController:
             for p in p.children():
                 self.minimize_headlines(p,prefix)
         elif h2.find('/') <= 0 and ends_with_ext:
-            if h2.startswith('/'): h2 = h2[1:]
+            if h2.startswith('/'):
+                h2 = h2[1:]
             if self.use_at_edit:
                 p.h = '@edit %s' % (h2)
-            elif self.safe_at_file:
-                if trace: g.trace('@@file %s' % (h2))
-                p.h = '@@file %s' % (h2)
+            elif self.use_at_nosent:
+                p.h = '@nosent %s' % (h2)
             else:
-                if trace: g.trace('@file %s' % (h2))
                 p.h = '@file %s' % (h2)
+            if self.safe_at_file:
+                p.h = '@' + p.h
+            if trace: g.trace(p.h)
             # We never scan the children of @file nodes.
         else:
             if h2.startswith('/'): h2 = h2[1:]
@@ -2025,12 +2041,157 @@ class RecursiveImportController:
             g.es_exception()
         finally:
             g.app.disable_redraw = False
-            root.contract()
+            for p in root.self_and_subtree():
+                p.contract()
             c.redraw(root)
         t2 = time.time()
         g.es('imported %s nodes in %2.2f sec' % (n,t2-t1))
     #@-others
+#@+node:ekr.20141210051628.26: ** class ZimImportController
+class ZimImportController:
+    '''
+    A class to import Zim folders and files: http://zim-wiki.org/
+    First use Zim to export your project to rst files.
+    
+    Original script by Davy Cottet.
+    
+    User options:
+        @int rst_level = 0
+        @string rst_type
+        @string zim_node_name
+        @string path_to_zim
+    
+    '''
+    #@+others
+    #@+node:ekr.20141210051628.31: *3* zic.__init__
+    def __init__(self,c):
+        '''Ctor for ZimImportController class.'''
+        self.c = c
+        # User options.
+        self.pathToZim = c.config.getString('path_to_zim')
+        self.rstLevel = c.config.getInt('rst_level') or 0
+        self.rstType = c.config.getString('rst_type') or 'rst'
+        self.zimNodeName = c.config.getString('zim_node_name') or 'Imported Zim Tree'
+    #@+node:ekr.20141210051628.28: *3* zic.parseZimIndex
+    def parseZimIndex(self):
+        """
+        Parse Zim wiki index.rst and return a list of tuples (level, name, path)
+        """
+        c = self.c
+        pathToZim = g.os_path_abspath(self.pathToZim)
+        pathToIndex = g.os_path_join(pathToZim,'index.rst')
+        if not g.os_path_exists(pathToIndex):
+            g.es('not found: %s' %(pathToIndex),color='red')
+            return None
+        index = open(pathToIndex).read()
+        # pylint: disable=anomalous-backslash-in-string
+        parse = re.findall('(\t*)-\s`(.+)\s<(.+)>`_',index)
+        if not parse:
+            g.es('invalid index: %s' %(pathToIndex), color='red')
+            return None
+        results = []
+        for result in parse:
+            level = len(result[0])
+            name = result[1].decode('utf-8')
+            path = [g.os_path_abspath(g.os_path_join(
+                pathToZim,urllib.unquote(result[2]).decode('utf-8')))]
+            results.append((level,name, path))
+        return results
+    #@+node:ekr.20141210051628.29: *3* zic.rstToLastChild
+    def rstToLastChild(self,pos,name,rst):
+        """Import an rst file as a last child of pos node with the specified name"""
+        c = self.c
+        c.selectPosition(pos,enableRedrawFlag=False)
+        c.importCommands.importFilesCommand(rst,'@rst',redrawFlag=False)
+        rstNode = pos.getLastChild()
+        rstNode.h = name
+        return rstNode
+    #@+node:davy.20141212140940.1: *3* zic.clean
+    def clean(self,zimNode,rstType):
+        """Clean useless nodes"""
+        warning = 'Warning: this node is ignored when writing this file'
+        for p in zimNode.subtree_iter():
+            # looking for useless bodies
+            if p.hasFirstChild() and warning in p.b:
+                child = p.getFirstChild()
+                table = (
+                    "@rst-no-head %s declarations" % p.h.replace(' ','_'),
+                    "@rst-no-head %s declarations" % p.h.replace(rstType,'').strip().replace(' ','_'),
+                )
+                # Replace content with @rest-no-head first child (without title head) and delete it
+                if child.h in table:
+                    p.b = '\n'.join(child.b.split('\n')[3:])
+                    child.doDelete()
+                    # Replace content of empty body parent node with first child with same name
+                elif p.h == child.h or ("%s %s" % (rstType,child.h) == p.h):
+                    if not child.hasFirstChild():
+                        p.b = child.b
+                        child.doDelete()
+                    elif not child.hasNext():
+                        p.b = child.b
+                        child.copyTreeFromSelfTo(p)
+                        child.doDelete()
+                    else:
+                        child.h = 'Introduction'
+            elif p.hasFirstChild() and p.h.startswith("@rst-no-head") and not p.b.strip():
+                child = p.getFirstChild()
+                p_no_head = p.h.replace("@rst-no-head","").strip()
+                # Replace empty @rst-no-head by its same named chidren
+                if child.h.strip() == p_no_head and not child.hasFirstChild():
+                    p.h = p_no_head
+                    p.b = child.b
+                    child.doDelete()
+            elif p.h.startswith("@rst-no-head"):
+                lines=p.b.split('\n')
+                p.h=lines[1]
+                p.b='\n'.join(lines[3:])
+
+    #@+node:ekr.20141210051628.30: *3* zic.run
+    def run(self):
+        '''Create the zim node as the last top-level node.'''
+        c = self.c
+        # Make sure a path is given.
+        if not self.pathToZim:
+            g.es('Missing setting: @string path_to_zim',color='red')
+            return
+        root = c.rootPosition()
+        while root.hasNext():
+            root.moveToNext()
+        zimNode = root.insertAfter()
+        zimNode.h = self.zimNodeName
+        # Parse the index file
+        files = self.parseZimIndex()
+        if files:
+            # Do the import
+            rstNodes = {'0':zimNode,}
+            for level, name, rst in files:
+                if level == self.rstLevel:
+                    name = "%s %s" % (self.rstType,name)
+                rstNodes[str(level+1)] = self.rstToLastChild(rstNodes[str(level)],name,rst)
+            # Clean nodes
+            g.es('Start cleaning process. Please wait...',color='blue')
+            self.clean(zimNode,self.rstType)
+            g.es('Done',color='blue')
+            # Select zimNode
+            c.selectPosition(zimNode)
+            c.redraw()
+    #@-others
 #@+node:ekr.20101103093942.5938: ** Commands (leoImport)
+#@+node:ekr.20141210051628.33: *3* @g.command(import-zim-folder)
+@g.command('import-zim-folder')
+def import_zim_command(event):
+    '''
+    Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline.
+    This command requires the following Leo settings::
+
+        @int rst_level = 0
+        @string rst_type
+        @string zim_node_name
+        @string path_to_zim
+    '''
+    c = event.get('c')
+    if c:
+        ZimImportController(c).run()
 #@+node:ekr.20120429125741.10057: *3* @g.command(parse-body)
 @g.command('parse-body')
 def parse_body_command(event):

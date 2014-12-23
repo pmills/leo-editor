@@ -38,11 +38,7 @@ if new_keys:
 enableDB = True
     # Don't even think about eliminating this constant:
     # it is needed for debugging.
-no_scroll = False
-    # True: disable all calls to w.setYScrollPosition.
-no_see = False
-    # True: disable all calls to w.see and w.seeInsertPoint.
-    
+
 # Switches to trace the garbage collector.
 trace_gc = False           
 trace_gc_calls = False    
@@ -51,9 +47,7 @@ trace_gc_inited = False
 
 # Other tracing options...
 trace_scroll = False
-    # Trace calls to get/setYScrollPosition
-trace_see = False
-    # Trace calls to see and setInsertPoint.
+    # Trace calls to get/setYScrollPosition.
 trace_minibuffer = False
 trace_modes = False
 
@@ -4108,7 +4102,8 @@ def importModule (moduleName,pluginName=None,verbose=False):
     then from the extensions and external directories.
     '''
     # Important: g is Null during startup.
-    trace = g.app.trace_plugins and not g.unitTesting
+    trace = (False or g.app.trace_plugins) and not g.unitTesting
+    # if moduleName == 'rope': g.pdb()
     module = sys.modules.get(moduleName)
     if module:
         return module
@@ -4121,9 +4116,9 @@ def importModule (moduleName,pluginName=None,verbose=False):
             # so search extensions and external directories here explicitly.
             for findPath in (None,'extensions','external'):
                 if findPath:
-                    findPath2 = g.os_path_finalize_join(
-                        g.app.loadDir,'..',findPath)
-                    findPath = [findPath2]
+                    findPath2 = g.os_path_finalize_join(g.app.loadDir,'..',findPath)
+                    findPath3 = g.os_path_finalize_join(findPath2,moduleName)
+                    findPath = [findPath2,findPath3]
                 if trace and verbose: g.trace('findPath',findPath)
                 try:
                     data = imp.find_module(moduleName,findPath) # This can open the file.
@@ -4783,7 +4778,7 @@ def toEncodedString (s,encoding='utf-8',reportErrors=False):
     '''Convert unicode string to an encoded string.'''
     if not g.isUnicode(s):
         return s
-    if encoding is None:
+    if not encoding:
         encoding = 'utf-8'
     try:
         s = s.encode(encoding,"strict")
@@ -5746,27 +5741,23 @@ tr = translateString
 #@+node:EKR.20040612114220: ** g.Miscellaneous
 #@+node:ekr.20120928142052.10116: *3* g.actualColor
 def actualColor(color):
-
-    if not g.app.log:
-        return color
-
-    c = g.app.log.c
+    '''Return the actual color corresponding to the requested color.'''
+    c = g.app.log and g.app.log.c
     if g.app.debug:
         d = {} # No color translation
     else:
         d = {
+            None:   'log_text_foreground_color',
             'black':'log_text_foreground_color',
             'blue': 'log_warning_color',
             'red':  'log_error_color',
         }
     setting = d.get(color)
-
-    # Bug fix: 2012/10/17: c.config may not yet exist.
+    # Be careful: c.config may not yet exist.
     if c and c.config and setting:
         color2 = c.config.getColor(setting)
     else:
         color2 = color
-
     # g.trace(color,color2)
     return color2
 #@+node:ekr.20060921100435: *3* g.CheckVersion & helpers

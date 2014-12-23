@@ -3,7 +3,7 @@
 <?xml-stylesheet ekr_test?>
 <leo_file xmlns:leo="http://leoeditor.com/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.50" body_secondary_ratio="0.59">
+<globals body_outline_ratio="0.49" body_secondary_ratio="0.73">
 	<global_window_position top="95" left="571" height="929" width="1307"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
@@ -136,13 +136,21 @@
 <v t="ekr.20080907123324.2"><vh>@nosent unittest/at-nosent-line-number-test.py</vh>
 <v t="ekr.20080907123324.3"><vh>at-nosent-child</vh></v>
 </v>
-<v t="ekr.20090704085350.5014"><vh>@shadow ../test/unittest/at-shadow-test.py</vh></v>
-<v t="ekr.20080907122804.1"><vh>@shadow unittest/at-shadow-line-number-test.py</vh></v>
-<v t="ekr.20111213122041.3930"><vh>@shadow unittest/at-shadow-unlink-clones.py</vh></v>
-<v t="ekr.20120229082711.3934"><vh>@@@shadow unittest/at-shadow-unlink-clones.py (COPY)</vh>
+<v t="ekr.20141213094716.13" a="O"><vh>@@@shadow COPY ../test/unittest/at-shadow-test.py</vh>
+<v t="ekr.20141213094716.14"><vh>spam</vh></v>
+<v t="ekr.20141213094716.15"><vh>eggs</vh></v>
+</v>
+<v t="ekr.20141213094716.19" a="O"><vh>@@@shadow COPY unittest/at-shadow-line-number-test.py</vh>
+<v t="ekr.20141213094716.20"><vh>spam</vh></v>
+<v t="ekr.20141213094716.21"><vh>eggs</vh></v>
+</v>
+<v t="ekr.20120229082711.3934"><vh>@@@shadow COPY unittest/at-shadow-unlink-clones.py</vh>
 <v t="ekr.20120229082711.3935"><vh>Node 1</vh></v>
 <v t="ekr.20120229082711.3936"><vh>Node 2</vh></v>
 </v>
+<v t="ekr.20090704085350.5014"><vh>@shadow ../test/unittest/at-shadow-test.py</vh></v>
+<v t="ekr.20080907122804.1"><vh>@shadow unittest/at-shadow-line-number-test.py</vh></v>
+<v t="ekr.20111213122041.3930"><vh>@shadow unittest/at-shadow-unlink-clones.py</vh></v>
 <v t="ekr.20100731163237.5782"><vh>@thin ../test/unittest/at-thin-html-test.html</vh></v>
 <v t="ekr.20090704085350.5022"><vh>@thin ../test/unittest/at-thin-test.py</vh></v>
 <v t="ekr.20070627082044.811"><vh>@thin ../test/unittest/batchTest.py</vh></v>
@@ -286,7 +294,7 @@
 </v>
 </v>
 <v t="ekr.20101220161557.6016"><vh>Active Unit Tests</vh>
-<v t="ekr.20070114140212" descendentVnodeUnknownAttributes="7d7100285808000000302e362e31342e3371017d71025808000000616e6e6f7461746571037d710473580a000000302e362e31352e342e3171057d7106580a0000007273742d696d706f727471077d710828580b000000756e6465726c696e657332710958010000003d710a580b000000756e6465726c696e657331710b58030000002d7e2e710c75735805000000302e372e37710d7d710e5808000000616e6e6f74617465710f7d7110735808000000302e362e31362e3771117d71125808000000616e6e6f7461746571137d7114735808000000302e362e31302e3971157d71165809000000756e69745f746573747117580400000061626364711873752e"><vh>@file activeUnitTests.txt</vh></v>
+<v t="ekr.20070114140212" descendentVnodeUnknownAttributes="7d7100285505302e372e3771017d71025808000000616e6e6f7461746571037d7104735508302e362e31302e3971057d71065809000000756e69745f7465737471075804000000616263647108735508302e362e31342e3371097d710a5808000000616e6e6f74617465710b7d710c735508302e362e31362e37710d7d710e5808000000616e6e6f74617465710f7d711073550a302e362e31352e342e3171117d7112580a0000007273742d696d706f727471137d711428580b000000756e6465726c696e657332711558010000003d7116580b000000756e6465726c696e657331711758030000002d7e2e71187573752e"><vh>@file activeUnitTests.txt</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -2216,5 +2224,15 @@ unl: organizer node--&gt;child1
 gnx: ekr.20140712142620.4581
 unl: organizer node--&gt;child2
 </t>
+<t tx="ekr.20141213094716.13">@others</t>
+<t tx="ekr.20141213094716.14">def spam():
+    pass</t>
+<t tx="ekr.20141213094716.15">def eggs():
+    pass</t>
+<t tx="ekr.20141213094716.19">@others</t>
+<t tx="ekr.20141213094716.20">def spam():
+    pass</t>
+<t tx="ekr.20141213094716.21">def eggs():
+    pass</t>
 </tnodes>
 </leo_file>

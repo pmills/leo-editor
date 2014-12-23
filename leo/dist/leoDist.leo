@@ -62,7 +62,7 @@
 <v t="EKR.20040519090846.9"><vh>@asis ../../README.TXT</vh></v>
 <v t="maphew.20141126130213.3"><vh>@edit ../../setup.cfg</vh></v>
 <v t="maphew.20141126130213.2" a="E"><vh>@file ../../setup.py</vh></v>
-<v t="maphew.20141126131006.2" a="E"><vh>setup.py scrapbook</vh>
+<v t="maphew.20141126131006.2"><vh>setup.py scrapbook</vh>
 <v t="maphew.20141126230535.2"><vh>Required reading</vh></v>
 <v t="maphew.20130503222911.1635"><vh>get_long_description</vh></v>
 <v t="ville.20090213231648.3"><vh>fullsplit (never used)</vh></v>
@@ -1543,10 +1543,7 @@ if not simple:
 #print data_files
 </t>
 <t tx="maphew.20141126131006.2">@ Place holder for functions ripped out of setup.py, that we may possibly reuse later
-
 @c
-
-
 
 setup(
     name = 'leo',

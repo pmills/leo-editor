@@ -98,7 +98,7 @@ def init ():
         g.plugin_signon(__name__)
     return ok
 #@+node:edream.110203113231.879: ** class FTPurl
-class FTPurl:
+class FTPurl(object):
     """An FTP wrapper class to store/retrieve files using an FTP URL.
 
     To create a connection, call the class with the constructor:
@@ -135,7 +135,7 @@ class FTPurl:
             auth = parse[1][:authIndex]
             ftphost = parse[1][authIndex+1:]
         self.ftp = ftplib.FTP(ftphost)
-        if auth == None:
+        if auth is None:
             self.ftp.login()
         else:
             # the URL has username/password
@@ -221,7 +221,7 @@ class FTPurl:
         """Issue a LIST command passing the specified argument and return output as a string."""
         s = []
 
-        if path == None:
+        if path is None:
             path = self.dirname
         try:
             listcmd = 'LIST %s' % path
@@ -233,7 +233,7 @@ class FTPurl:
     #@+node:edream.110203113231.890: *4* exists
     def exists(self, path=None):
         """Return 1 if the specified path exists. If path is omitted, the current file name is tried."""
-        if path == None:
+        if path is None:
             path = self.filename
 
         s = self.dir(path)
@@ -305,7 +305,7 @@ def insert_read_only_node (c,p,name):
         g.es("..." + name)
         new = file.read()
         file.close()
-    except IOError as msg:
+    except IOError: # as msg:
         # g.es("error reading %s: %s" % (name, msg))
         # g.es("...not found: " + name)
         c.setBodyString(p,"") # Clear the body text.

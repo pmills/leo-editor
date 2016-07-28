@@ -114,7 +114,7 @@ def start(event):
             controllers[h] = cc = CtagsController(c)
         cc.start(event)
 #@+node:ekr.20110307092028.14154: ** class CtagsController
-class CtagsController:
+class CtagsController(object):
 
     # To do: put cursor at end of word initially.
 
@@ -137,13 +137,11 @@ class CtagsController:
     #@+node:ekr.20091015185801.5243: *3* complete
     def complete(self,event):
 
-        c = self.c ; cpl = self.completer
-
+        # c = self.c
+        cpl = self.completer
         tc = self.body.textCursor()
         tc.select(tc.WordUnderCursor)
         prefix = tc.selectedText()
-        # g.trace(prefix)
-
         hits = self.lookup(prefix)
         model = QtGui.QStringListModel(hits)
         cpl.setModel(model)
@@ -152,12 +150,10 @@ class CtagsController:
     #@+node:ekr.20110307141357.14195: *3* end
     def end (self,completion=''):
 
-        body = self.body ; cpl = self.completer
-        kill = not completion
-
+        body = self.body
+        cpl = self.completer
         if not completion:
             completion = g.u(cpl.currentCompletion())
-
         if completion:
             cmpl = g.u(completion).split(None,1)[0]
             cmpl = g.u(cmpl)
@@ -169,7 +165,6 @@ class CtagsController:
             tc.movePosition(tc.EndOfWord)
             tc.insertText(cmpl[-extra:])
             body.setTextCursor(tc)
-
         self.kill()
     #@+node:ekr.20110307141357.14198: *3* kill
     def kill (self):

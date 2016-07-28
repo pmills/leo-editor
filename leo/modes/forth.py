@@ -123,14 +123,14 @@ if 0:
         return colorer.match_keywords(s, i)
 # Properties for forth mode.
 properties = {
-	# "indentNextLines": "\\s*[^#]{3,}:\\s*(#.*)?",
+    # "indentNextLines": "\\s*[^#]{3,}:\\s*(#.*)?",
     "lineComment": "\\",
 }
 # Attributes dict for forth_main ruleset.
 forth_main_attributes_dict = {
     "default": "null",
     "digit_re": "",
-	# "escape": "\\",
+    # "escape": "\\",
     "highlight_digits": "false",
     "ignore_case": "false",
     "no_word_sep": "",
@@ -158,7 +158,7 @@ rulesDictDict = {
 }
 # Import dict for forth mode.
 importDict = {}
-class extendForth:
+class extendForth(object):
     '''A helper class to extend the mode tables from @data forth-x settings.'''
     def __init__(self):
         self.c = None # set by pre_init_mode function.
@@ -281,7 +281,7 @@ class extendForth:
     def createDefiningWordRule(self, word):
 
         def forth_defining_word_rule(colorer, s, i):
-            pattern = ''
+
             return colorer.match_word_and_regexp(s, i,
                 kind1="keyword2", # defining word
                 word=word,

@@ -1,9 +1,10 @@
 #@+leo-ver=5-thin
 #@+node:ekr.20060621123339: * @file examples/print_cp.py
-'''A plugin showing how to convert an @button node to a plugin.
+'''
+A plugin showing how to convert an @button node to a plugin.
 
-This plugin registers the 'print-cp' minibuffer command.'''
-__version__ = '0.1'
+This plugin registers the 'print-cp' minibuffer command.
+'''
 import leo.core.leoGlobals as g
 #@+others
 #@+node:ekr.20060621123339.4: ** init
@@ -19,10 +20,10 @@ def init():
 #@+node:ekr.20060621123339.5: ** onCreate
 def onCreate(tag, keys):
     c = keys.get('c')
-    if not c: return
-    thePluginController = pluginController(c)
+    if c:
+        pluginController(c)
 #@+node:ekr.20060621123339.6: ** class pluginController
-class pluginController:
+class pluginController(object):
     #@+others
     #@+node:ekr.20060621123339.7: *3* __init__ (pluginController, print_cp.py)
     def __init__(self, c):

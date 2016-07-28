@@ -25,6 +25,7 @@
 <v t="ekr.20101026142031.1516"><vh>Registry Keys</vh></v>
 </v>
 </v>
+<v t="ekr.20160501153808.1"><vh>Anaconda install notes</vh></v>
 <v t="EKR.20040519091259"><vh>Announcements</vh>
 <v t="EKR.20040519091259.1"><vh>Download statistics</vh></v>
 <v t="ekr.20160315105606.1"><vh>Previous announcements</vh>
@@ -35,9 +36,8 @@
 <v t="ekr.20131105110107.16636"><vh>Leo 4.11 final</vh></v>
 </v>
 <v t="ekr.20141105082156.2"><vh>Leo 5.0 final</vh></v>
-<v t="ekr.20150415145711.1"><vh>Leo 5.1 final (markdown)</vh></v>
-</v>
-<v t="ekr.20160314155002.1"><vh>Leo 5.2-final (markdown)</vh>
+<v t="ekr.20150415145711.1"><vh>Leo 5.1 final</vh></v>
+<v t="ekr.20160314155002.1"><vh>Leo 5.2-final</vh>
 <v t="ekr.20160314155002.2"><vh> Highlights</vh></v>
 <v t="ekr.20160314155002.3"><vh>Bugs</vh>
 <v t="ekr.20160314155002.4"><vh>Fixed #131: Insert time in headline now inserts time in body</vh></v>
@@ -142,6 +142,8 @@
 <v t="ekr.20160314155002.95"><vh>Settings for gutter numbers</vh></v>
 </v>
 </v>
+</v>
+<v t="ekr.20160428153901.1"><vh>Leo 5.3-final</vh></v>
 <v t="EKR.20040519091259.2"><vh>Quotes of the month</vh>
 <v t="ekr.20080901114425.2"><vh>Sept 2008</vh></v>
 <v t="ekr.20070425092712"><vh>April 2007</vh></v>
@@ -200,6 +202,7 @@
 </v>
 <v t="ekr.20101027054254.1590"><vh>@edit ../../leo.nsi</vh></v>
 <v t="ekr.20101027115225.1494"><vh>@file nsi-boilerplate.txt</vh></v>
+<v t="ekr.20160510090441.1"><vh>@file ../../leo_assoc.nsi</vh></v>
 </v>
 <v t="ekr.20101027070126.1639"><vh>@button make leo</vh>
 <v t="ekr.20090905082405.1487"><vh>&lt;&lt; includes &gt;&gt;</vh></v>
@@ -259,13 +262,82 @@ INCIDENTAL, CONSEQUENTIAL OR OTHER DAMAGES.
 </t>
 <t tx="EKR.20040519090846.8">Metadata-Version: 1.0
 Name: leo
-Version: 5.2
+Version: 5.3
 Summary: Leo: Leonine Editor with Outlines
 Home-page: http://leoeditor.com/
 Author: Edward K. Ream
 Author-email: edreamleo@gmail.com
 License: MIT
-Description: **Leo is**:
+Keywords: Outliner, IDE, PIM
+Platform: Windows, Linux, MaxOS
+Classifier: Development Status :: 6 - Mature
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Text Processing
+Download-URL: http://sourceforge.net/projects/leo/files/
+Description: Leo is:
+
+             - An outliner. Everything in Leo is an outline.
+             - A Personal Information Manager.
+             - A browser with a memory.
+             - A powerful scripting environment.
+             - A tool for studying other people's code.
+             - A fully-featured IDE, with emacs-like commands.
+             - Extensible via a simple plugin architecture.
+             - A tool that plays well with  IPython, vim and xemacs.
+             - Written in 100% pure Python
+             - Compatible with Python 2.6 and above or Python 3.0 and above.
+             - A tool with an inspiring and active community.
+             
+             **Leo's unique features**
+             
+             - Always-present, persistent, outline structure.
+             - Leo's underlying data is a Directed Acyclic Graph.
+             - Clones create multiple views of an outline.
+             - A simple, powerful, outline-oriented Python API.
+             - Scripts and programs can be composed from outlines.
+             - Importers convert flat text into outlines.
+             - Scripts have full access to all of Leo's sources.
+             - Commands that act on outline structure.
+               Example: the rst3 command converts outlines to reStructuredText.
+             - @test and @suite scripts create unit tests automatically.
+             - @button scripts apply scripts to outline data.
+             - Outline-oriented directives.
+             
+             Simulating these features in vim, Emacs or Eclipse is possible,
+             just as it is possible to simulate Python in assembly language...
+             
+             **Links**
+             
+             - Leo's home page:  http://leoeditor.com
+             - Documentation:    http://leoeditor.com/leo_toc.html
+             - Tutorials:        http://leoeditor.com/tutorial.html
+             - Video tutorials:  http://leoeditor.com/screencasts.html
+             - Forum:            http://groups.google.com/group/leo-editor
+             - Download:         http://sourceforge.net/projects/leo/files/
+             - Github sources:   https://github.com/leo-editor/leo-editor
+             - What people are saying about Leo:     http://leoeditor.com/testimonials.html
+             - A web page that displays .leo files:  http://leoeditor.com/load-leo.html
+             - More links:       http://leoeditor.com/leoLinks.html
+</t>
+<t tx="EKR.20040519090846.9">Leo 5.3-final May 2, 2016
+
+[Leo](http://leoeditor.com/) 5.3-final is now available on [SourceForge](http://sourceforge.net/projects/leo/files/Leo/). Leo is a PIM, an IDE and an outliner.
+
+**The highlights of Leo 5.3**
+
+- Leo now supports Jupyter Notebook (.ipynb) files.
+- @chapter is now allowed anywhere. No need for @chapters.
+- Faster spell checking.
+- The rst3 command supports @rst-table.
+- The show-invisibles command now uses native Qt characters.
+- Dozens of other improvements and bug fixes.
+
+**Leo is**:
 
 - An outliner. Everything in Leo is an outline.
 - A Personal Information Manager.
@@ -295,50 +367,6 @@ Description: **Leo is**:
 
 Simulating these features in vim or Emacs is possible, just as
 it is possible to simulate Python in assembly language...
-
-**Links**
-
-- Leo's home page:  http://leoeditor.com
-- Documentation:    http://leoeditor.com/leo_toc.html
-- Tutorials:        http://leoeditor.com/tutorial.html
-- Video tutorials:  http://leoeditor.com/screencasts.html
-- Forum:            http://groups.google.com/group/leo-editor
-- Download:         http://sourceforge.net/projects/leo/files/
-- Github sources:   https://github.com/leo-editor/leo-editor
-- What people are saying about Leo:     http://leoeditor.com/testimonials.html
-- A web page that displays .leo files:  http://leoeditor.com/load-leo.html
-- More links:       http://leoeditor.com/leoLinks.html
-
-Download URL: http://sourceforge.net/projects/leo/files/
-Keywords: Outliner, IDE, PIM
-Platform: Windows, Linux, MacOS
-Categories:
-    Development Status :: 6 - Mature
-    License :: OSI Approved :: MIT License
-    Operating System :: MacOS
-    Operating System :: Microsoft :: Windows
-    Operating System :: POSIX :: Linux
-    Programming Language :: Python
-    Topic :: Software Development
-    Topic :: Text Processing
-</t>
-<t tx="EKR.20040519090846.9">Leo 5.2-final, March 18, 2016
-
-[Leo](http://leoeditor.com/) 5.2-final is now available [at SourceForge.](http://sourceforge.net/projects/leo/files/Leo/) Leo is a PIM, an IDE and an outliner.
-
-**The highlights of Leo 5.2**
-
-- Easy install with PyInstaller packaging
-- c.cloneFindByPredicate
-- clone-find-marked commands
-- decorators create all Leo commands
-- find-def and find-var
-- help-for-keystroke
-- The --ipyhon command-line option works with latest IPython versions
-- Optional line numbers in the body pane
-- show-invisibles uses Qt characters
-- Themes
-- Wildcard file names on Leo's command line
 
 **Links**
 
@@ -616,14 +644,6 @@ Pre-testing:
 - Run all unit tests with *both* Python 2 and 3.
 - Run pylint -a.
 
-LeoDocs.leo:
-- Remove top-level clones.
-- Spell check entire file.
-- Select the readme node.
-
-LeoReleaseNotes.leo:
-- Update release notes from LeoDocs.leo
-
 Update release notes and web documentation:
 - Make sure copyright dates are correct.
 - Update version numbers in html/conf.py
@@ -634,7 +654,15 @@ Update release notes and web documentation:
 - Update version number and modification date on Leo's home page.
   (The sphinx date is updated automatically.)
 - Regenerate all .html files.
-- Copy files to web.
+- Copy files to web, including leo/doc/html/index.html
+
+LeoReleaseNotes.leo:
+- Update release notes from LeoDocs.leo
+
+LeoDocs.leo:
+- Remove top-level clones.
+- Spell check entire file.
+- Select the readme node.
 
 leoVersion.py:
 - Update version constant.
@@ -655,7 +683,7 @@ LeoDist.leo:
 
 Run pyinstaller:
 - Delete leo-editor/dist and leo-editor/build folders first.
-- Run pyinstaller launchLeo-unified.spec.
+- Run pyinstaller2 launchLeo-unified.spec.
 - Test it, then rerun it (so .pyo files are not part of the package)
 - Compress the folder:
     - Windows: Leo_&lt;version&gt;_Win.zip.
@@ -667,7 +695,7 @@ Run make-leo.
 - Commit any changed files.
 
 Create the executable installer:
-- Double-click leo.nsi.
+- Double-click leo.nsi. (Run with makeNSIS.exe)
 
 Test files in installed folder:
 - Run all unit tests in the installed folder, with the installed Leo.
@@ -677,8 +705,8 @@ Test files in installed folder:
     - LeoDocs.leo
 
 Create a git tag **last**:
-- Do *not* use -f option!
 - Create a full (annotated) tag: git tag -a Leo_5.2 -m "commit message"
+    - Do *not* use -f option!
 
 Scan all folders &amp; files before uploading.
 
@@ -687,15 +715,16 @@ Create Release on SourceForge: http://sourceforge.net/projects/leo/
 Announcements
 - Update version number on Leo's wikipedia site:
   http://en.wikipedia.org/wiki/Leo_%28editor%29
-  Edit with the 'Edit this page' *tab* (not a link)
-- Update version number on web site.
-
-1. Announce to SourceForge:  http://sourceforge.net/projects/leo/
+  - Edit with the 'Edit this page' *tab* (not a link)
+  - Update version number on web site.
+- Update the *GitHub* release at https://github.com/leo-editor/leo-editor/releases
+   This must be done *soon* after the release's actual commit.
+- Announce to SourceForge:  http://sourceforge.net/projects/leo/
    **Markdown accepted, so paste release notes in LeoDocs.leo.**.
    **Paste SourceForge announcement to leo-editor announcement &amp; blog post**.
-2. Announce to leo-editor.
+- Announce to leo-editor.
    **Paste source-forge announcement**.
-3. Announce to Python-announce-list using email:
+- Announce to Python-announce-list using email:
    mailto:python-announce-list@python.org
    **Paste source-forge or leo-editor announcement**.
   - Check it by visiting the archive:
@@ -749,7 +778,7 @@ Copy these files from the leo\dist folder to the top-level folder::
     nsi-boilerplate.txt
 '''
 
-version = '5.2-final' ##version
+version = '5.3-final' ##version
 &lt;&lt; includes &gt;&gt;
 &lt;&lt; define global paths and file names &gt;&gt;
 
@@ -1058,7 +1087,7 @@ def deleteTempFiles (self,lines):
         # This commit ensures the proper files are included in the distribution.
         # r'git commit -m "commit doc files during make"',
         ##version
-        r'%s archive --format zip --output "%s" --prefix=Leo-5.2-final/ master' % (
+        r'%s archive --format zip --output "%s" --prefix=Leo-5.3-final/ master' % (
             r'c:\apps\Git\bin\git.exe',zipFile),
     )
     g.execute_shell_commands(commands,trace=True)
@@ -1333,7 +1362,7 @@ A. Add  ~/leo-5.2 to your path.
 B. Create alias for Leo.
 
 I prefer using aliases because they allow me to start Leo using Python 2 or 3,
-or other distributesion, like Anaconda 2 or 3.
+or other distributions, like Anaconda 2 or 3.
 
 See `Running Leo`_ for how to run Leo after installing it.
 </t>
@@ -1654,7 +1683,7 @@ and answer wizard steps, you'll need your pypi user and pass handy.
 DO save at end.
 
 Step 2: manually edit %HOME%\.pypirc and make sure it resembles below.
-DONT use httpS.
+**Do not** use https.
 
 Step 3: the commands in previous message (`python setup.py sdist upload`)
 
@@ -2745,5 +2774,69 @@ Includes descendant settings if os.environ('HOSTNAME') != name
 </t>
 <t tx="ekr.20160314155303.1"></t>
 <t tx="ekr.20160315105606.1"></t>
+<t tx="ekr.20160428153901.1">Leo 5.3-final May 2, 2016
+
+[Leo](http://leoeditor.com/) 5.3-final is now available on [SourceForge](http://sourceforge.net/projects/leo/files/Leo/). Leo is a PIM, an IDE and an outliner.
+
+**The highlights of Leo 5.3**
+
+- Leo now supports Jupyter Notebook (.ipynb) files.
+- @chapter is now allowed anywhere. No need for @chapters.
+- Faster spell checking.
+- The rst3 command supports @rst-table.
+- The show-invisibles command now uses native Qt characters.
+- Dozens of other improvements and bug fixes.
+
+**Leo is**:
+
+- An outliner. Everything in Leo is an outline.
+- A Personal Information Manager.
+- A browser with a memory.
+- A powerful scripting environment.
+- A tool for studying other people's code.
+- A fully-featured IDE, with emacs-like commands.
+- Extensible via a simple plugin architecture.
+- A tool that plays well with  IPython, vim and xemacs.
+- Written in 100% pure Python
+- Compatible with Python 2.6 and above or Python 3.0 and above.
+- A tool with an inspiring and active community.
+
+**Leo's unique features**:
+    
+- Always-present, persistent, outline structure.
+- Leo's underlying data is a Directed Acyclic Graph.
+- Clones create multiple views of an outline.
+- A simple, powerful, outline-oriented Python API.
+- Scripts and programs can be composed from outlines.
+- Importers convert flat text into outlines.
+- Scripts have full access to all of Leo's sources.
+- Commands that act on outline structure.
+  Example: the rst3 command converts outlines to reStructuredText.
+- @test and @suite scripts create unit tests automatically.
+- @button scripts apply scripts to outline data.
+- Outline-oriented directives.
+
+Simulating these features in vim or Emacs is possible, just as
+it is possible to simulate Python in assembly language...
+
+**Links**
+
+- [Leo's home page](http://leoeditor.com)
+- [Documentation](http://leoeditor.com/leo_toc.html)
+- [Tutorials](http://leoeditor.com/tutorial.html)
+- [Video tutorials](http://leoeditor.com/screencasts.html)
+- [Forum](http://groups.google.com/group/leo-editor)
+- [Download](http://sourceforge.net/projects/leo/files/)
+- [Leo on Github](https://github.com/leo-editor/leo-editor)
+- [What people are saying about Leo](http://leoeditor.com/testimonials.html)
+- [A web page that displays .leo files](http://leoeditor.com/load-leo.html)
+- [More links](http://leoeditor.com/leoLinks.html)
+</t>
+<t tx="ekr.20160501153808.1">- Install pyenchant. (spelling)
+- Install meta (livecode plugin)
+- Downinstall setuptools:
+    - Erase setuptools stuff from Lib/sitecustomize.
+    - pip2/3 install setuptools==19.2
+</t>
 </tnodes>
 </leo_file>

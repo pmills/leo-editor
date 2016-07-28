@@ -34,7 +34,7 @@ normcase = g.os_path_normcase
 split = g.os_path_split
 #@+others
 #@+node:ekr.20100208062523.5885: ** class Cacher
-class Cacher:
+class Cacher(object):
     '''A class that encapsulates all aspects of Leo's file caching.'''
     #@+others
     #@+node:ekr.20100208082353.5919: *3* cacher.Birth
@@ -50,7 +50,6 @@ class Cacher:
         self.globals_tag = 'leo.globals'
             # 'leo3k.globals' if g.isPython3 else 'leo2k.globals'
         self.inited = False
-        
     #@+node:ekr.20100208082353.5918: *4* cacher.initFileDB
     def initFileDB(self, fn):
         trace = False and not g.unitTesting
@@ -166,7 +165,6 @@ class Cacher:
         '''
         trace = False and not g.unitTesting
         c = self.c
-        indices = g.app.nodeIndices
         gnxString = g.toUnicode(gnxString)
         gnxDict = c.fileCommands.gnxDict
         if gnxString is None: v = None
@@ -358,7 +356,7 @@ class Cacher:
         assert g.app.db is not None
             # a PickleShareDB instance.
         # Make sure g.guessExternalEditor works.
-        junk = g.app.db.get("LEO_EDITOR")
+        g.app.db.get("LEO_EDITOR")
         self.initFileDB('~/testpickleshare')
         db = self.db
         db.clear()
@@ -374,7 +372,7 @@ class Cacher:
 #@+node:ekr.20100208223942.5967: ** class PickleShareDB
 _sentinel = object()
 
-class PickleShareDB:
+class PickleShareDB(object):
     """ The main 'connection' object for PickleShare database """
     #@+others
     #@+node:ekr.20100208223942.5968: *3*  Birth & special methods
@@ -413,7 +411,7 @@ class PickleShareDB:
     def __contains__(self, key):
         trace = False and g.unitTesting
         if trace: g.trace('(PickleShareDB)', key)
-        return self.has_key(key)
+        return self.has_key(key) # NOQA
     #@+node:ekr.20100208223942.5971: *4* __delitem__
     def __delitem__(self, key):
         """ del db["key"] """

@@ -76,10 +76,9 @@ def getWordConnection():
         word.Visible = 1
         word.Documents.Add()
         return word
-    except Exception as err:
+    except Exception:
         g.warning("Failed to connect to Word")
         raise
-        # return None
 #@+node:EKR.20040517075715.17: ** doPara
 def doPara(word, text, style=None):
 
@@ -99,16 +98,15 @@ def writeNodeAndTree (c, word, header_style, level,
     maxlevel = 3,
     usesections = 1,
     sectionhead = "",
-    vnode = None):
-
+    vnode = None
+):
     """Write a node and its children to Word"""
-
     if vnode is None:
         vnode = c.currentVnode()
     #
     dict = c.scanAllDirectives(p=vnode)
     encoding = dict.get("encoding",None)
-    if encoding == None:
+    if encoding is None:
         # encoding = c.config.default_derived_file_encoding
         encoding = sys.getdefaultencoding()
     #
@@ -134,7 +132,7 @@ def cmd_Export(event):
     try:
         word = getWordConnection()
         if word:
-            header_style = getConfiguration().get("Main", "Header_Style")
+            # header_style = getConfiguration().get("Main", "Header_Style")
             # Based on the rst plugin
             g.blue("Writing tree to Word")
             config = getConfiguration()
@@ -145,7 +143,7 @@ def cmd_Export(event):
                 config.get("Main", "use_section_numbers") == "Yes",
                 "")
             g.es("Done!")
-    except Exception as err:
+    except Exception:
         g.error("Exception writing Word")
         g.es_exception()
 #@-others

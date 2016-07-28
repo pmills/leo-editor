@@ -169,7 +169,7 @@
 <v t="ekr.20100808060203.4273"><vh>@file html/index.html</vh></v>
 </v>
 <v t="ekr.20101007100904.4372"><vh>Slideshows</vh>
-<v t="ekr.20101028110015.8271" descendentVnodeUnknownAttributes="7d710028580b000000302e312e312e382e322e3171017d7102580b0000007374725f6c656f5f706f7371035800000000710473580b000000302e312e312e382e352e3171057d7106580b0000007374725f6c656f5f706f737107680473580b000000302e312e312e382e332e3171087d7109580b0000007374725f6c656f5f706f73710a680473580b000000302e312e312e382e342e31710b7d710c580b0000007374725f6c656f5f706f73710d680473752e"><vh>@file slideshows.txt</vh></v>
+<v t="ekr.20101028110015.8271" descendentVnodeUnknownAttributes="7d710028550b302e312e312e382e342e3171017d7102580b0000007374725f6c656f5f706f7371035800000000710473550b302e312e312e382e332e3171057d7106580b0000007374725f6c656f5f706f737107680473550b302e312e312e382e352e3171087d7109580b0000007374725f6c656f5f706f73710a680473550b302e312e312e382e322e31710b7d710c580b0000007374725f6c656f5f706f73710d680473752e"><vh>@file slideshows.txt</vh></v>
 </v>
 <v t="ekr.20131005214621.16089"><vh>TOC</vh>
 <v t="ekr.20090428102353.1"><vh>@edit html\leo_toc.html.txt</vh></v>
@@ -189,7 +189,7 @@
 <v t="ekr.20131017094004.16739"><vh>How to...</vh>
 <v t="ekr.20090401113141.1"><vh>How to generate odt/rtf/pdf files</vh>
 <v t="ekr.20090620131445.5595"><vh>Post from ville</vh></v>
-<v t="ekr.20090401113141.2"><vh>@rst c:\prog\test\test.html</vh>
+<v t="ekr.20090401113141.2"><vh>@rst c:/test/test.html</vh>
 <v t="ekr.20090401113141.4"><vh>section 1</vh></v>
 </v>
 </v>
@@ -305,6 +305,8 @@
 <v t="ekr.20141109053526.4"><vh>Scipting &amp; Testing</vh>
 <v t="ekr.20141108064630.15"><vh>How can I create buttons with dropdown menus?</vh></v>
 <v t="ekr.20120229094652.15099"><vh>How can I make commonly-used scripts widely accessible?</vh></v>
+<v t="ekr.20160415031743.21"><vh>How can I organize large docstrings?</vh></v>
+<v t="ekr.20160428105918.1"><vh>How can I run pylint outside of Leo?</vh></v>
 <v t="ekr.20131115075142.16636"><vh>How can I test settings easily?</vh></v>
 <v t="ekr.20141108064630.12"><vh>How can I use setuptools instead of .bat files?</vh></v>
 <v t="ekr.20141108064630.13"><vh>How can scripts call functions from Leo's core?</vh></v>
@@ -323,6 +325,7 @@
 <v t="ekr.20150416100041.1"><vh>How can I organize data so I can find stuff later?</vh></v>
 <v t="ekr.20120229094652.15124"><vh>How can I restore focus without using the mouse</vh></v>
 <v t="ekr.20050830115714.116"><vh>How can I show Leo files with Excel?</vh></v>
+<v t="ekr.20160414191631.1"><vh>How can I simulate more flexible clones?</vh></v>
 <v t="ekr.20141030042423.9"><vh>How can I specify the root directory of a thumb drive?</vh></v>
 <v t="ekr.20160304081437.3"><vh>How can I use a dark theme in Leo?</vh></v>
 <v t="ekr.20120229094652.15148"><vh>How can I use BibTeX citations from Leo?</vh></v>
@@ -395,6 +398,7 @@
 <v t="ekr.20131002055813.19037"><vh>Moving the cursor in text panes</vh></v>
 <v t="ekr.20131001100335.15946"><vh>The minibuffer &amp; completions</vh></v>
 <v t="ekr.20131001100335.15938"><vh>Finding &amp; replacing text</vh></v>
+<v t="ekr.20160428113347.1"><vh>Clone-find commands</vh></v>
 <v t="ekr.20131002055813.19837"><vh>Undoing and redoing changes</vh></v>
 <v t="ekr.20131001100335.15947"><vh>Getting help</vh></v>
 <v t="ekr.20131004064408.16020"><vh>Leo directives</vh></v>
@@ -485,6 +489,7 @@
 <v t="ekr.20070317043727.3"><vh>Complex settings nodes</vh>
 <v t="ekr.20090116094356.5"><vh>\@button</vh></v>
 <v t="ekr.20090116094356.6"><vh>\@commands</vh></v>
+<v t="ekr.20160428111506.1"><vh>\@command-history</vh></v>
 <v t="ekr.20090116094356.7"><vh>\@data</vh></v>
 <v t="ekr.20090116094356.8"><vh>\@enabled-plugins</vh></v>
 <v t="ekr.20090116094356.11"><vh>\@font</vh></v>
@@ -666,6 +671,7 @@
 <v t="ekr.20150323161357.3"><vh>Moving outline nodes</vh></v>
 <v t="ekr.20150323161357.4"><vh>Moving the cursor</vh></v>
 </v>
+<v t="ekr.20160428110816.1"><vh>Clone-find commands</vh></v>
 <v t="ekr.20150318110552.10"><vh>Debug commands</vh></v>
 <v t="ekr.20150318110552.18"><vh>Edit commands</vh>
 <v t="ekr.20150318110552.21"><vh>Cutting, pasting and selecting text</vh></v>
@@ -968,6 +974,7 @@
 <v t="ekr.20131015035606.16780"><vh>Moving the cursor</vh></v>
 </v>
 <v t="ekr.20131015035606.16801"><vh>Frequently used commands</vh></v>
+<v t="ekr.20160428104050.1"><vh>Gathering find commands</vh></v>
 <v t="ekr.20131015035606.16786"><vh>Leo directives</vh></v>
 <v t="ekr.20131015035606.16788"><vh>Settings</vh></v>
 <v t="ekr.20131031101712.16486"><vh>Node types</vh></v>
@@ -1191,6 +1198,7 @@
 <v t="ekr.20160415031743.3"><vh>Create xml stylesheet elements only from settings</vh></v>
 <v t="ekr.20160415031743.15"><vh>Fixed #132: Section Reference causes clone on Leo-Editor file open</vh></v>
 <v t="ekr.20160415031743.6"><vh>Fixed #156: ILeo errors not piped to Log and Do not show in Ipython console</vh></v>
+<v t="ekr.20160428073403.3"><vh>Fixed #180: goto-prev-history-node bugged with bookmarks</vh></v>
 <v t="ekr.20160415031743.12"><vh>Fixed #221: goto-global-line navigating to wrong line reported by PyLint</vh></v>
 <v t="ekr.20160416163605.21"><vh>Fixed #241: QMimeData...</vh></v>
 <v t="ekr.20160415031743.10"><vh>Fixed #242: @auto-rst open/save error</vh></v>
@@ -1198,16 +1206,24 @@
 <v t="ekr.20160415031743.11"><vh>Fixed #247: @language c breaks goto-global-line</vh></v>
 <v t="ekr.20160415031743.9"><vh>Fixed #249: Leo and Stickynote plugin do not request to save</vh></v>
 <v t="ekr.20160416163605.17"><vh>Fixed #251: goto-global-line is inaccurate with @clean</vh></v>
+<v t="ekr.20160428073403.10"><vh>Fixed #252: goto-next clone activate chapter view</vh></v>
+<v t="ekr.20160428073403.4"><vh>Fixed #258: leoBridge does not work with @auto-md</vh></v>
 <v t="ekr.20160416163605.105"><vh>Fixed #261: exception executing equal-sized-panes</vh></v>
+<v t="ekr.20160428073403.5"><vh>Fixed #264: Solution to #261 needs improvement</vh></v>
+<v t="ekr.20160428073403.6"><vh>Fixed #265: Erratic scrolling bug</vh></v>
+<v t="ekr.20160428073403.7"><vh>Fixed #268: cff &amp; cfa could search some @all trees</vh></v>
+<v t="ekr.20160428073403.11"><vh>Fixed #270: Leo's keyboard events don't work after...</vh></v>
+<v t="ekr.20160501113304.3"><vh>Fixed #279: Revert bugs with tabs</vh></v>
 <v t="ekr.20160415031743.16"><vh>Fixed an ancient scrolling problem</vh></v>
 <v t="ekr.20160415031743.5"><vh>Fixed bug: Undo paste-node selected the wrong node</vh></v>
 <v t="ekr.20160416163605.4"><vh>Fixed shutdown hard crash on Python 3</vh></v>
+<v t="ekr.20160428073403.8"><vh>Fixed vim-mode problems</vh></v>
 <v t="ekr.20160418093902.1"><vh>Investigated #129: Font setting overridden by new workbook</vh></v>
 <v t="ekr.20160415031743.13"><vh>Investigated #205: @ or @doc does't work perfectly in @clean</vh></v>
 <v t="ekr.20160415031743.7"><vh>Investigated #248:  Empty lines in @file/@clean trees</vh></v>
+<v t="ekr.20160501113304.4"><vh>Investigated #280: @data qt-scintilla-styles only works in leoSetting.leo</vh></v>
 <v t="ekr.20160415031743.4"><vh>jEdit2py now runs only on Python 3</vh></v>
 <v t="ekr.20160416163605.34"><vh>Leo now allows bindings to numbers!</vh></v>
-<v t="ekr.20160417062046.1"><vh>Leo now allows plain keys to be found in the outline pane</vh></v>
 <v t="ekr.20160416163605.33"><vh>Leo now honors @bool outline_pane_has_initial_focus</vh></v>
 <v t="ekr.20160416163605.36"><vh>The last outline node is now always visible.</vh></v>
 </v>
@@ -1215,26 +1231,14 @@
 <v t="ekr.20160415031743.28"><vh>Improved chapters</vh></v>
 <v t="ekr.20160416163627.1"><vh>Improved Leo's spell tab</vh></v>
 <v t="ekr.20160415031743.32"><vh>Leo now supports Jupyter (.ipynb) files</vh></v>
+<v t="ekr.20160417062046.1"><vh>Leo now allows plain keys to be found in the outline pane</vh></v>
 <v t="ekr.20160415031743.33"><vh>The rst3 command now supports @rst-table</vh></v>
 <v t="ekr.20160416163605.6"><vh>The show-invisibles command uses Qt characters</vh></v>
 </v>
 <v t="ekr.20160417061710.1"><vh>Commands: new and improved</vh></v>
 <v t="ekr.20160417062135.1"><vh>Plugins: new and improved</vh></v>
 </v>
-<v t="ekr.20160415031743.20"><vh>Docs TO DO</vh>
-<v t="ekr.20160414191609.1"><vh>Document cffm, cff in Tutorial, cheat sheet, etc</vh></v>
-<v t="ekr.20160414191631.1"><vh>Gathering scripts</vh></v>
-<v t="ekr.20160414191645.1"><vh>pylint command/script</vh></v>
-<v t="ekr.20160415031743.21"><vh>A Leonine pattern to organize docstrings</vh></v>
-<v t="ekr.20160417113739.1"><vh>Docs wishlist for newbies (Fidel)</vh>
-<v t="ekr.20160417113739.2"><vh>Quickstart tells how to associate .leo files</vh></v>
-<v t="ekr.20160417113739.3"><vh>More buttons in quick-start guide</vh></v>
-<v t="ekr.20160417113739.4"><vh>Better descript of plugins</vh></v>
-<v t="ekr.20160417113739.5"><vh>Quickstart opens by default</vh></v>
-</v>
-</v>
-<v t="ekr.20160418165705.1"><vh>** document history list</vh></v>
-<v t="ekr.20160418165714.1"><vh>** add @data history-list to leoSettings.leo</vh></v>
+<v t="ekr.20160502092850.1"><vh>** update myLeoSettings.leo docs</vh></v>
 </vnodes>
 <tnodes>
 <t tx="EKR.20040524104904.140">Leo stores options in **@settings trees**, outlines whose headline is @settings. When opening a .leo file, Leo looks for @settings trees not only in the outline being opened but also in various leoSettings.leo files. This scheme allows for the following kinds of settings:
@@ -1252,7 +1256,6 @@ There are four kinds of settings files:
 
 3. **Machine settings files**, named **LeoSettings.leo** (note the capital 'L'), and appearing in a unique directory.
 
-4. **Command-line settings files**, specified using Leo's -c command-line option. Any .leo file may be used, provided it has an @settings tree. These files typically provide a common set of settings for files scattered in various places on the file system.
 
 The following sections describe the kinds of nodes in @settings trees.
 </t>
@@ -5050,31 +5053,26 @@ The file leo/test/test.leo contains the source code for leoBridgeTest.py. Here i
 </t>
 <t tx="ekr.20070317043727">Organizer nodes have headlines that do no start with @. Organizer nodes may be inserted freely without changing the meaning of an @setting tree.
 </t>
-<t tx="ekr.20070317043727.2">Simple settings nodes have headlines of the form::
+<t tx="ekr.20070317043727.2">Simple settings nodes have headlines of the form ``@&lt;type&gt; name = val``.
+These settings set the value of name to val, with the indicated type::
 
-    @&lt;type&gt; name = val
-
-set the value of name to val, with the indicated type.
-
-&lt;type&gt; may be one of the following:
-
-=============== =========================================================================================
-&lt;type&gt;          Valid values
---------------- -----------------------------------------------------------------------------------------
-\@bool           True, False, 0, 1
-\@color          A Qt color name or value, such as 'red' or 'xf2fddff' (without the quotes)
-\@directory      A path to a directory
-\@float          A floating point number of the form nn.ff.
-\@int            An integer
-\@ints[list]     An integer (must be one of the ints in the list).
-                 Example: @ints meaningOfLife[0,42,666]=42
-\@keys[name]     Gives a name to a set of bindings for the Check Bindings script in leoSettings.leo.
-\@path           A path to a directory or file
-\@ratio          A floating point number between 0.0 and 1.0, inclusive.
-\@string         A string
-\@strings[list]  A string (must be one of the strings in the list).
-                 Example: @strings tk_relief['flat','groove','raised']='groove'
-=============== =========================================================================================
+    &lt;type&gt;          Valid values
+    ------          ------------
+    @bool           True, False, 0, 1
+    @color          A Qt color name or value, such as 'red' or 'xf2fddff'   
+                    (without the quotes)
+    @directory      A path to a directory
+    @float          A floating point number of the form nn.ff.
+    @int            An integer
+    @ints[list]     An integer (must be one of the ints in the list).
+                    Example: @ints meaningOfLife[0,42,666]=42
+    @keys[name]     Gives a name to a set of bindings.
+                    (For the Check Bindings script in leoSettings.leo.)
+    @path           A path to a directory or file
+    @ratio          A floating point number between 0.0 and 1.0, inclusive.
+    @string         A string
+    @strings[list]  A string (must be one of the strings in the list).
+                    Example: @strings tk_relief['flat','groove','raised']='groove'
 
 **Note**: For a list of Tk color specifiers see:
 
@@ -5083,26 +5081,22 @@ set the value of name to val, with the indicated type.
 
 **Important**: you can use the show-colors minibuffer command to guide you in making these settings.
 </t>
-<t tx="ekr.20070317043727.3">Complex settings nodes have headlines of the form::
+<t tx="ekr.20070317043727.3">Complex settings nodes have headlines of the form ``@&lt;type&gt; description``::
 
-    @&lt;type&gt; description
-
-The type may be one of the following:
-
-=================== =====================================================================
-&lt;type&gt;              Valid values 
-------------------- ---------------------------------------------------------------------
-\@buttons           Child @button nodes create global buttons
-\@commands          Child @command nodes create global buttons
-\@data              Body text contains a list of strings, one per line.
-\@enabled-plugins   Body text contains a list of enabled plugins
-\@font              Body text contains a font description
-\@menus             Child @menu and @item nodes create menus and menu items.
-\@menuat            Child @menu and @item nodes modify menu tree create by \@menus.
-\@mode [name]       Body text contains a list of shortcut specifiers.
-\@recentfiles       Body text contains a list of file paths.
-\@shortcuts         Body text contains a list of shortcut specifies.
-=================== =====================================================================
+    @&lt;type&gt;             Valid values
+    -------             ------------
+    @buttons            Child @button nodes create global buttons.
+    @commands           Child @command nodes create global buttons.
+    @command-history    Body is a list of commands pre-loaded into history list.
+    @data               Body is a list of strings, one per line.
+    @enabled-plugins    Body is a list of enabled plugins.
+    @font               Body is a font description.
+    @menus              Child @menu and @item nodes create menus and menu items.
+    @menuat             Child @menu and @item nodes modify menu trees
+                        created by \@menus.
+    @mode [name]        Body is a list of shortcut specifiers.
+    @recentfiles        Body is a list of file paths.
+    @shortcuts          Body is a list of shortcut specifies.
 
 Complex nodes specify settings in their body text.
 See the following sections for details.
@@ -5852,10 +5846,7 @@ With all these options it should be possible to emulate the keyboard behavior of
    c. homeDir/&lt;machine-name&gt;LeoSettings.leo (note capitalization)
    d. localDir/myLeoSettings.leo
 
-3. Local settings files:
-
-   a. The file specified by the -c command-line option.
-   b. The file being loaded.
+3. Local settings files: the file being loaded.
 
 Settings that appear later in this list override settings that appear earlier in this list.  This happens on a setting-by-setting basis, *not* on a file-by-file basis.  In other words, each individual setting overrides only the *corresponding* setting in previously-read files.  Reading a setting file does *not* reset all previous settings. Note that the same file might appear several times in the search list. Leo detects such duplicate file names and only loads each settings file once. Leo remembers all the settings in settings files and does not reread those settings when reading another .leo file.
 
@@ -5915,7 +5906,6 @@ The command name follows @item. If the body text of an @item node exists, this b
 
 - **localDir**, the directory containing the .leo file being loaded.
 
-In addition, Leo's -c command-line option can specify any .leo file anywhere.
 </t>
 <t tx="ekr.20090130144433.1">All questions are welcome at http://groups.google.com/group/leo-editor
 </t>
@@ -10121,8 +10111,8 @@ At present, the file leo/plugins/leo_to_html.ini contains configuration settings
 | screenshot = [http://sourceforge.net/project/screenshots.php?group_id=3458&amp;ssid=22298 Screenshots]
 | caption =
 | developer = Edward K. Ream
-| latest_release_version = 5.2 b1
-| latest_release_date = {{release date and age|2016|03|15}}
+| latest_release_version = 5.3
+| latest_release_date = {{release date and age|2016|04|02}}
 | operating_system = [[Cross-platform]]
 | genre = [[Text editor]], [[Outliner]], [[Integrated development environment|IDE]]
 | license = [[Python (programming language)|Python]] License
@@ -12899,6 +12889,7 @@ See the `Directives reference`_ for full details::
     @language rest          # restructured text
     @language plain         # plain text: no syntax coloring.
     @lineending lineending
+    @nosearch               # suppress searching for cff &amp; cfa commands.
     @pagewidth 100
     @raw, @end_raw          # @file only.
     @tabwidth -4            # use spaces
@@ -12911,11 +12902,12 @@ Leading whitespace is allowed (and significant) for::
     @all
     @others
     </t>
-<t tx="ekr.20131015035606.16788">For documentation see node: "About this file" in leoSettings.leo.
+<t tx="ekr.20131015035606.16788">For documentation see node: "About this file" in leoSettings.leo::
 
-- Key bindings:     @shortcuts
-- Visual settings:  @data qt-gui-plugin-style-sheet
-- Enabling plugins: @enabled-plugins
+    Command history:    @history-list
+    Key bindings:       @shortcuts
+    Visual settings:    @data qt-gui-plugin-style-sheet
+    Enabling plugins:   @enabled-plugins
 
 To disable a binding for a key, bind it to do-nothing::
 
@@ -13145,17 +13137,18 @@ The `scripting portion`_ of `Leo's cheat sheet`_ contains much more information 
 
 `Leo's Directive Reference`_ discusses all directives in great detail. It would be a good idea to skim this chapter to see what it contains.
 </t>
-<t tx="ekr.20131016103844.16730">See the docstring of these plugins for more details:
+<t tx="ekr.20131016103844.16730">See the docstring of these plugins for more details::
 
-- bookmarks.py: Manages URL's used as bookmarks.
-- contextmenu.py: Brings up context menu when user right-clicks a headline.
-- mod_scripting.py: Supports @button and @command nodes.
-- quicksearch.py: Adds Nav tab for searching.
-- todo.py: Manages to-do lists and simple project management.
-- valuespace.py: Creates an outline-oriented spreadsheet.
-- viewrendered.py: Creates a rendering pane.
-  Automatically loaded by Leo's help commands.
-  Supports @graphics-script, @image, @html, @movie and @svg nodes.
+    bookmarks.py:       Manages URL's used as bookmarks.
+    contextmenu.py:     Creates context menus for headlines.
+    mod_scripting.py:   Supports @button and @command nodes.
+    quicksearch.py:     Adds Nav tab for searching.
+    todo.py:            To-do lists and simple project management.
+    valuespace.py:      Creates an outline-oriented spreadsheet.
+    viewrendered.py:    Creates a rendering pane.
+                        Automatically loaded by Leo's help commands.
+                        Supports @graphics-script, @image, @html,
+                        @movie and @svg nodes.
 </t>
 <t tx="ekr.20131017051340.16732">These are not included on the web, but may be of interest to those
 reading LeoDocs.leo.</t>
@@ -13360,7 +13353,9 @@ The Leonine World
 - It is easy to run only the @test nodes in a particular suboutline.
 - @test scripts can easily use data in their children.
 
-**Work flow**: Clones accelerate your work flow by focusing your attention on the task at hand. Once you have gathered the relevant nodes, there is no need to keep searching for them. You can change the clones, and the original nodes change as well. This is a great way to fix bugs or to write books.
+.. _`clone-find`: tutorial-basics.html#clone-find-commands
+
+**Work flow**: The `clone-find`_ commands gather all match a pattern under a single node. No need to keep searching for them. You can change the clones, and the original nodes change as well. This is a great way to fix bugs or to write books.
 
 **Databases**: Leo's clones create new opportunities for scriptable databases. In my brother Speed's outlines, suboutlines *are* SQL queries!
 </t>
@@ -13894,7 +13889,7 @@ More: Associate leo files
 </t>
 <t tx="ekr.20131028213522.17138">::
 
-    Usage: launchLeo.py [options]
+    Usage: launchLeo.py [options] file1, file2, ...
     
     Options:
       -h, --help            show this help message and exit
@@ -13908,7 +13903,6 @@ More: Associate leo files
       --no-cache            disable reading of cached files
       --no-plugins          disable all plugins
       --no-splash           disable the splash screen
-      --old-nosent          disable new @clean update logic
       --screen-shot=SCREENSHOT_FN
                             take a screen shot and then exit
       --script=SCRIPT       execute a script and then exit
@@ -13922,7 +13916,7 @@ More: Associate leo files
       -v, --version         print version number and exit
       --window-size=WINDOW_SIZE
                             initial window size (height x width)
-</t>
+    </t>
 <t tx="ekr.20131028213522.17150"></t>
 <t tx="ekr.20131030071311.17087">This tutorial would benefit from an example toolchain for a writer. How to actually get an html file that can be loaded into a word processor to output an .odt or .docx file for example.
 
@@ -13982,45 +13976,46 @@ Then run::
 </t>
 <t tx="ekr.20131030184445.17286">You may download Leo's sources in one of three ways, as described at:
 http://leoeditor.com/download.html If the sources are zipped, unzip them
-into a folder in your home directory, say ~/leo-5.2.
+into a folder in your home directory, say ~/leo-5.3.
 
 You now have several choices.
 
-1. You can run Leo from your home directory. Just add  ~/leo-5.2 to your path.
+1. You can run Leo from your home directory. Just add  ~/leo-5.3 to your path.
 
 2. You can install leo into /usr/local/lib and /usr/local/bin with:
 
-    cd ~/leo-5.2
+    cd ~/leo-5.3
     sudo python setup.py install
 
 See `Running Leo`_ for how to run Leo after installing it.
 </t>
-<t tx="ekr.20131031101712.16486">Supported by Leo's core:
+<t tx="ekr.20131031101712.16486">Supported by Leo's core::
 
-- @chapter
-- @rst, @rst-no-head, @rst-ignore, @rst-ignore-tree
-- @settings
-- @test, @testsetup, @testclass
-- @url
+    @chapter
+    @rst, @rst-no-head, @rst-ignore, @rst-ignore-tree
+    @settings
+    @test, @testsetup, @testclass
+    @url
 
-Within @settings trees:
+Within @settings trees::
 
-- @bool, @color, @directory, @encoding, @int
-- @float, @font, @ratio, @path, @string
-- @buttons, @commands
-- @enabled-plugins
-- @menus, @menu, @menuat, @item
-- @openwith, @shortcuts
+    @bool, @buttons, @color, @commands
+    @directory, @encoding
+    @enabled-plugins, @float, @font,
+    @history-list, @int
+    @menus, @menu, @menuat, @item
+    @openwith, @path, @shortcuts, @string
 
-Supported by plugins:
+Supported by plugins::
 
-- bookmarks.py: @bookmarks, @bookmark
-- at_folder.py: @folder
-- at_produce.py: @produce
-- at_view.py: @clip, @strip, @view
-- expfolder.py: @expfolder
-- mod_scripting.py: @button, @command, @script
-- viewrendered.py: @graphics-script, @image, @html, @movie and @svg
+    bookmarks.py:       @bookmarks, @bookmark
+    at_folder.py:       @folder
+    at_produce.py:      @produce
+    at_view.py:         @clip, @strip, @view
+    expfolder.py:       @expfolder
+    mod_scripting.py:   @button, @command, @script
+    viewrendered.py:    @graphics-script, @image
+                        @html, @movie, @svg
 </t>
 <t tx="ekr.20131031101712.16685">Leo 4.10 final was released March 29, 2012. It contained a huge number of improvements and bug fixes::
 
@@ -18199,7 +18194,7 @@ In short, unit tests are a *master tool* for any programmer or designer.
 <t tx="ekr.20160310062634.1"></t>
 <t tx="ekr.20160310062651.1">::
 
-    Leo 5.2 beta 1 release March 15, 2016
+    Leo 5.2-final release March 18, 2016
 
     Easy install with PyInstaller packaging
     c.cloneFindByPredicate
@@ -18358,65 +18353,19 @@ Expansion of section names and @others:
 - Leo replaces @others with the *expanded* text of all nodes
   that *aren't* section-definition nodes.
 </t>
-<t tx="ekr.20160414191609.1"></t>
-<t tx="ekr.20160414191631.1">The frequently asked-for feature if for clones that don't share children.  It's been amusing to think of multi-colored threaded trees, split nodes, and what have you.
+<t tx="ekr.20160414191631.1">A frequently requested feature is for clones that don't share children. The typical use case is to gather data from one place to be used in another. For instance, we might want to document a function by special-cloning only its node excluding its children. A **gathering script** can provide most of the benefits of detached clone:
 
-The typical use case is to gather data from one place to be used in another. For instance, we might want to document a function by special-cloning only its node excluding its children.
-
-Imo, this one special case *in no way* justifies changes to Leo's vnodes or positions.  Instead, the simplest and the most general thing that could possibly work is to gather desired data using a script.
-
-1, The script has complete flexibility to find a desired positions anywhere, including other .leo files.  This moots the need for cross-file clones.
+1. The script has complete flexibility to find a desired positions anywhere, including other .leo files.  This moots the need for cross-file clones.
 
 2. For any gathered position p, the script has complete flexibility to make available p.h, p.b or p.children, depending on the needs of the script.
 
 For example, a documentation script might "scrape" one or more .leo files for data, and then create nodes that reference the scraped data.
 
-That's all there is to it.
 
-Edward
 </t>
-<t tx="ekr.20160414191645.1">On Fri, Mar 25, 2016 at 6:59 AM, john lunzer &lt;lunzer@gmail.com&gt; wrote:
+<t tx="ekr.20160415031743.1">Leo 5.3-final May 2, 2016
 
-​&gt; ​My biggest wishlist item is what I would "Livelint" which constantly runs and reruns pylint (or similar) in the background​.​
-​
-This basically already exists.  On Windows, I have this pylint.bat file:
-
-python2 c:\leo.repo\leo-editor\pylint-leo.py ^
-rc=c:\leo.repo\leo-editor\leo\test\pylint-leo-rc.txt %*
-
-In other words, the top-level leo-editor folder contains:
-
-- pylint-leo.py
-- pylint-leo-rc.txt
-
-c:\leo.repo\leo-editor&gt;c:\Anaconda2\python.exe c:\leo.repo\leo-editor\pylint-leo.py rc=c:\leo.repo\leo-editor\leo\test\pylint-leo-rc.txt -h
-Usage: pylint-leo.py [options]
-
-Options:
-  -h, --help   show this help message and exit
-  -a           all
-  -c           core
-  -e           external
-  -f FILENAME  filename, relative to leo folder
-  -g           gui plugins
-  -m           modes
-  -p           plugins
-  -s           silent
-  -u           user commands
-  -v           report pylint version
-
-
-My typical usage is pylint -a -s
-
-Of course, this only runs pylint once (on all of Leo's files) in the background.  The rest is left as an exercise for the reader ;-)
-
-Hmm.  It seems I haven't documented the pylint script (until now).  Shame on me.
-
-Edward
-</t>
-<t tx="ekr.20160415031743.1">Leo 5.3-b1 April 22, 2016
-
-[Leo](http://leoeditor.com/) 5.3-b1 is now available on [SourceForge](http://sourceforge.net/projects/leo/files/Leo/). Leo is a PIM, an IDE and an outliner.
+[Leo](http://leoeditor.com/) 5.3-final is now available on [SourceForge](http://sourceforge.net/projects/leo/files/Leo/). Leo is a PIM, an IDE and an outliner.
 
 **The highlights of Leo 5.3**
 
@@ -18439,6 +18388,7 @@ Edward
 - A tool that plays well with  IPython, vim and xemacs.
 - Written in 100% pure Python
 - Compatible with Python 2.6 and above or Python 3.0 and above.
+- A tool with an inspiring and active community.
 
 **Leo's unique features**:
     
@@ -18455,8 +18405,8 @@ Edward
 - @button scripts apply scripts to outline data.
 - Outline-oriented directives.
 
-Simulating these features in vim or Emacs is possible, just as
-it is possible to simulate Python in assembly language...
+Simulating these features in vim, Emacs or Eclisps is possible,
+just as it is possible to simulate Python in assembly language...
 
 **Links**
 
@@ -18506,30 +18456,22 @@ Fixed at a039305.
 
 Changed g.get_directives_dict.</t>
 <t tx="ekr.20160415031743.2"></t>
-<t tx="ekr.20160415031743.20"></t>
-<t tx="ekr.20160415031743.21">Here is a cool pattern for organizing long docstrings:
+<t tx="ekr.20160415031743.21">Start your file with::
 
-1. Start your file with:
+    '''
+    &lt;&lt; docstring &gt;&gt;
+    '''
 
-'''
-&lt;&lt; docstring &gt;&gt;
-'''
-
-2. The &lt;&lt; docstring &gt;&gt; section can just contain:
+The &lt;&lt; docstring &gt;&gt; section can just contain::
 
     @language rest # or md
     @wrap
     @others
 
 This allows the "interior" of the docstring to be colored using rST (or markdown).
+The children of the &lt;&lt; docstring &gt;&gt; node form the actual docstring. No section names are required!
 
-3. The children of the &lt;&lt; docstring &gt;&gt; node form the actual docstring. No section names are required!
-
-**Summary**
-
-This pattern allows us to organize large docstrings in a natural, Leonine way.
-
-The only drawback is that the actual external file contains sentinel lines separating the parts of the docstring.  In practice, it's no big deal, especially if each child starts with a blank line.
+This pattern organizes large docstrings in a Leonine way. The only drawback is that the actual external file contains sentinel lines separating the parts of the docstring. In practice, it's no big deal, especially if each child starts with a blank line.
 </t>
 <t tx="ekr.20160415031743.28">@chapter is now allowed anywhere. No need for @chapters.
 
@@ -18566,7 +18508,7 @@ Alia K: Leo + Ipython notebook integration is a killer app indeed.
 
 - Added leo/plugins/importer/ipynb.py &amp; leo/plugins/writers/ipynb.py
 
-How to use sphynx with markdown:
+How to use sphinx with markdown:
 - https://github.com/spatialaudio/nbsphinx/
 - http://nbsphinx.readthedocs.org/en/0.2.5/usage.html#Sphinx-Setup
 </t>
@@ -18623,20 +18565,23 @@ closeLeoWindow now calls g.app.windowList.remove(frame).
 - Added python-to-coffeescript command.
 - Better defaults for open/save file dialogs.
 - Improved clone-find commands.
-- Improved kill &amp; yank commands.</t>
+- Improved kill &amp; yank commands.
+- quickstart.leo tells how add Windows file associations.</t>
 <t tx="ekr.20160417062046.1"></t>
 <t tx="ekr.20160417062135.1">- The livecode plugin is enabled by default, provided that the [meta](https://pypi.python.org/pypi/meta) package is available.
 
 - The viewrendered3 plugin is intended to replace the VR1 and VR2 plugins.</t>
 <t tx="ekr.20160417063026.1"></t>
 <t tx="ekr.20160417112500.1"></t>
-<t tx="ekr.20160417112511.1">- Leo now supports Jupyter Notebook (.ipynb) files.
+<t tx="ekr.20160417112511.1">Leo 5.3-final released May 2, 2016.
+
+- Leo now supports Jupyter Notebook (.ipynb) files.
 - @chapter is now allowed anywhere. No need for @chapters.
 - Faster spell checking.
 - The rst3 command supports @rst-table.
 - The show-invisibles command now uses native Qt characters.
 </t>
-<t tx="ekr.20160417112540.32">- Added clean-at-clean-files and clean-at-clean-tre commands.
+<t tx="ekr.20160417112540.32">- Added clean-at-clean-files and clean-at-clean-tree commands.
 - Added python-to-coffeescript command.
 - Better defaults for open/save file dialogs.
 - Improved clone-find commands.
@@ -18645,47 +18590,121 @@ closeLeoWindow now calls g.app.windowList.remove(frame).
   (https://pypi.python.org/pypi/meta) package is available.
 
 - The viewrendered3 plugin is intended to replace the VR1 and VR2 plugins.</t>
-<t tx="ekr.20160417113739.1">From the thread: "Associate .Leo files to open with Leo when double click"
-https://groups.google.com/d/msg/leo-editor/KOXSm8crU1I/qCLYzZCJuc4J
-
-
-
-
-
-
-
-
-</t>
-<t tx="ekr.20160417113739.2">Include a small file within the Quickstart guide which would associate files automatically.
-
-(Or maybe asking for imput, which can be done through a Leo node and this way the user learns about its functionality).
-</t>
-<t tx="ekr.20160417113739.3">More buttons or scripts in quick start guide, preferably before the "programming" section, so when a new user opens it, he has had the opportunity to do Ctrl+B on several scripts. For instance:
-
-- showing in the log the name of all the nodes within the selected one,
-- having some subnodes with numbers and doing math on them and showing the result on the log pane
-- As much "silly" but visual functions as possible.
-
-so the user, by going pressing ctrl+b on each, gets a bigger chance to understand what is Leo.
-
-In my oppinion some users will just stop in the quickguide if they are not presented with such a thing before going to docs.leo etc.
-</t>
-<t tx="ekr.20160417113739.4">The description of the plugins is not as accessible as it should be.
-
-A script for activating them easier, been a week using Leo and still cant quite activate, find the descriptions or use them freely.
-
-If each plugin or script had an example of use that would be priceless, for instance, including them all in quickstart (both scripts, plugins branchs) and then the new user could just go through all clicking on the examples and just seeing Leo work and show its potential.
-</t>
-<t tx="ekr.20160417113739.5">Quickstart should be open by default (instead of current Leo workbook) at least until the user changes some config and prevents that from happening.
-</t>
 <t tx="ekr.20160418093902.1">Leo reading CheatSheet settings
 https://groups.google.com/forum/#!topic/leo-editor/cicfbqZn1lQ
 
 https://github.com/leo-editor/leo-editor/issues/129
 Font setting overridden by new workbook
 </t>
-<t tx="ekr.20160418165705.1"></t>
-<t tx="ekr.20160418165714.1"></t>
+<t tx="ekr.20160428073403.10">https://github.com/leo-editor/leo-editor/issues/252
+</t>
+<t tx="ekr.20160428073403.11">Leo's keyboard events doesn't work after "Insert" on headline and Alt+Tab Alt+Tab.
+https://github.com/leo-editor/leo-editor/issues/270
+
+Strange behavior when I leave Leo (Alt+Tab) after "Insert" on headline node.
+
+When I come back (Alt+Tab) to Leo only the menu works (Alt+F, ...) and the mouse.
+
+Other unusual behavior:
+left-arrow, right-arrow changes between Leo documents (like Ctrl+Tab in normal behavior)
+</t>
+<t tx="ekr.20160428073403.3">https://github.com/leo-editor/leo-editor/issues/180
+
+Terry:
+I suspect this is not really a bookmark specific problem. Rather, the point in code execution where visited positions are recorded for goto-prev-history-node is too "high", so that a lot of things which change the selected node are missed by it.
+
+What is the definition of visiting a node? It could be giving focus to the body editor, but that would be confusing, so it seems it should be having the tree drawn with a node selected counts as visiting the node.
+</t>
+<t tx="ekr.20160428073403.4">https://github.com/leo-editor/leo-editor/issues/258
+</t>
+<t tx="ekr.20160428073403.5">https://groups.google.com/d/msg/leo-editor/9KnhXmusJVY/BiNFmyPcBwAJ
+@string initial_split_orientation = horizontal no effect.
+
+#264: Solution to #261 needs improvement
+https://github.com/leo-editor/leo-editor/issues/264
+
+If you go from the initial layout to a custom layout and then back to "Default", you get a layout the *looks* like the default, but has no splitter 'splitter_2'. The splitters are unnamed.
+
+So rather than searching for the splitter called splitter_2, you'd need to search for the splitter containing the two panes usually separated by splitter 2.
+</t>
+<t tx="ekr.20160428073403.6">https://github.com/leo-editor/leo-editor/issues/265
+
+Discussion
+https://groups.google.com/forum/#!topic/leo-editor/Tlf4FVwDDSY
+</t>
+<t tx="ekr.20160428073403.7">https://github.com/leo-editor/leo-editor/issues/268
+</t>
+<t tx="ekr.20160428073403.8">https://groups.google.com/d/msg/leo-editor/1eNTdxLUXJs/y6xUsxdvBwAJ
+
+The problem was an apparent reversion. VimEvent's now need a "c" ivar.
+</t>
+<t tx="ekr.20160428104050.1">The **clone find** commands, cfa and cff,  move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node::
+
+    cfa     clone-find-all
+    cff     clone-find-all-flattened
+    
+The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand::
+
+    cfam    clone-find-marked 
+    cffm    clone-find-flattened-marked
+</t>
+<t tx="ekr.20160428105918.1">Leo's pylint command hangs Leo while it is running. The top-level leo-editor folder contains pylint-leo.py and pylint-leo-rc.txt. To run pylint outside of Leo, create a .bat or .sh file to run leo-editor/pylint-leo.py. On Windows, I use this pylint.bat file::
+
+    python2 c:\leo.repo\leo-editor\pylint-leo.py ^
+    rc=c:\leo.repo\leo-editor\leo\test\pylint-leo-rc.txt %*
+
+The -h option produces this::
+
+    Usage: pylint-leo.py [options]
+    
+    Options:
+      -h, --help   show this help message and exit
+      -a           all
+      -c           core
+      -e           external
+      -f FILENAME  filename, relative to leo folder
+      -g           gui plugins
+      -m           modes
+      -p           plugins
+      -s           silent
+      -u           user commands
+      -v           report pylint version
+
+My typical usage is pylint -a -s
+</t>
+<t tx="ekr.20160428110816.1">The **clone find** commands, cfa and cff,  move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node::
+
+    cfa     clone-find-all
+    cff     clone-find-all-flattened
+    
+The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand::
+
+    cfam    clone-find-marked 
+    cffm    clone-find-flattened-marked
+</t>
+<t tx="ekr.20160428111506.1">The body text contains a list of commands, one per line, to be preloaded into Leo's command history. You access command history using the up and down arrow keys in Leo's minibuffer.</t>
+<t tx="ekr.20160428113347.1">The **clone find** commands, cfa and cff are extraordinarily useful. These commands move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node::
+
+    cfa     clone-find-all
+    cff     clone-find-all-flattened
+    
+The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand::
+
+    cfam    clone-find-marked 
+    cffm    clone-find-flattened-marked
+</t>
+<t tx="ekr.20160501113304.3">https://github.com/leo-editor/leo-editor/issues/279
+
+- Revert moves the reverted tab to the right.
+- Leo hangs afterwards when closing!
+</t>
+<t tx="ekr.20160501113304.4">- @data qt-scintilla-styles *only* works in leoSetting.leo, not myLeoSettings.leo.
+</t>
+<t tx="ekr.20160502092850.1">The docs. might need tweaking to mention that while the above describes
+how Leo searches for existing settings, if you attempt to open (through
+the Settings menu) myLeoSettings.leo when it doesn't exist, it's
+automagically created with a copy of @enabled-plugins from
+leoSettings.leo. </t>
 <t tx="peckj.20130813123907.6841" str_ctime="1376412039.0" str_mtime="1376412039.0" str_atime="1376414164.0">Documenting new plugins is important for users to be able understand and use the features they add. To that effect, there are a few documentation steps that should not be overlooked.
 
 - Document the plugin thoroughly in the plugin's docstring. This allows the documentation to be accessed from the Plugins menu.

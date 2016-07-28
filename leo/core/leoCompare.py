@@ -37,7 +37,7 @@ def go():
         name2 = "c:\\prog\\test\\compare2.txt"
         compare.compare_files(name1, name2)
 #@+node:ekr.20031218072017.3633: ** class LeoCompare
-class BaseLeoCompare:
+class BaseLeoCompare(object):
     """The base class for Leo's compare code."""
     #@+others
     #@+node:ekr.20031218072017.3634: *3* compare.__init__
@@ -60,7 +60,8 @@ class BaseLeoCompare:
         printMatches=False,
         printMismatches=True,
         printTrailingMismatches=False,
-        outputFileName=None):
+        outputFileName=None
+    ):
         # It is more convenient for the LeoComparePanel to set these directly.
         self.c = commands
         self.appendOutput = appendOutput
@@ -104,7 +105,7 @@ class BaseLeoCompare:
             return self.show("invalid directory:" + dir2)
         if self.outputFileName:
             self.openOutputFile()
-        ok = self.outputFileName == None or self.outputFile
+        ok = self.outputFileName is None or self.outputFile
         if not ok: return None
         # Create files and files2, the lists of files to be compared.
         files1 = []
@@ -169,7 +170,7 @@ class BaseLeoCompare:
             f2 = self.doOpen(name2)
             if self.outputFileName:
                 self.openOutputFile()
-            ok = self.outputFileName == None or self.outputFile
+            ok = self.outputFileName is None or self.outputFile
             ok = 1 if ok and ok != 0 else 0
             if f1 and f2 and ok: # Don't compare if there is an error opening the output file.
                 self.compare_open_files(f1, f2, name1, name2)
@@ -222,18 +223,18 @@ class BaseLeoCompare:
             if not sentinelComment1: self.show("no @+leo line for " + name1)
             if not sentinelComment2: self.show("no @+leo line for " + name2)
         if self.ignoreFirstLine1:
-            if s1 == None:
+            if s1 is None:
                 g.readlineForceUnixNewline(f1); lines1 += 1
             s1 = None
         if self.ignoreFirstLine2:
-            if s2 == None:
+            if s2 is None:
                 g.readlineForceUnixNewline(f2); lines2 += 1
             s2 = None
         #@-<< handle opening lines >>
         while 1:
-            if s1 == None:
+            if s1 is None:
                 s1 = g.readlineForceUnixNewline(f1); lines1 += 1
-            if s2 == None:
+            if s2 is None:
                 s2 = g.readlineForceUnixNewline(f2); lines2 += 1
             #@+<< ignore blank lines and/or sentinels >>
             #@+node:ekr.20031218072017.3640: *4* << ignore blank lines and/or sentinels >>
@@ -368,7 +369,7 @@ class BaseLeoCompare:
         return g.match(s, i, sentinelComment)
     #@+node:ekr.20031218072017.1144: *4* openOutputFile (compare)
     def openOutputFile(self):
-        if self.outputFileName == None:
+        if self.outputFileName is None:
             return
         theDir, name = g.os_path_split(self.outputFileName)
         if len(theDir) == 0:

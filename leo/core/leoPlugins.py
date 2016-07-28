@@ -32,7 +32,7 @@ class TryNext(Exception):
         self.args = args
         self.kwargs = kwargs
 #@+node:ekr.20100908125007.6033: ** class CommandChainDispatcher
-class CommandChainDispatcher:
+class CommandChainDispatcher(object):
     """ Dispatch calls to a chain of commands until some func can handle it
 
     Usage: instantiate, execute "add" to add commands (with optional
@@ -90,7 +90,6 @@ class BaseLeoPlugin(object):
 
     Usage
     =====
-
 
     Initialization
     --------------
@@ -186,7 +185,6 @@ class BaseLeoPlugin(object):
             def ciao(self, event):
                 g.pr("ciao baby (%s)" % self.c.p.h)
 
-
         leoPlugins.registerHandler("after-create-leo-frame", Hello)
 
     """
@@ -246,7 +244,7 @@ class BaseLeoPlugin(object):
             buttonText=buttonText, bg=color)
     #@-others
 #@+node:ekr.20100908125007.6007: ** class LeoPluginsController
-class LeoPluginsController:
+class LeoPluginsController(object):
     #@+others
     #@+node:ekr.20100909065501.5954: *3* plugins.Birth
     #@+node:ekr.20100908125007.6034: *4* plugins.ctor
@@ -504,8 +502,9 @@ class LeoPluginsController:
                 # g.es_exception()
             result = None
         except Exception:
-            report('exception importing plugin: %s' % moduleName)
-            g.es_exception()
+            if trace:
+                report('exception importing plugin: %s' % moduleName)
+                g.es_exception()
             result = None
         self.loadingModuleNameStack.pop()
         if result:
@@ -527,8 +526,9 @@ class LeoPluginsController:
                             report('%s.init() returned False' % moduleName)
                         result = None
                 except Exception:
-                    report('exception loading plugin: %s' % moduleName)
-                    g.es_exception()
+                    if trace:
+                        report('exception loading plugin: %s' % moduleName)
+                        g.es_exception()
                     result = None
             else:
                 # No top-level init function.

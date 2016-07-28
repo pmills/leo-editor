@@ -22,7 +22,7 @@ def view_pack_command(event):
     if c and c.persistenceController:
         c.persistenceController.clean()
 #@+node:ekr.20140711111623.17795: ** class ConvertController
-class ConvertController:
+class ConvertController(object):
     '''A class to convert @file trees to @auto trees.'''
 
     def __init__(self, c, p):
@@ -168,7 +168,7 @@ class ConvertController:
         return s
     #@-others
 #@+node:ekr.20140711111623.17790: ** class PersistenceDataController
-class PersistenceDataController:
+class PersistenceDataController(object):
     #@+<< docstring >>
     #@+node:ekr.20140711111623.17791: *3*  << docstring >> (class persistenceController)
     '''
@@ -232,7 +232,6 @@ class PersistenceDataController:
         Update the @data node for root, a foreign node.
         Create @gnxs nodes and @uas trees as needed.
         '''
-        trace = False and not g.unitTesting
         # Delete all children of the @data node.
         self.at_persistence = self.find_at_persistence_node()
         if not self.at_persistence:
@@ -272,7 +271,6 @@ class PersistenceDataController:
     #@+node:ekr.20140716021139.17773: *5* pd.delete_at_data_children
     def delete_at_data_children(self, at_data, root):
         '''Delete all children of the @data node'''
-        c = self.c
         if at_data.hasChildren():
             at_data.deleteAllChildren()
     #@+node:ekr.20140711111623.17807: *4* pd.update_after_read_foreign_file & helpers
@@ -299,7 +297,6 @@ class PersistenceDataController:
             gnx:<gnx>
             unl:<unl>
         '''
-        trace = False and not g.unitTesting
         lines = g.splitLines(at_gnxs.b)
         gnxs = [s[4:].strip() for s in lines if s.startswith('gnx:')]
         unls = [s[4:].strip() for s in lines if s.startswith('unl:')]
@@ -748,7 +745,7 @@ class PersistenceDataController:
     def unl(self, p):
         '''Return the unl corresponding to the given position.'''
         return '-->'.join(reversed(
-            [self.expected_headline(p) for p in p.self_and_parents()]))
+            [self.expected_headline(p2) for p2 in p.self_and_parents()]))
     #@+node:ekr.20140711111623.17885: *5* pd.unl_tail
     def unl_tail(self, unl):
         '''Return the last part of a unl.'''

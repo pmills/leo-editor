@@ -28,7 +28,7 @@ free-layout-zoom
 #@+<< imports >>
 #@+node:tbrown.20110203111907.5520: ** << imports >> (free_layout.py)
 import leo.core.leoGlobals as g
-from leo.core.leoQt import QtWidgets
+from leo.core.leoQt import QtWidgets, QtCore
 if QtWidgets:
     from leo.plugins.nested_splitter import NestedSplitter
         # NestedSplitterChoice
@@ -40,7 +40,7 @@ def init():
     '''Return True if the free_layout plugin can be loaded.'''
     return g.app.gui.guiName() == "qt"
 #@+node:ekr.20110318080425.14389: ** class FreeLayoutController
-class FreeLayoutController:
+class FreeLayoutController(object):
     """Glue between Leo and the NestedSplitter gui widget.  All Leo aware
     code should be in here, none in NestedSplitter.
 
@@ -128,6 +128,7 @@ class FreeLayoutController:
         splitter.findChild(QtWidgets.QWidget, "logFrame")._ns_id = '_leo_pane:logFrame'
         splitter.findChild(QtWidgets.QWidget, "bodyFrame")._ns_id = '_leo_pane:bodyFrame'
         splitter.register_provider(self)
+        splitter.splitterClicked_connect(self.splitter_clicked)
     #@+node:tbrown.20120119080604.22982: *3* flc.embed (FreeLayoutController)
     def embed(self):
         """called from ns_do_context - embed layout in outline's
@@ -151,19 +152,46 @@ class FreeLayoutController:
         if not nd or nd.h != "@settings":
             g.es("WARNING: @data free-layout-layout node is not " "under an active @settings node")
         c.redraw()
-    #@+node:ekr.20160416082543.1: *3* flc.get_splitter*
-    def get_main_splitter(self):
-        '''Return the splitter whose name is "splitter".'''
-        return self.get_splitter_by_name('splitter')
-        
-    def get_splitter2(self):
-        '''Return the splitter whose name is "splitter_2".'''
-        return self.get_splitter_by_name('splitter_2')
+    #@+node:ekr.20160424035257.1: *3* flc.get_main_splitter & helper
+    def get_main_splitter(self, w=None):
+        '''
+        Return the splitter the main splitter, or None. The main splitter is a
+        NestedSplitter that contains the body pane.
 
-    def get_splitter_by_name(self, name):
-        '''Return the splitter with the given objectName().'''
+        Yes, the user could delete the secondary splitter but if so, there is
+        not much we can do here.
+        '''
+        trace = False and not g.unitTesting
         top = self.get_top_splitter()
-        return top and top.get_splitter_by_name(name)
+        if top:
+            w = top.find_child(QtWidgets.QWidget, "bodyFrame")
+            while w:
+                if isinstance(w, NestedSplitter):
+                    if trace: g.trace('found splitter', id(w))
+                    return w
+                w = w.parent()
+        if trace: g.trace('not found')
+        return None
+    #@+node:ekr.20160424035254.1: *3* flc.get_secondary_splitter & helper
+    def get_secondary_splitter(self):
+        '''
+        Return the secondary splitter, if it exists. The secondary splitter
+        contains the outline pane.
+
+        Yes, the user could delete the outline pane, but if so, there is not
+        much we can do here.
+        '''
+        trace = False and not g.unitTesting
+        top = self.get_top_splitter()
+        if top:
+            w = top.find_child(QtWidgets.QWidget, 'outlineFrame')
+            while w:
+                if isinstance(w, NestedSplitter):
+                    if trace: g.trace('found splitter', id(w))
+                    return w
+                w = w.parent()
+        if trace: g.trace('not found')
+        return None
     #@+node:tbrown.20110621120042.22914: *3* flc.get_top_splitter
     def get_top_splitter(self):
         '''Return the top splitter of c.frame.top.'''
@@ -282,8 +310,10 @@ class FreeLayoutController:
             return True
         if id_.startswith('_fl_delete_layout:'):
             name = id_.split(':', 1)[1]
-            if g.app.gui.runAskYesNoCancelDialog(self.c, "Really delete Layout?",
-                "Really permanently delete the layout '%s'?" % name) == 'yes':
+            if ('yes' == g.app.gui.runAskYesNoCancelDialog(self.c,
+                "Really delete Layout?",
+                "Really permanently delete the layout '%s'?" % name)
+            ):
                 d = g.app.db.get('ns_layouts', {})
                 del d[name]
                 # make sure g.app.db's __set_item__ is hit so it knows to save
@@ -338,6 +368,34 @@ class FreeLayoutController:
         ans.append(('Body', '_leo_pane:bodyFrame'))
         ans.append(('Tab pane', '_leo_pane:logFrame'))
         return ans
+    #@+node:tbnorth.20160510122413.1: *3* flc.splitter_clicked
+    def splitter_clicked(self, splitter, handle, event, release, double):
+        """
+        splitter_clicked - middle click release will zoom adjacent
+        body / tree panes
+
+        :param NestedSplitter splitter: splitter containing clicked handle
+        :param NestedSplitterHandle handle: clicked handle
+        :param QMouseEvent event: mouse event for click
+        :param bool release: was it a Press or Release event
+        :param bool double: was it a double click event
+        """
+        if not release or event.button() != QtCore.Qt.MidButton:
+            return
+        if splitter.root.zoomed:  # unzoom if *any* handle clicked
+            splitter.zoom_toggle()
+            return
+        before = splitter.widget(splitter.indexOf(handle) - 1)
+        after = splitter.widget(splitter.indexOf(handle))
+        for pane in before, after:
+            if pane.objectName() == 'bodyFrame':
+                pane.setFocus()
+                splitter.zoom_toggle()
+                return
+            if pane.objectName() == 'outlineFrame':
+                pane.setFocus()
+                splitter.zoom_toggle(local=True)
+                return
     #@-others
 #@+node:ekr.20160416065221.1: ** commands: free_layout.py
 #@+node:tbrown.20140524112944.32658: *3* @g.command free-layout-context-menu
@@ -373,8 +431,11 @@ def free_layout_load(event):
         return
     name = str(action.text())
     c.db['_ns_layout'] = name
-    layout = g.app.db['ns_layouts'][name]
-    c.free_layout.get_top_splitter().load_layout(layout)
+    # layout = g.app.db['ns_layouts'][name]
+    layouts = g.app.db.get('ns_layouts', {})
+    layout = layouts.get(name)
+    if layout:
+        c.free_layout.get_top_splitter().load_layout(layout)
 #@+node:tbrown.20140522153032.32658: *3* @g.command free-layout-zoom
 @g.command('free-layout-zoom')
 def free_layout_zoom(event):

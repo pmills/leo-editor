@@ -2,8 +2,8 @@
 <!-- Created by Leo: http://leoeditor.com/leo_toc.html -->
 <leo_file xmlns:leo="http://leoeditor.com/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.44" body_secondary_ratio="0.78">
-	<global_window_position top="108" left="527" height="957" width="914"/>
+<globals body_outline_ratio="0.54" body_secondary_ratio="0.78">
+	<global_window_position top="108" left="527" height="957" width="1099"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -1222,8 +1222,7 @@
 <v t="ekr.20070627082044.808"><vh>@thin unittest/errorTest.py</vh></v>
 </v>
 <v t="ekr.20101220161557.6016"><vh>Active Unit Tests</vh>
-<v t="edward.20160314170027.56" descendentVnodeUnknownAttributes="7d7100285809000000302e362e31392e333971017d710258090000006d795f706c7567696e7103580300000076616c7104735808000000302e362e31382e3771057d71065808000000616e6e6f7461746571077d7108735808000000302e362e31322e3971097d710a5809000000756e69745f74657374710b580400000061626364710c735808000000302e362e32372e37710d7d710e5808000000616e6e6f74617465710f7d711073580a000000302e362e31372e352e3171117d7112580a0000007273742d696d706f727471137d711428580b000000756e6465726c696e657331711558030000002d7e2e7116580b000000756e6465726c696e657332711758010000003d711875735808000000302e362e31362e3371197d711a5808000000616e6e6f74617465711b7d711c73752e"
-marks="ekr.20100205235740.5392,"><vh>@file activeUnitTests.txt</vh></v>
+<v t="edward.20160314170027.56" descendentVnodeUnknownAttributes="7d7100285808000000302e362e31322e3971017d71025809000000756e69745f746573747103580400000061626364710473580a000000302e362e31372e352e3171057d7106580a0000007273742d696d706f727471077d710828580b000000756e6465726c696e657331710958030000002d7e2e710a580b000000756e6465726c696e657332710b58010000003d710c75735808000000302e362e31362e33710d7d710e5808000000616e6e6f74617465710f7d7110735808000000302e362e31382e3771117d71125808000000616e6e6f7461746571137d7114735808000000302e362e32372e3771157d71165808000000616e6e6f7461746571177d7118735809000000302e362e31392e333971197d711a58090000006d795f706c7567696e711b580300000076616c711c73752e"><vh>@file activeUnitTests.txt</vh></v>
 </v>
 <v t="ekr.20160330182418.1"><vh>Recent failures</vh>
 <v t="ekr.20160410152100.1"><vh> Tests of @auto-md</vh>
@@ -1241,7 +1240,7 @@ marks="ekr.20100205235740.5392,"><vh>@file activeUnitTests.txt</vh></v>
 <v t="ekr.20071113090055.5"><vh>@test g.get_directives_dict</vh></v>
 <v t="ekr.20100131180007.5434"><vh>@test g.get_directives_dict 2</vh></v>
 <v t="ekr.20100131171342.5608"><vh>@test k.strokeFromSetting</vh></v>
-<v t="ekr.20100205235740.5392" a="M"><vh>@test syntax of all files</vh></v>
+<v t="ekr.20100205235740.5392"><vh>@test syntax of all files</vh></v>
 <v t="ekr.20110610122533.3369"><vh>goto-global-line tests</vh>
 <v t="ekr.20110610122533.3405"><vh>@@test zz restore the screen</vh></v>
 <v t="ekr.20100212072149.5341"><vh>@test c.goToScriptLineNumber</vh>
@@ -1267,6 +1266,10 @@ marks="ekr.20100205235740.5392,"><vh>@file activeUnitTests.txt</vh></v>
 <v t="ekr.20100131171342.5509"><vh>@test leoBridge init logic</vh></v>
 </v>
 <v t="ekr.20160419061017.1"><vh>@test event classes</vh></v>
+<v t="ekr.20160318094009.1"><vh>@test Python3 features</vh></v>
+<v t="ekr.20100223123103.5382"></v>
+<v t="ekr.20111006064419.3493"><vh>@test move-marked-nodes</vh></v>
+<v t="ekr.20160523094102.1"><vh>@test leoAst traverser classes</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -7758,7 +7761,8 @@ else:
         i = j = w.getInsertPoint()
         sel = (i,i)
     return i,j</t>
-<t tx="ekr.20070417092935" str_leo_pos="6"></t>
+<t tx="ekr.20070417092935" str_leo_pos="6">
+@nosearch</t>
 <t tx="ekr.20070503064257"></t>
 <t tx="ekr.20070528100318"># Required to make a typing test work.
 </t>
@@ -8740,18 +8744,19 @@ else:
         c.treeWantsFocusNow,
     )
     for func in table:
+        name = func.__name__
         func()
         f.contractPane()
         if func == c.logWantsFocusNow:
             assert ratio2 != f.secondary_ratio,'fail 1'
         else:
-            assert ratio != f.ratio,'fail 2: %s, %s' % (ratio,f.ratio)
+            assert ratio != f.ratio,'fail 2: %s, %s: %s' % (ratio,f.ratio,name)
         func()
         f.expandPane()
-        assert closeEnough(ratio,f.ratio),'fail 3 %s != %s' % (
-            ratio,f.ratio)
-        assert closeEnough(ratio2,f.secondary_ratio),'fail 4 %s != %s' % (
-            ratio2,f.secondary_ratio)
+        assert closeEnough(ratio,f.ratio),'fail 3 %s != %s: %s' % (
+            ratio,f.ratio,name)
+        assert closeEnough(ratio2,f.secondary_ratio),'fail 4 %s != %s: %s' % (
+            ratio2,f.secondary_ratio,name)
 </t>
 <t tx="ekr.20100225094004.5405"># test/at-file-test.leo contains tnodeList.
 # test/at-file-test.py contains file-like sentinels.
@@ -9273,6 +9278,37 @@ for i in range(len(aList)):
         total += 1
 
 g.es('"%s": total tests: %s' % (p.h,total))
+</t>
+<t tx="ekr.20111006064419.3493">if g.app.isExternalUnitTest:
+    self.skipTest('Can not be run externally')
+else:
+
+    exec(g.findTestScript(c,'@common x-marked-nodes test code'))
+    
+    def test(p):
+        setup_test(p)
+        n = p.numberOfChildren()
+        assert n == 4 ,'delete: children: %s' % (n)
+        c.moveMarked()
+        assert c.p.h == 'Moved marked nodes'
+        n = p.numberOfChildren()
+        assert n == 2 ,'delete: children: %s' % (n)
+        if 0:
+            # The new move-marked-nodes command doesn't
+            # leave the result in the root node.
+            root = c.rootPosition()
+            assert root.h == 'Moved marked nodes',root.h
+        if 0: # The move-marked-nodes command is no longer undoable.
+            c.undoer.undo()
+            n = p.numberOfChildren()
+            assert n == 4,'undo: children: %s' % (n)
+            c.undoer.redo()
+            n = p.numberOfChildren()
+            assert n == 2 ,'delete: children: %s' % (n)
+    try:
+        test(p)
+    finally:
+        tear_down(p,'Moved marked nodes')
 </t>
 <t tx="ekr.20111026111009.3972"># lowercase xml tags, one per line.
 
@@ -12744,6 +12780,32 @@ else:
 </t>
 <t tx="ekr.20150626102601.1">gnx: ekr.20150626101842.1
 </t>
+<t tx="ekr.20160318094009.1">if not g.isPython3:
+    self.skipTest('python 3 test')
+else:
+    import leo.core.leoAst as leoAst
+    import leo.external.make_stub_files as msf
+    import leo.external.py2cs as py2cs
+    import ast, tokenize
+    path = g.os_path_finalize_join(g.app.loadDir,
+        '..', 'test', 'unittest', 'python3_test.py')
+    assert g.os_path_exists(path), path
+    fn = g.shortFileName(path)
+    source = open(path, 'r').read()
+    node = ast.parse(source, filename=fn, mode='exec')
+    src = open(path, 'r').read()
+    readlines = g.ReadLinesClass(src).next
+    tokens = list(tokenize.generate_tokens(readlines))
+    leoAst.AstFullTraverser().visit(node)
+    s = leoAst.HTMLReportTraverser(debug=True).main(fn, node)
+    assert s
+    s = leoAst.AstFormatter().format(node)
+    assert s
+    s = py2cs.CoffeeScriptTraverser(controller=g.NullObject()).format(node, src, tokens)
+    assert s
+    controller = msf.StandAloneMakeStubFile()
+    msf.StubTraverser(controller).visit(node)
+</t>
 <t tx="ekr.20160327132053.1"># Mimic the code in g.get_directives_dict
 import re
 pat = g.compute_directives_re()
@@ -13070,6 +13132,18 @@ vim_event = leoVim.VimEvent(c, char, stroke, w)
 # assert hasattr(event_wrapper, 'c')
 assert hasattr(key_event, 'c')
 assert hasattr(vim_event, 'c')
+</t>
+<t tx="ekr.20160523094102.1"># Great ast docs: http://greentreesnakes.readthedocs.io/en/latest/nodes.html
+
+import leo.core.leoAst as leoAst
+leoAst.unit_test(raise_on_fail=True)
+
+import leo.external.make_stub_files as msf
+msf.unit_test(raise_on_fail=True)
+
+import leo.external.py2cs as py2cs
+py2cs.unit_test(raise_on_fail=True)
+
 </t>
 </tnodes>
 </leo_file>

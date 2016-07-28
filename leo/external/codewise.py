@@ -91,6 +91,10 @@ This can be much slower if you have a huge database.
 #@-<< docstring >>
 #@+<< imports >>
 #@+node:ekr.20110310091639.14293: ** << imports >>
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 import os
 import sqlite3
 import sys
@@ -105,6 +109,7 @@ g = sys.modules.get(get_module.__module__)
 assert g, 'no g'
 # print(g)
 #@-<< imports >>
+# pylint: disable=unidiomatic-typecheck
 isPython3 = sys.version_info >= (3, 0, 0)
 #@+<< define usage >>
 #@+node:ekr.20110310091639.14292: ** << define usage >>
@@ -176,7 +181,7 @@ def cmd_init(args):
     print("Initializing CodeWise db at: %s" % DEFAULT_DB)
     if os.path.isfile(DEFAULT_DB):
         os.remove(DEFAULT_DB)
-    cw = CodeWise()
+    CodeWise()
 #@+node:ekr.20110310091639.14288: *4* cmd_members
 def cmd_members(args):
     cw = CodeWise()
@@ -416,16 +421,16 @@ def isCallable(obj):
 def isString(s):
     '''Return True if s is any string, but not bytes.'''
     if g.isPython3:
-        return type(s) == type('a')
+        return type(s) == type('a') # NOQA
     else:
         return type(s) in types.StringTypes
 
 def isUnicode(s):
     '''Return True if s is a unicode string.'''
     if g.isPython3:
-        return type(s) == type('a')
+        return type(s) == type('a') # NOQA
     else:
-        return type(s) == types.UnicodeType
+        return type(s) == types.UnicodeType # NOQA
 #@+node:ekr.20110310093050.14283: *5* isValidEncoding (codewise)
 def isValidEncoding(encoding):
     if not encoding:
@@ -480,10 +485,10 @@ if isPython3: # g.not defined yet.
 else:
 
     def u(s):
-        return unicode(s)
+        return builtins.unicode(s)
 
     def ue(s, encoding):
-        return unicode(s, encoding)
+        return builtins.unicode(s, encoding)
 #@+node:ekr.20110310091639.14290: *3* main
 def main():
     #g.trace()
@@ -526,7 +531,7 @@ def run_ctags(paths):
 def test(self):
     pass
 #@+node:ekr.20110310091639.14256: ** class CodeWise
-class CodeWise:
+class CodeWise(object):
     #@+others
     #@+node:ekr.20110310091639.14257: *3* __init__(CodeWise)
     def __init__(self, dbpath=None):
@@ -538,7 +543,7 @@ class CodeWise:
         if not os.path.exists(dbpath):
             self.createdb(dbpath)
         else:
-            self.dbconn = c = sqlite3.connect(dbpath)
+            self.dbconn = sqlite3.connect(dbpath)
             self.create_caches()
     #@+node:ekr.20110310091639.14258: *3* createdb
     def createdb(self, dbpath):
@@ -587,14 +592,15 @@ class CodeWise:
     #@+node:ekr.20110310091639.14263: *3* get_members
     def get_members(self, classnames):
         clset = set(classnames)
-        class_by_id = dict((v, k) for k, v in self.classcache.items())
-        file_by_id = dict((v, k) for k, v in self.filecache.items())
+        # class_by_id = dict((v, k) for k, v in self.classcache.items())
+        # file_by_id = dict((v, k) for k, v in self.filecache.items())
         result = []
         for name, idd in self.classcache.items():
             if name in clset:
                 c = self.cursor()
-                #print idd
-                c.execute('select name, class, file, searchpattern from function where class = (?)', (idd,))
+                c.execute(
+                    'select name, class, file, searchpattern from function where class = (?)',
+                    (idd,))
                 for name, klassid, fileid, pat in c:
                     result.append((name, pat))
         return result
@@ -652,7 +658,7 @@ class CodeWise:
         """
         for l in apifile_obj:
             if not isPython3:
-                l = unicode(l, 'utf8', 'replace')
+                l = builtins.unicode(l, 'utf8', 'replace')
             parts = l.split('?')
             fullsym = parts[0].rsplit('.', 1)
             klass, func = fullsym
@@ -671,14 +677,14 @@ class CodeWise:
         for l in tagsfile_obj:
             #print l
             if not isPython3:
-                l = unicode(l, 'utf8', 'replace')
+                l = builtins.unicode(l, 'utf8', 'replace')
             if l.startswith('!'):
                 continue
             fields = l.split('\t')
             m = fields[0]
             fil = fields[1]
             pat = fields[2]
-            typ = fields[3]
+            # typ = fields[3]
             klass = None
             try:
                 ext = fields[4]
@@ -736,7 +742,7 @@ class CodeWise:
                 self.add_source('tagdir', a)
     #@-others
 #@+node:ekr.20110310091639.14275: ** class ContextSniffer
-class ContextSniffer:
+class ContextSniffer(object):
     """ Class to analyze surrounding context and guess class
 
     For simple dynamic code completion engines

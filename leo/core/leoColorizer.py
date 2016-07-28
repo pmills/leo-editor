@@ -10,13 +10,17 @@ python_qsh = True
 #@+node:ekr.20140827092102.18575: ** << imports >> (leoColorizer.py)
 import leo.core.leoGlobals as g
 from leo.core.leoQt import isQt5, Qsci, QtCore, QtGui, QtWidgets
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 import re
 import string
 import time
 #@-<< imports >>
 #@+<< class PythonQSyntaxHighlighter >>
 #@+node:ekr.20140825132752.18554: ** << class PythonQSyntaxHighlighter >>
-class PythonQSyntaxHighlighter:
+class PythonQSyntaxHighlighter(object):
     '''
     Python implementation of QtGui.QSyntaxHighlighter.
 
@@ -64,10 +68,27 @@ class PythonQSyntaxHighlighter:
     #@+node:ekr.20140825132752.18566: *4* pqsh.rehighlight
     def rehighlight(self):
         '''Color the whole document.'''
-        if self.d:
-            # g.trace('*****',g.callers())
-            cursor = QtGui.QTextCursor(self.d)
-            self.rehighlight_helper(cursor, QtGui.QTextCursor.End)
+        trace = False and not g.unitTesting
+        c, d = self.c, self.d
+        if d:
+            n = d.characterCount()
+            if 0 < c.max_pre_loaded_body_chars < n:
+                if trace: g.trace('big text: no color', c.p.h)
+            elif n > 1000*10:
+
+                def rehightlight_callback(c=c, d=d, p=c.p, self=self):
+                    if p == c.p:
+                        if trace: g.trace('=====', n, p.h)
+                        cursor = QtGui.QTextCursor(d)
+                        self.rehighlight_helper(cursor, QtGui.QTextCursor.End)
+                    else:
+                        if trace: g.trace('node not selected', p.h)
+
+                QtCore.QTimer.singleShot(200, rehightlight_callback)
+            else:
+                if trace: g.trace(n)
+                cursor = QtGui.QTextCursor(d)
+                self.rehighlight_helper(cursor, QtGui.QTextCursor.End)
     #@+node:ekr.20140825132752.18568: *4* pqsh.rehighlightBlock (not used)
     def rehighlightBlock(self, block):
         '''Reapplies the highlighting to the given QTextBlock block.'''
@@ -85,7 +106,6 @@ class PythonQSyntaxHighlighter:
             # QtGui.QTextCursor.MoveOperation operation
         self.inReformatBlocks = True
         try:
-            c = self.c
             cursor.beginEditBlock()
             from_ = cursor.position()
             cursor.movePosition(operation)
@@ -297,7 +317,7 @@ class PythonQSyntaxHighlighter:
 #@-<< class PythonQSyntaxHighlighter >>
 #@+others
 #@+node:ekr.20140906081909.18690: ** class ColorizerMixin
-class ColorizerMixin:
+class ColorizerMixin(object):
     '''A mixin class for all c.frame.body.colorizer classes.'''
 
     def __init__(self, c):
@@ -481,7 +501,7 @@ class ColorizerMixin:
 #@+node:ekr.20110605121601.18569: ** class JEditColorizer
 # This is c.frame.body.colorizer.highlighter.colorer
 
-class JEditColorizer:
+class JEditColorizer(object):
     '''
     This class contains jEdit pattern matchers adapted
     for use with QSyntaxHighlighter.
@@ -1514,7 +1534,8 @@ class JEditColorizer:
     def match_eol_span(self, s, i,
         kind=None, seq='',
         at_line_start=False, at_whitespace_end=False, at_word_start=False,
-        delegate='', exclude_match=False):
+        delegate='', exclude_match=False
+    ):
         '''Succeed if seq matches s[i:]'''
         if self.verbose: g.trace(g.callers(1), i, repr(s[i: i + 20]))
         if at_line_start and i != 0 and s[i - 1] != '\n': return 0
@@ -1608,7 +1629,8 @@ class JEditColorizer:
     def match_mark_following(self, s, i,
         kind='', pattern='',
         at_line_start=False, at_whitespace_end=False, at_word_start=False,
-        exclude_match=False):
+        exclude_match=False
+    ):
         '''Succeed if s[i:] matches pattern.'''
         if not self.allow_mark_prev: return 0
         # g.trace(g.callers(1),i,repr(s[i:i+20]))
@@ -1649,7 +1671,8 @@ class JEditColorizer:
     def match_mark_previous(self, s, i,
         kind='', pattern='',
         at_line_start=False, at_whitespace_end=False, at_word_start=False,
-        exclude_match=False):
+        exclude_match=False
+    ):
         '''Return the length of a matched SEQ or 0 if no match.
 
         'at_line_start':    True: sequence must start the line.
@@ -2167,7 +2190,6 @@ class JEditColorizer:
         trace = False and not g.unitTesting
         traceCallers = False; traceLine = True
         traceState = False; traceReturns = False
-        limit = True # do only 10 lines at a time.
         # Update the counts.
         self.recolorCount += 1
         if self.colorizer.changingText:
@@ -2241,7 +2263,7 @@ class JEditColorizer:
 #@+node:ekr.20110605121601.18551: ** class LeoQtColorizer
 # This is c.frame.body.colorizer
 
-class LeoQtColorizer:
+class LeoQtColorizer(object):
     '''An adaptor class that interfaces Leo's core to two class:
 
     1. a subclass of QSyntaxHighlighter,
@@ -2368,7 +2390,7 @@ class LeoQtColorizer:
         '''Set self.language based on the directives in p's tree.'''
         trace = False and not g.unitTesting
         c = self.c
-        if c == None: return None # self.c may be None for testing.
+        if c is None: return None # self.c may be None for testing.
         root = p.copy()
         self.colorCacheFlag = False
         self.language = None
@@ -2605,7 +2627,7 @@ if QtGui:
                 if g.isPython3:
                     s = str(s)
                 else:
-                    s = unicode(s)
+                    s = builtins.unicode(s)
                 self.colorer.recolor(s)
                 v = self.c.p.v
                 if hasattr(v, 'colorCache') and v.colorCache and not self.colorizer.changingText:
@@ -2634,9 +2656,10 @@ if QtGui:
                 try:
                     tree.selecting = True
                     if (
-                        self.colorizer.colorCacheFlag
-                        and hasattr(p.v, 'colorCache') and p.v.colorCache
-                        and not g.unitTesting
+                        self.colorizer.colorCacheFlag and
+                        hasattr(p.v, 'colorCache') and
+                        p.v.colorCache and
+                        not g.unitTesting
                     ):
                         # Should be no need to init the colorizer.
                         self.rehighlight_with_cache(p.v.colorCache)
@@ -2703,7 +2726,7 @@ if Qsci:
 
         def configure_lexer(self):
             '''Configure the QScintilla lexer.'''
-            c = self.leo_c
+            # c = self.leo_c
             lexer = self
             # To do: use c.config setting.
             # pylint: disable=no-member

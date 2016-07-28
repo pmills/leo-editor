@@ -143,12 +143,10 @@ def show_unittest_failures(event):
 #@+node:tbrown.20111011152601.48462: ** install_qt_quicksearch_tab (Creates commands)
 def install_qt_quicksearch_tab(c):
 
-    #tabw = c.frame.top.tabWidget
-
+    # tabw = c.frame.top.tabWidget
     wdg = LeoQuickSearchWidget(c, mode="nav")
-    qsWidgent = wdg
     c.frame.log.createTab("Nav", widget = wdg)
-    #tabw.addTab(wdg, "QuickSearch")
+    # tabw.addTab(wdg, "QuickSearch")
 
     def focus_quicksearch_entry(event):
         c.frame.log.selectTab('Nav')
@@ -221,21 +219,23 @@ def install_qt_quicksearch_tab(c):
     def activate_input(idx, c=c):
         wdg = c.frame.nav
         tab_widget = wdg.parent().parent()
-        if tab_widget.currentWidget() == wdg:
+        if (tab_widget and
+            hasattr(tab_widget, 'currentWidget') and
+            tab_widget.currentWidget() == wdg
+        ):
             wdg.ui.lineEdit.selectAll()
             wdg.ui.lineEdit.setFocus()
 
     # Careful: we may be unit testing.
     if wdg and wdg.parent():
         tab_widget = wdg.parent().parent()
-        if 1:
-            tab_widget.currentChanged.connect(activate_input)
-        else:
-            tab_widget.connect(tab_widget,
-                QtCore.SIGNAL("currentChanged(int)"), activate_input)
+        tab_widget.currentChanged.connect(activate_input)
 #@+node:jlunz.20151027094647.1: ** class OrderedDefaultDict
 class OrderedDefaultDict(OrderedDict):
-    '''Credit:  http://stackoverflow.com/questions/4126348/how-do-i-rewrite-this-function-to-implement-ordereddict/4127426#4127426'''
+    '''
+    Credit:  http://stackoverflow.com/questions/4126348/
+    how-do-i-rewrite-this-function-to-implement-ordereddict/4127426#4127426
+    '''
     def __init__(self, *args, **kwargs):
         if not args:
             self.default_factory = None
@@ -271,15 +271,11 @@ class QuickSearchEventFilter(QtCore.QObject):
     #@+node:ekr.20111015194452.15719: *3* eventFilter
     def eventFilter(self,obj,event):
 
-        #print "Event filter"
+        # g.trace()
         eventType = event.type()
         ev = QtCore.QEvent
-
         # QLineEdit generates ev.KeyRelease only on Windows,Ubuntu
-        kinds = [ev.KeyPress,ev.KeyRelease]
-
-        #g.trace(eventType,eventType in kinds)
-
+        # kinds = [ev.KeyPress,ev.KeyRelease]
         if eventType == ev.KeyRelease:
             #print "key event"
             lw = self.listWidget
@@ -305,8 +301,8 @@ class QuickSearchEventFilter(QtCore.QObject):
 #@+node:ville.20121223213319.3670: ** dumpfocus
 def dumpfocus():
     f = QtGui.QApplication.instance().focusWidget()
-    g.es("Focus: " + 'f')
-    print("Focus: " + 'f')
+    g.es("Focus: " + f)
+    print("Focus: " + f)
 #@+node:ville.20090314215508.2: ** class LeoQuickSearchWidget (QWidget)
 class LeoQuickSearchWidget(QtWidgets.QWidget):
 
@@ -412,7 +408,7 @@ def matchlines(b, miter):
     return res
 
 #@+node:ville.20090314215508.12: ** class QuickSearchController
-class QuickSearchController:
+class QuickSearchController(object):
 
     #@+others
     #@+node:ekr.20111015194452.15685: *3* __init__
@@ -626,7 +622,7 @@ class QuickSearchController:
             else:
                 hNodes = node.self_and_subtree()
                 bNodes = node.self_and_subtree()
-            
+
         else:
             hNodes = [self.c.p]
             bNodes = [self.c.p]
@@ -667,11 +663,11 @@ class QuickSearchController:
 
         if not pat.startswith('r:'):
             hpat = fnmatch.translate('*'+ pat + '*').replace(r"\Z(?ms)","")
-            bpat = fnmatch.translate(pat).rstrip('$').replace(r"\Z(?ms)","")
+            # bpat = fnmatch.translate(pat).rstrip('$').replace(r"\Z(?ms)","")
             flags = re.IGNORECASE
         else:
             hpat = pat[2:]
-            bpat = pat[2:]
+            # bpat = pat[2:]
             flags = 0
         combo = self.widgetUI.comboBox.currentText()
         if combo == "All":
@@ -681,11 +677,11 @@ class QuickSearchController:
         else:
             hNodes = [self.c.p]
         hm = self.find_h(hpat, hNodes, flags)
-        #self.addHeadlineMatches(hm)
-        #bm = self.c.find_b(bpat, flags)
-        #self.addBodyMatches(bm)
+        # self.addHeadlineMatches(hm)
+        # bm = self.c.find_b(bpat, flags)
+        # self.addBodyMatches(bm)
         return hm, []
-        #self.lw.insertItem(0, "%d hits"%self.lw.count())
+        # self.lw.insertItem(0, "%d hits"%self.lw.count())
     #@+node:jlunz.20150826091415.1: *3* find_h
     def find_h(self, regex, nodes, flags=re.IGNORECASE):
         """ Return list (a PosList) of all nodes where zero or more characters at

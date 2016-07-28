@@ -436,6 +436,7 @@
 <v t="ekr.20131112150804.18737"><vh>@bool force_execute_entire_body = False</vh></v>
 <v t="ekr.20111115083813.12518"><vh>@bool indent_added_comments = True</vh></v>
 <v t="ekr.20150227102835.1"><vh>@bool make_node_conflicts_node = True</vh></v>
+<v t="ekr.20160428072005.1"><vh>@data history-list</vh></v>
 <v t="ekr.20041119041019.1"><vh>@string remove_sentinels_extension = .txt</vh></v>
 <v t="ekr.20141010095448.19776"><vh>Beautify command settings</vh>
 <v t="ekr.20150602160413.1"><vh>@bool tidy_autobeautify = False</vh></v>
@@ -684,6 +685,7 @@
 <v t="ekr.20111029055127.16614"><vh>@data import_xml_tags</vh></v>
 </v>
 <v t="ekr.20060122105527.3"><vh>Keyboard and minibuffer options</vh>
+<v t="ekr.20160504145653.1"><vh>@bool plain_key_outline_search = True</vh></v>
 <v t="ekr.20120205022040.15410"><vh>@bool enable_alt_ctrl_bindings = True</vh></v>
 <v t="ekr.20131007055150.13034"><vh>@bool ignore_unbound_non_ascii_keys = False</vh></v>
 <v t="ekr.20060122105527.8"><vh>@bool showHelpWhenEnteringModes = False</vh></v>
@@ -2137,6 +2139,10 @@
 <v t="ekr.20120926072255.11432"><vh>@color minibuffer-foreground-color = black</vh></v>
 <v t="ekr.20100313080341.8371"><vh>@color minibuffer-warning-color = lightgrey</vh></v>
 </v>
+<v t="ekr.20160514162747.1"><vh>Tab colors</vh>
+<v t="ekr.20160514162753.1"><vh>@color selected-tab-bg = @LightSteelBlue1</vh></v>
+<v t="ekr.20160514162820.1"><vh>@color unselected-tab-bg = lightgrey</vh></v>
+</v>
 </v>
 <v t="ekr.20041213105954"><vh>Windows</vh>
 <v t="ekr.20100929121021.8511"><vh>@bool fixedwindow = False</vh></v>
@@ -2442,6 +2448,8 @@
 </v>
 </v>
 </v>
+<v t="ekr.20110611092035.16471"></v>
+<v t="ekr.20140915194122.19470"></v>
 </vnodes>
 <tnodes>
 <t tx="TL.20080702085131.2">If True: Save the Leo file and all modified derived files every time the external editor saves a modified file.
@@ -2499,7 +2507,9 @@ To enable a theme:
 2. Move the tree so it is the *last* top-level node under @settings.
 3. Remove the @ignore from the copy of this node.
 4. Enable one of the three themes below by removing @ignore for its node.
-5. Test by opening another Leo outline.
+5. Select menu Settings&gt;Reload Styles.
+6. Test by opening another Leo outline.
+
 </t>
 <t tx="edward.20150613090031.10"></t>
 <t tx="edward.20150613090031.100">Foreground color of unselected headline text in a headline that is being edited.
@@ -5104,7 +5114,8 @@ move-lines-up               ! body = Ctrl-UpArrow
 move-lines-down             ! body = Ctrl-DnArrow 
   
 goto-first-visible-node     = Alt-Home
-goto-last-visible-node      = Alt-End
+# goto-last-visible-node    = Alt-End
+goto-last-sibling           = Alt-End
 
 back-page                       ! text = PageUp
 back-page-extend-selection      ! text = Shift-PageUp
@@ -10530,6 +10541,14 @@ QTabbedWidget {
     background-color: @tabbed-widget-bg;
 }
 
+QTabBar::tab {
+    background: @unselected-tab-bg;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: @selected-tab-bg;
+}
+
 QStackedWidget {
     border-color:       @stacked-widget-border-color;
     background-color:   @stacked-widget-bg;
@@ -11151,6 +11170,17 @@ v2: V</t>
 <t tx="ekr.20160318061607.5"></t>
 <t tx="ekr.20160318061607.6"></t>
 <t tx="ekr.20160318061607.7"></t>
+<t tx="ekr.20160428072005.1"># Lines starting with '#' are comment lines.
+# A list of command names to be pre-loaded into the history list.
+pylint
+sort-lines
+</t>
+<t tx="ekr.20160504145653.1">True: plain keys in the outline pane search for headlines.
+False: Ignore plain keys in the outline pane.
+</t>
+<t tx="ekr.20160514162747.1"></t>
+<t tx="ekr.20160514162753.1"></t>
+<t tx="ekr.20160514162820.1"></t>
 <t tx="jlunz.20150821113251.1">def html_tag():
     """expand &lt;tag&gt; to 
        &lt;tag&gt;\n&lt;/tag&gt; with proper indendation"""

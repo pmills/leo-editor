@@ -47,7 +47,7 @@ import leo.core.leoGlobals as g
 # pylint: disable=unpacking-non-sequence
 #@+others
 #@+node:ekr.20031218072017.3605: ** class Undoer
-class Undoer:
+class Undoer(object):
     """A class that implements unlimited undo and redo."""
     # pylint: disable=not-an-iterable
     # pylint: disable=unsubscriptable-object
@@ -132,7 +132,7 @@ class Undoer:
     def cmd(name):
         '''Command decorator for the Undoer class.'''
         # pylint: disable=no-self-argument
-        return g.new_cmd_decorator(name, ['c', 'undoer',])
+        return g.new_cmd_decorator(name, ['c', 'undoer', ])
     #@+node:ekr.20050416092908.1: *3* u.Internal helpers
     #@+node:ekr.20031218072017.3607: *4* u.clearOptionalIvars
     def clearOptionalIvars(self):
@@ -212,7 +212,8 @@ class Undoer:
     def recognizeStartOfTypingWord(self,
         old_lines, old_row, old_col, old_ch,
         new_lines, new_row, new_col, new_ch,
-        prev_row, prev_col):
+        prev_row, prev_col
+    ):
         ''' A potentially user-modifiable method that should return True if the
         typing indicated by the params starts a new 'word' for the purposes of
         undo with 'word' granularity.
@@ -380,7 +381,7 @@ class Undoer:
         # Aside: Prior to 4.2 Leo used a scheme that was equivalent to the
         # createUndoInfoDict info, but quite a bit uglier.
         #@-<< about u.saveTree >>
-        u = self; topLevel = (treeInfo == None)
+        u = self; topLevel = (treeInfo is None)
         if topLevel: treeInfo = []
         # Add info for p.v.  Duplicate tnode info is harmless.
         data = (p.v, u.createVnodeUndoInfo(p.v), u.createTnodeUndoInfo(p.v))
@@ -544,6 +545,29 @@ class Undoer:
         bunch.newDirty = p.isDirty()
         bunch.newMarked = p.isMarked()
         u.pushBead(bunch)
+    #@+node:ekr.20160502175451.1: *5* u.afterCopyMarkedNodes
+    def afterCopyMarkedNodes(self, p):
+        u = self; c = u.c
+        if u.redoing or u.undoing:
+            return
+        bunch = u.createCommonBunch(p)
+            # Sets
+            # oldChanged = c.isChanged(),
+            # oldDirty = p.isDirty(),
+            # oldMarked = p.isMarked(),
+            # oldSel = w and w.getSelectionRange() or None,
+            # p = p.copy(),
+        # Set types & helpers
+        bunch.kind = 'copy-marked-nodes'
+        bunch.undoType = 'copy-marked-nodes'
+        # Set helpers
+        bunch.undoHelper = u.undoCopyMarkedNodes
+        bunch.redoHelper = u.redoCopyMarkedNodes
+        bunch.newP = p.next()
+        bunch.newChanged = c.isChanged()
+        bunch.newDirty = p.isDirty()
+        bunch.newMarked = p.isMarked()
+        u.pushBead(bunch)
     #@+node:ekr.20050411193627.5: *5* u.afterCloneNode
     def afterCloneNode(self, p, command, bunch, dirtyVnodeList=None):
         u = self; c = u.c
@@ -682,25 +706,6 @@ class Undoer:
         bunch.redoHelper = u.redoMark
         bunch.dirtyVnodeList = dirtyVnodeList
         bunch.newChanged = u.c.isChanged()
-        bunch.newDirty = p.isDirty()
-        bunch.newMarked = p.isMarked()
-        u.pushBead(bunch)
-    #@+node:ekr.20111005152227.15562: *5* u.afterMoveMarkedNodes
-    def afterMoveMarkedNodes(self, data, p):
-        u = self; c = u.c
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
-        # Set types & helpers
-        bunch.kind = 'move-marked-nodes'
-        bunch.undoType = 'move-marked-nodes'
-        # Set helpers
-        bunch.undoHelper = u.undoMoveMarkedNodes
-        bunch.redoHelper = u.redoMoveMarkedNodes
-        bunch.newP = p.copy()
-        bunch.deleteMarkedNodesData = data
-        # bunch.dirtyVnodeList = dirtyVnodeList
-        bunch.newChanged = c.isChanged()
         bunch.newDirty = p.isDirty()
         bunch.newMarked = p.isMarked()
         u.pushBead(bunch)
@@ -922,9 +927,12 @@ class Undoer:
             u.setIvarsFromBunch(v.undo_info)
     #@+node:ekr.20031218072017.1490: *4* u.setUndoTypingParams
     def setUndoTypingParams(self, p, undo_type, oldText, newText, oldSel, newSel, oldYview=None):
-        '''Save enough information so a typing operation can be undone and redone.
+        '''
+        Save enough information to undo or redo typing operation.
 
-        Do nothing when called from the undo/redo logic because the Undo and Redo commands merely reset the bead pointer.'''
+        Do nothing when called from the undo/redo logic because the Undo
+        and Redo commands merely reset the bead pointer.
+        '''
         trace = False and not g.unitTesting
         verbose = False
         u = self; c = u.c
@@ -932,7 +940,7 @@ class Undoer:
         #@+node:ekr.20040324061854: *5* << return if there is nothing to do >>
         if u.redoing or u.undoing:
             return None
-        if undo_type == None:
+        if undo_type is None:
             return None
         if undo_type == "Can't Undo":
             u.clearUndoState()
@@ -1115,7 +1123,8 @@ class Undoer:
                         elif old_col == 0 or new_col == 0:
                             # py-lint: disable=W0511
                             # W0511:1362: TODO
-                            # TODO this is not true, we might as well just have entered a char at the beginning of an existing line
+                            # TODO this is not true, we might as well just have entered a
+                            # char at the beginning of an existing line
                             pass # We have just inserted a line.
                         else:
                             # 2011/04/01: Patch by Sam Hartsfield
@@ -1237,6 +1246,13 @@ class Undoer:
         u = self; c = u.c
         c.selectPosition(u.p)
         c.cloneMarked()
+        u.newP = c.p
+        u.newChanged = c.isChanged()
+    #@+node:ekr.20160502175557.1: *4* u.redoCopyMarkedNodes
+    def redoCopyMarkedNodes(self):
+        u = self; c = u.c
+        c.selectPosition(u.p)
+        c.copyMarked()
         u.newP = c.p
         u.newChanged = c.isChanged()
     #@+node:ekr.20050412083057: *4* u.redoCloneNode
@@ -1393,13 +1409,6 @@ class Undoer:
         u.updateMarks('new')
         for v in u.dirtyVnodeList:
             v.setDirty()
-    #@+node:ekr.20111005152227.15564: *4* u.redoMoveMarkedNodes
-    def redoMoveMarkedNodes(self):
-        u = self; c = u.c
-        c.selectPosition(u.p)
-        c.moveMarked()
-        c.selectPosition(u.newP)
-        u.newChanged = c.isChanged()
     #@+node:ekr.20080425060424.13: *4* u.redoPromote
     def redoPromote(self):
         u = self; c = u.c
@@ -1524,6 +1533,14 @@ class Undoer:
         u = self
         next = u.p.next()
         assert next.h == 'Clones of marked nodes', repr(u.p, next.h)
+        next.doDelete()
+        u.p.setAllAncestorAtFileNodesDirty()
+        u.c.selectPosition(u.p)
+    #@+node:ekr.20160502175653.1: *4* u.undoCopyMarkedNodes
+    def undoCopyMarkedNodes(self):
+        u = self
+        next = u.p.next()
+        assert next.h == 'Copies of marked nodes', (u.p.h, next.h)
         next.doDelete()
         u.p.setAllAncestorAtFileNodesDirty()
         u.c.selectPosition(u.p)
@@ -1696,23 +1713,6 @@ class Undoer:
         u.updateMarks('old')
         for v in u.dirtyVnodeList:
             v.setDirty() # Bug fix: Leo 4.4.6.
-    #@+node:ekr.20111005152227.15563: *4* u.undoMoveMarkedNodes
-    def undoMoveMarkedNodes(self):
-        u = self; c = u.c
-        # Undo the moves in reverse order
-        aList = u.deleteMarkedNodesData[:]
-        aList.reverse()
-        root = c.rootPosition()
-        for p in aList:
-            if p.stack:
-                parent_v, junk = p.stack[-1]
-            else:
-                parent_v = c.hiddenRootNode
-            p.v._addLink(p._childIndex, parent_v)
-        # A shortcut. This deletes all the "extra copies of the nodes".
-        root.doDelete()
-        u.p.setAllAncestorAtFileNodesDirty()
-        c.selectPosition(u.p)
     #@+node:ekr.20080425060424.14: *4* u.undoPromote
     def undoPromote(self):
         u = self; c = u.c
@@ -1784,7 +1784,7 @@ class Undoer:
         '''Replace p and its subtree using old_data during undo.'''
         # Same as undoReplace except uses g.Bunch.
         u = self; c = u.c
-        if new_data == None:
+        if new_data is None:
             # This is the first time we have undone the operation.
             # Put the new data in the bead.
             bunch = u.beads[u.bead]

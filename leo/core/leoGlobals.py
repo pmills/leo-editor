@@ -24,16 +24,6 @@ trace_startup = False
     # the traces can add class info to the method name.
 trace_gnxDict = False
     # True: trace assignments to fc.gnxDict & related.
-new_find = True
-new_modes = False
-    # True: use ModeController and ModeInfo classes.
-if new_modes:
-    print('\n***** new_modes')
-new_keys = False
-    # This project hardly seems urgent.
-    # True: Qt input methods produce a **user setting**, not a stroke.
-if new_keys:
-    print('\n***** new_keys')
 # Debugging options...
 enableDB = True
     # Don't even think about eliminating this constant:
@@ -62,6 +52,10 @@ if 0:
     import leo.core.leoGlobals as g # So code can use g below.
 # Don't import this here: it messes up Leo's startup code.
 # import leo.core.leoTest as leoTest
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 import codecs
 try:
     import gc
@@ -132,6 +126,7 @@ globalDirectiveList = [
     'markup',
     'nobeautify',
     'nocolor-node', 'nocolor', 'noheader', 'nowrap',
+    'nosearch', # Leo 5.3.
     'others', 'pagewidth', 'path', 'quiet',
     'raw', 'root-code', 'root-doc', 'root', 'silent',
     'tabwidth', 'terse',
@@ -242,7 +237,7 @@ bunch = Bunch
 #@+node:ekr.20040331083824.1: *3* class g.FileLikeObject
 # Note: we could use StringIo for this.
 
-class FileLikeObject:
+class FileLikeObject(object):
     """Define a file-like object for redirecting writes to a string.
 
     The caller is responsible for handling newlines correctly."""
@@ -297,7 +292,7 @@ fileLikeObject = FileLikeObject
 # Important: The startup code uses this class,
 # so it is convenient to define it in leoGlobals.py.
 
-class GeneralSetting:
+class GeneralSetting(object):
     '''A class representing any kind of setting except shortcuts.'''
 
     def __init__(self, kind, encoding=None, ivar=None, setting=None, val=None, path=None, tag='setting', unl=None):
@@ -325,7 +320,7 @@ class GeneralSetting:
 def isGeneralSetting(obj):
     return isinstance(obj, GeneralSetting)
 #@+node:ekr.20120201164453.10090: *3* class g.KeyStroke & isStroke/OrNone
-class KeyStroke:
+class KeyStroke(object):
     '''A class that announces that its contents has been canonicalized by k.strokeFromSetting.
 
     This allows type-checking assertions in the code.'''
@@ -404,7 +399,7 @@ def isStroke(obj):
 def isStrokeOrNone(obj):
     return obj is None or isinstance(obj, KeyStroke)
 #@+node:ekr.20160119093947.1: *3* class g.MatchBrackets
-class MatchBrackets:
+class MatchBrackets(object):
     '''
     A class implementing the match-brackets command. In the interest of
     speed, the code assumes that the user invokes the match-bracket command
@@ -433,7 +428,6 @@ class MatchBrackets:
         if self.language in ('javascript', 'perl',):
             assert s[i] == '/'
             offset = 1 if self.forward else - 1
-            i1 = i
             i += offset
             while 0 <= i < len(s) and s[i] != '\n':
                 if s[i] == '/':
@@ -442,7 +436,6 @@ class MatchBrackets:
             return False
         else:
             return False
-
     #@+node:ekr.20160121112536.1: *5* mb.scan_regex
     def scan_regex(self, s, i):
         '''Scan a regex (or regex substitution for perl).'''
@@ -480,8 +473,7 @@ class MatchBrackets:
         Scan the string starting at s[i] (forward or backward).
         Return the index of the next character.
         '''
-        # if not self.forward: g.pdb()
-        i1 = i if self.forward else i + 1
+        # i1 = i if self.forward else i + 1
         delim = s[i]
         assert delim in "'\"", repr(delim)
         offset = 1 if self.forward else -1
@@ -507,7 +499,6 @@ class MatchBrackets:
     def find_matching_bracket(self, ch1, s, i):
         '''Find the bracket matching s[i] for self.language.'''
         self.forward = ch1 in self.open_brackets
-        offset = 1 if self.forward else - 1
         # Find the character matching the initial bracket.
         for n in range(len(self.brackets)):
             if ch1 == self.brackets[n]:
@@ -608,7 +599,6 @@ class MatchBrackets:
             if s[i] == '\n':
                 if self.single_comment:
                     # Scan backward for any single-comment delim.
-                    found = None
                     i -= 1
                     while 0 <= i and s[i] != '\n':
                         if g.match(s, i, self.single_comment):
@@ -660,7 +650,6 @@ class MatchBrackets:
     #@+node:ekr.20160119230141.2: *5* mb.back_scan_comment
     def back_scan_comment(self, s, i):
         '''Return the index of the character after a comment.'''
-        trace = False and not g.unitTesting
         i1 = i
         if g.match(s, i, self.end_comment):
             i1 += len(self.end_comment) # For traces.
@@ -668,7 +657,6 @@ class MatchBrackets:
             while 0 <= i:
                 if g.match(s, i, self.start_comment):
                     i -= 1
-                    # g.trace('multi-line',s[i:i1])
                     return i
                 i -= 1
             self.oops('unmatched multiline comment')
@@ -679,7 +667,6 @@ class MatchBrackets:
             i -= 1
             while 0 <= i and s[i] != '\n':
                 if g.match(s, i, self.single_comment):
-                    # g.trace('single-line',s[i:i1].rstrip())
                     found = i-1
                 i -= 1
             if found is None:
@@ -692,7 +679,6 @@ class MatchBrackets:
         Return True if s[i] ends a comment. This is called while scanning
         backward, so this is a bit of a guess.
         '''
-        i1 = i
         if s[i] == '\n':
             # This is the hard (dubious) case.
             # Let w, x, y and z stand for any strings not containg // or quotes.
@@ -706,7 +692,7 @@ class MatchBrackets:
                 # Scan backward for single-line comment delims or quotes.
                 quote = None
                 i -= 1
-                while 0 <= i and  s[i] != '\n':
+                while 0 <= i and s[i] != '\n':
                     progress = i
                     if quote and s[i] == quote:
                         quote = None
@@ -742,7 +728,6 @@ class MatchBrackets:
         '''The driver for the MatchBrackets class.'''
         # A partial fix for bug 127: Bracket matching is buggy.
         w = self.c.frame.body.wrapper
-        brackets = "()[]{}<>"
         s = w.getAllText()
         ins = w.getInsertPoint()
         ch1 = 0 <= ins - 1 < len(s) and s[ins - 1] or ''
@@ -769,11 +754,10 @@ class MatchBrackets:
         else:
             g.es("unmatched", repr(ch))
     #@-others
-
 #@+node:ekr.20031219074948.1: *3* class g.NullObject (Python Cookbook)
 #@@nobeautify
 
-class NullObject:
+class NullObject(object):
     """
     An object that does nothing, and does it very well.
     From the Python cookbook, recipe 5.23
@@ -862,7 +846,7 @@ class PosList(list):
         return aList2
     #@-others
 #@+node:EKR.20040612114220.4: *3* class g.ReadLinesClass
-class ReadLinesClass:
+class ReadLinesClass(object):
     """A class whose next method provides a readline method for Python's tokenize module."""
 
     def __init__(self, s):
@@ -880,7 +864,7 @@ class ReadLinesClass:
 
     __next__ = next
 #@+node:ekr.20031218072017.3121: *3* class g.RedirectClass & convenience functions
-class RedirectClass:
+class RedirectClass(object):
     """A class to redirect stdout and stderr to Leo's log pane."""
     #@+<< RedirectClass methods >>
     #@+node:ekr.20031218072017.1656: *4* << RedirectClass methods >>
@@ -891,7 +875,7 @@ class RedirectClass:
         self.encoding = 'utf-8' # 2019/03/29 For pdb.
     #@+node:ekr.20041012082437.1: *5* isRedirected
     def isRedirected(self):
-        return self.old != None
+        return self.old is not None
     #@+node:ekr.20041012082437.2: *5* flush
     # For LeoN: just for compatibility.
 
@@ -979,7 +963,7 @@ def rawPrint(s):
 #@-others
 #@-<< define convenience methods for redirecting streams >>
 #@+node:ekr.20121128031949.12605: *3* class g.SherlockTracer
-class SherlockTracer:
+class SherlockTracer(object):
     '''
     A stand-alone tracer class with many of Sherlock's features.
 
@@ -1323,7 +1307,7 @@ class SherlockTracer:
 # Important: The startup code uses this class,
 # so it is convenient to define it in leoGlobals.py.
 
-class ShortcutInfo:
+class ShortcutInfo(object):
     '''A class representing any kind of key binding line.
 
     This includes other information besides just the KeyStroke.'''
@@ -1371,7 +1355,7 @@ class ShortcutInfo:
 def isShortcutInfo(obj):
     return isinstance(obj, ShortcutInfo)
 #@+node:ekr.20080531075119.1: *3* class g.Tracer
-class Tracer:
+class Tracer(object):
     '''A "debugger" that computes a call graph.
 
     To trace a function and its callers, put the following at the function's start:
@@ -1488,7 +1472,7 @@ def startTracer(limit=0, trace=False, verbose=False):
     sys.settrace(t.tracer)
     return t
 #@+node:ekr.20120129181245.10220: *3* class g.TypedDict/OfLists & isTypedDict/OfLists
-class TypedDict:
+class TypedDict(object):
     '''A class containing a name and enforcing type checking.'''
     #@+others
     #@+node:ekr.20120205022040.17769: *4* td.ctor
@@ -1644,7 +1628,7 @@ def check_cmd_instance_dict(c, g):
             if name != key:
                 g.trace('class mismatch', key, name)
 #@+node:ville.20090521164644.5924: *3* g.command (decorator)
-class Command:
+class Command(object):
     '''
     A global decorator for functions outside of any class.
 
@@ -1816,7 +1800,7 @@ def file_date(theFile, format=None):
     if theFile and len(theFile) and g.os_path_exists(theFile):
         try:
             n = g.os_path_getmtime(theFile)
-            if format == None:
+            if format is None:
                 format = "%m/%d/%y %H:%M:%S"
             return time.strftime(format, time.gmtime(n))
         except(ImportError, NameError):
@@ -1932,6 +1916,8 @@ def run_pylint(fn, rc,
             sherlock.stop()
             sherlock.print_stats(patterns=stats_patterns or [])
     else:
+        # print('g.run_pylint: lint: %s' % lint)
+        # print('g.run_pylint: %s' % g.shortFileName(fn))
         lint.Run(args)
 #@+node:ekr.20120912153732.10597: *4* g.wait
 def sleep(n):
@@ -2058,10 +2044,10 @@ def printGcObjects(tag=''):
         typesDict = {}
         for obj in gc.get_objects():
             t = type(obj)
-            if t == 'instance' and t != types.UnicodeType:
+            if t == 'instance' and t != types.UnicodeType: # NOQA
                 try: t = obj.__class__
                 except Exception: pass
-            if t != types.FrameType:
+            if t != types.FrameType: # NOQA
                 r = repr(t) # was type(obj) instead of repr(t)
                 n = typesDict.get(r, 0)
                 typesDict[r] = n + 1
@@ -2518,7 +2504,7 @@ def scanAtPagewidthDirectives(aList, issue_error_flag=False):
         s = d.get('pagewidth')
         if s is not None:
             i, val = g.skip_long(s, 0)
-            if val != None and val > 0:
+            if val is not None and val > 0:
                 # g.trace(val)
                 return val
             else:
@@ -2571,7 +2557,7 @@ def scanAtRootOptions(s, i, err_flag=False):
             z_line = g.get_line(s, i)
             g.es("unknown option:", z_opt, "in", z_line)
         #@-<< scan another @root option >>
-    if mode == None:
+    if mode is None:
         doc = app.config.at_root_bodies_start_in_doc_mode
         mode = "doc" if doc else "code"
     # g.trace(mode,g.callers(3))
@@ -2731,7 +2717,7 @@ def set_language(s, i, issue_errors_flag=False):
     """
     tag = "@language"
     # g.trace(g.get_line(s,i))
-    assert(i != None)
+    assert(i is not None)
     # assert(g.match_word(s,i,tag))
     if g.match_word(s, i, tag):
         i += len(tag)
@@ -2828,7 +2814,7 @@ def computeStandardDirectories():
     return g.app.loadManager.computeStandardDirectories()
 #@+node:ekr.20031218072017.3103: *3* g.computeWindowTitle
 def computeWindowTitle(fileName):
-    if fileName == None:
+    if not fileName:
         return "untitled"
     else:
         path, fn = g.os_path_split(fileName)
@@ -2922,7 +2908,7 @@ def guessExternalEditor(c=None):
     else:
         g.es('''No editor set.
 Please set LEO_EDITOR or EDITOR environment variable,
-or do g.app.db['LEO_EDITOR'] = "gvim"'''         )
+or do g.app.db['LEO_EDITOR'] = "gvim"''')
         return None
 #@+node:ekr.20160330204014.1: *3* g.init_dialog_folder
 def init_dialog_folder(c, p, use_at_path=True):
@@ -3088,6 +3074,21 @@ def openWithFileName(fileName, old_c=None, gui=None):
     returns the commander of the newly-opened outline.
     """
     return g.app.loadManager.loadLocalFile(fileName, gui, old_c)
+#@+node:ekr.20160504062833.1: *3* g.readFileToUnicodeString (new in Leo 5.4)
+def readFileIntoUnicodeString(fn, silent=False):
+    '''Return the raw contents of the file whose full path is fn.'''
+    try:
+        f = open(fn, 'rb')
+        s = f.read()
+        f.close()
+        return g.toUnicode(s)
+    except IOError:
+        if not silent:
+            g.error('can not open', fn)
+    except Exception:
+        g.error('readFileIntoUnicodeString: unexpected exception reading %s' % (fn))
+        g.es_exception()
+    return None
 #@+node:ekr.20150306035851.7: *3* g.readFileIntoEncodedString
 def readFileIntoEncodedString(fn, silent=False):
     '''Return the raw contents of the file whose full path is fn.'''
@@ -3332,22 +3333,25 @@ def recursiveUNLSearch(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
     NOTE: maxdepth is max depth seen in recursion so far, not a limit on
           how far we will recurse.  So it should default to 0 (zero).
     """
+    trace = False and not g.unitTesting
     if g.unitTesting:
         g.app.unitTestDict['g.recursiveUNLSearch'] = True
         return True, maxdepth, maxp
 
     def moveToP(c, p):
+        if trace: g.trace(p and p.h)
         c.expandAllAncestors(p)
         c.selectPosition(p)
         c.redraw()
         c.frame.bringToFront()
 
-    found, maxdepth, maxp = recursiveUNLFind(unlList, c, depth, p, maxdepth, maxp,
-                                             soft_idx=soft_idx, hard_idx=hard_idx)
+    found, maxdepth, maxp = recursiveUNLFind(
+        unlList, c, depth, p, maxdepth, maxp,
+        soft_idx=soft_idx, hard_idx=hard_idx)
     if maxp:
         moveToP(c, maxp)
     return found, maxdepth, maxp
-#@+node:ekr.20140711071454.17654: *4* g.recureiveUNLFind
+#@+node:ekr.20140711071454.17654: *4* g.recursiveUNLFind
 def recursiveUNLFind(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
                      soft_idx=False, hard_idx=False):
     """
@@ -3403,7 +3407,7 @@ def recursiveUNLFind(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
                     order.append(nths[nth_same])
             # Then we try *all* other nodes with same header
             order += [n for n, s in enumerate(heads)
-                      if n not in order and s == target]
+                        if n not in order and s == target]
             # Then position based, if requested
             if soft_idx and nth_sib < len(heads):
                 order.append(nth_sib)
@@ -3416,14 +3420,18 @@ def recursiveUNLFind(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
         # note, the above also fixes calling with soft_idx=True and an old UNL
     for ndi in order:
         nd = nds[ndi]
-        if target == nd.h or (use_idx_mode and (soft_idx or hard_idx) and ndi == nth_sib):
+        if (
+            target == nd.h or
+            (use_idx_mode and (soft_idx or hard_idx) and ndi == nth_sib)
+        ):
             if depth + 1 == len(unlList): # found it
                 return True, maxdepth, nd
             else:
                 if maxdepth < depth + 1:
                     maxdepth = depth + 1
                     maxp = nd.copy()
-                found, maxdepth, maxp = g.recursiveUNLFind(unlList, c, depth + 1, nd,
+                found, maxdepth, maxp = g.recursiveUNLFind(
+                    unlList, c, depth + 1, nd,
                     maxdepth, maxp, soft_idx=soft_idx, hard_idx=hard_idx)
                 if found:
                     return found, maxdepth, maxp
@@ -3435,14 +3443,15 @@ def recursiveUNLFind(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
         for p in c.all_unique_positions():
             if any([p.h.replace('--%3E', '-->') in unl for unl in unlList]):
                 aList.append((p.copy(), p.get_UNL(False, False, True)))
-        # unl_list = [re.sub(pos_pattern,"",x).replace('--%3E','-->') for x in unl.split('-->')]
         maxcount = 0
         singleMatch = True
         for iter_unl in aList:
             count = 0
             compare_list = unlList[:]
             for header in reversed(iter_unl[1].split('-->')):
-                if re.sub(pos_pattern, "", header).replace('--%3E', '-->') == compare_list[-1]:
+                if (re.sub(pos_pattern, "", header).replace('--%3E', '-->') ==
+                     compare_list[-1]
+                ):
                     count = count + 1
                     compare_list.pop(-1)
                 else:
@@ -3452,7 +3461,7 @@ def recursiveUNLFind(unlList, c, depth=0, p=None, maxdepth=0, maxp=None,
                 singleMatch = True
             elif count == maxcount:
                 singleMatch = False
-        if maxcount and singleMatch == True:
+        if maxcount and singleMatch:
             maxp = p
             maxdepth = p.level()
     return False, maxdepth, maxp
@@ -3848,17 +3857,18 @@ def match(s, i, pattern):
     return s and pattern and s.find(pattern, i, i + len(pattern)) == i
 #@+node:ekr.20031218072017.3182: *4* match_c_word
 def match_c_word(s, i, name):
-    if name == None: return False
     n = len(name)
-    if n == 0: return False
-    return name == s[i: i + n] and (i + n == len(s) or not g.is_c_id(s[i + n]))
+    return (
+        name and
+        name == s[i: i + n] and
+        (i + n == len(s) or not g.is_c_id(s[i + n]))
+    )
 #@+node:ekr.20031218072017.3183: *4* match_ignoring_case
 def match_ignoring_case(s1, s2):
-    if s1 == None or s2 == None: return False
-    return s1.lower() == s2.lower()
+    return s1 and s2 and s1.lower() == s2.lower()
 #@+node:ekr.20031218072017.3184: *4* match_word
 def match_word(s, i, pattern):
-    if pattern == None: return False
+    if pattern is None: return False
     j = len(pattern)
     if j == 0: return False
     if s.find(pattern, i, i + j) != i:
@@ -5323,9 +5333,9 @@ def prettyPrintType(obj):
     t = type(obj)
     if t in (types.BuiltinFunctionType, types.FunctionType):
         return 'function'
-    elif t == types.ModuleType:
+    elif t == types.ModuleType: # NOQA
         return 'module'
-    elif t == types.InstanceType:
+    elif t == types.InstanceType: # NOQA
         return 'object'
     elif t in method_types:
         return 'method'
@@ -5618,105 +5628,6 @@ def CheckVersionToInt(s):
             return int(s)
         else:
             return 0
-#@+node:ekr.20060921100435.1: *4* g.oldCheckVersion (Dave Hein)
-#@+at g.CheckVersion() is a generic version checker.  Assumes a
-# version string of up to four parts, or tokens, with
-# leftmost token being most significant and each token
-# becoming less signficant in sequence to the right.
-# 
-# RETURN VALUE
-# 
-# 1 if comparison is True
-# 0 if comparison is False
-# 
-# PARAMETERS
-# 
-# version: the version string to be tested
-# againstVersion: the reference version string to be
-#               compared against
-# condition: can be any of "==", "!=", ">=", "<=", ">", or "<"
-# stringCompare: whether to test a token using only the
-#              leading integer of the token, or using the
-#              entire token string.  For example, a value
-#              of "0.0.1.0" means that we use the integer
-#              value of the first, second, and fourth
-#              tokens, but we use a string compare for the
-#              third version token.
-# delimiter: the character that separates the tokens in the
-#          version strings.
-# 
-# The comparison uses the precision of the version string
-# with the least number of tokens.  For example a test of
-# "8.4" against "8.3.3" would just compare the first two
-# tokens.
-# 
-# The version strings are limited to a maximum of 4 tokens.
-#@@c
-
-def oldCheckVersion(version, againstVersion, condition=">=", stringCompare="0.0.0.0", delimiter='.'):
-    # tokenize the stringCompare flags
-    compareFlag = stringCompare.split('.')
-    # tokenize the version strings
-    testVersion = version.split(delimiter)
-    testAgainst = againstVersion.split(delimiter)
-    # find the 'precision' of the comparison
-    tokenCount = 4
-    if tokenCount > len(testAgainst):
-        tokenCount = len(testAgainst)
-    if tokenCount > len(testVersion):
-        tokenCount = len(testVersion)
-    # Apply the stringCompare flags
-    justInteger = re.compile("^[0-9]+")
-    for i in range(tokenCount):
-        if "0" == compareFlag[i]:
-            m = justInteger.match(testVersion[i])
-            testVersion[i] = m.group()
-            m = justInteger.match(testAgainst[i])
-            testAgainst[i] = m.group()
-        elif "1" != compareFlag[i]:
-            errMsg = "stringCompare argument must be of " + "the form \"x.x.x.x\" where each " + "'x' is either '0' or '1'."
-            raise EnvironmentError(errMsg)
-    # Compare the versions
-    if condition == ">=":
-        for i in range(tokenCount):
-            if testVersion[i] < testAgainst[i]:
-                return 0
-            if testVersion[i] > testAgainst[i]:
-                return 1 # it was greater than
-        return 1 # it was equal
-    if condition == ">":
-        for i in range(tokenCount):
-            if testVersion[i] < testAgainst[i]:
-                return 0
-            if testVersion[i] > testAgainst[i]:
-                return 1 # it was greater than
-        return 0 # it was equal
-    if condition == "==":
-        for i in range(tokenCount):
-            if testVersion[i] != testAgainst[i]:
-                return 0 # any token was not equal
-        return 1 # every token was equal
-    if condition == "!=":
-        for i in range(tokenCount):
-            if testVersion[i] != testAgainst[i]:
-                return 1 # any token was not equal
-        return 0 # every token was equal
-    if condition == "<":
-        for i in range(tokenCount):
-            if testVersion[i] >= testAgainst[i]:
-                return 0
-            if testVersion[i] < testAgainst[i]:
-                return 1 # it was less than
-        return 0 # it was equal
-    if condition == "<=":
-        for i in range(tokenCount):
-            if testVersion[i] > testAgainst[i]:
-                return 0
-            if testVersion[i] < testAgainst[i]:
-                return 1 # it was less than
-        return 1 # it was equal
-    # didn't find a condition that we expected.
-    raise EnvironmentError("condition must be one of '>=', '>', '==', '!=', '<', or '<='.")
 #@+node:ekr.20031218072017.3147: *3* g.choose (deprecated)
 # This can and should be replaced by Python's ternary operator.
 
@@ -6241,7 +6152,6 @@ def getScript(c, p, useSelectedText=True, forcePythonSentinels=True, useSentinel
     import leo.core.leoAtFile as leoAtFile
     at = leoAtFile.AtFile(c)
     w = c.frame.body.wrapper
-    p1 = p and p.copy()
     if not p: p = c.p
     try:
         if g.app.inBridge:
@@ -6299,8 +6209,13 @@ def handleScriptException(c, p, script, script1):
         i += 1
     #@-<< dump the lines near the error >>
 #@+node:ekr.20031218072017.2418: *3* g.initScriptFind (no longer used)
-def initScriptFind(c, findHeadline, changeHeadline=None, firstNode=None,
-    script_search=True, script_change=True):
+def initScriptFind(c,
+    findHeadline,
+    changeHeadline=None,
+    firstNode=None,
+    script_search=True,
+    script_change=True,
+):
     import leo.core.leoGlobals as g
     # Find the scripts.
     p = c.p
@@ -6392,7 +6307,9 @@ def toUnicodeWithErrorCode(s, encoding, reportErrors=False):
     ok = True
     # pylint: disable=undefined-variable
     # unicode does not exist in Python 3.
-    f = str if g.isPython3 else unicode
+    # f = str if g.isPython3 else unicode
+    f = builtins.str if g.isPython3 else builtins.unicode
+        # Suppress pyflakes complaint.
     if s is None:
         s = g.u('')
     if not g.isUnicode(s):
@@ -6529,22 +6446,28 @@ def handleUrl(url, c=None, p=None):
             g.trace('url          ', url)
             g.trace('c.frame.title', c.frame.title)
             g.trace('leo_path     ', leo_path)
+            g.trace('parsed.fragment', fragment)
             g.trace('parsed.netloc', netloc)
             g.trace('parsed.path  ', path)
-            g.trace('parsed.scheme', scheme)
+            g.trace('parsed.scheme', repr(scheme))
         if c and scheme in ('', 'file'):
             if not leo_path:
                 if '-->' in path:
-                    g.recursiveUNLSearch(unquote(path).split("-->"), c,
-                                         soft_idx=True)
+                    g.recursiveUNLSearch(
+                        unquote(path).split("-->"),
+                        c,
+                        soft_idx=True)
                     return
                 if not path and fragment:
-                    g.recursiveUNLSearch(unquote(fragment).split("-->"), c,
-                                         soft_idx=True)
+                    g.recursiveUNLSearch(
+                        unquote(fragment).split("-->"),
+                        c,
+                        soft_idx=True)
                     return
             # .leo file
             if leo_path.lower().endswith('.leo') and os.path.exists(leo_path):
-                # Immediately end editing, so that typing in the new window works properly.
+                # Immediately end editing,
+                # so that typing in the new window works properly.
                 c.endEditing()
                 c.redraw_now()
                 if g.unitTesting:

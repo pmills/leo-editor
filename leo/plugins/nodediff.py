@@ -130,7 +130,7 @@ def onCreate (tag, keys):
     theNodeDiffController = NodeDiffController(c)
     c.theNodeDiffController = theNodeDiffController
 #@+node:peckj.20140113131037.5797: ** class NodeDiffController
-class NodeDiffController:
+class NodeDiffController(object):
 
     #@+others
     #@+node:peckj.20140113131037.5798: *3* __init__ (NodeDiffController, nodediff.py)
@@ -252,10 +252,14 @@ class NodeDiffController:
     #@+node:peckj.20140113131037.5809: *4* run_diff_on_subtree
     # for command 'diff-subtree'
     def run_diff_on_subtree(self, event=None):
-        '''Runs a diff on the children of the currently selected node.  Will only work if the node has exactly two children.'''
+        '''
+        Runs a diff on the children of the currently selected node.
+        Will only work if the node has exactly two children.
+        '''
         ns = self.get_subtree()
         if ns is None:
-            g.es('nodediff.py: Make sure that the selected node has exactly two children.', color='red')
+            g.es('nodediff.py: Make sure that the selected node has exactly two children.',
+                color='red')
             return
         self.run_appropriate_diff(ns)
     #@+node:tbrown.20140118145024.25546: *4* run_diff_on_saved

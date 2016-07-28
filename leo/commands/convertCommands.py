@@ -14,7 +14,7 @@ def cmd(name):
 
 #@+<< class To_Python >>
 #@+node:ekr.20150514063305.123: ** << class To_Python >>
-class To_Python:
+class To_Python(object):
     '''The base class for x-to-python commands.'''
     #@+others
     #@+node:ekr.20150514063305.124: *3* top.cmd (decorator
@@ -449,7 +449,7 @@ class To_Python:
 #@+node:ekr.20160316111303.1: ** class ConvertCommandsClass
 class ConvertCommandsClass(BaseEditCommandsClass):
     '''Leo's file-conversion commands'''
-    
+
     def __init__(self, c):
         '''Ctor for EditCommandsClass class.'''
         # pylint: disable=super-init-not-called
@@ -466,7 +466,6 @@ class ConvertCommandsClass(BaseEditCommandsClass):
         '''
         self.C_To_Python(self.c).go()
         self.c.bodyWantsFocus()
-
     #@+node:ekr.20150514063305.160: *4* class C_To_Python (To_Python)
     class C_To_Python(To_Python):
         #@+others
@@ -939,7 +938,7 @@ class ConvertCommandsClass(BaseEditCommandsClass):
         '''
         #@+others
         #@+node:ekr.20160213070235.1: *4* class MakeStubFileAdapter
-        class MakeStubFileAdapter:
+        class MakeStubFileAdapter(object):
             '''
             An class that adapts leo/external/make_stub_files.py to Leo.
 
@@ -1076,7 +1075,6 @@ class ConvertCommandsClass(BaseEditCommandsClass):
                 x.trace_reduce = self.trace_reduce
                 x.trace_visitors = self.trace_visitors
                 x.run(node)
-
             #@+node:ekr.20160213070235.8: *5* msf.run
             def run(self, p):
                 '''Make stub files for all files in p's tree.'''
@@ -1113,7 +1111,7 @@ class ConvertCommandsClass(BaseEditCommandsClass):
         '''
         #@+others
         #@+node:ekr.20160316092837.1: *4* class Python_To_Coffeescript_Adapter
-        class Python_To_Coffeescript_Adapter:
+        class Python_To_Coffeescript_Adapter(object):
             '''An interface class between Leo and leo/external/py2cs.py.'''
             #@+others
             #@+node:ekr.20160316112717.1: *5* py2cs.ctor
@@ -1126,7 +1124,7 @@ class ConvertCommandsClass(BaseEditCommandsClass):
                 # self.output_fn = None
                 self.overwrite = c.config.getBool('py2cs-overwrite', default=False)
                 # Connect to the external module.
-                self.py2cs = py2cs = g.importExtension(
+                self.py2cs = g.importExtension(
                     'py2cs',
                     pluginName=None,
                     verbose=False,
@@ -1139,8 +1137,6 @@ class ConvertCommandsClass(BaseEditCommandsClass):
                     self.run()
                 else:
                     g.es_print('can not load py2cs.py')
-                   
-                
             #@+node:ekr.20160316094011.7: *5* py2cs.finalize
             def finalize(self, fn):
                 '''Finalize and regularize a filename.'''
@@ -1657,6 +1653,7 @@ class ConvertCommandsClass(BaseEditCommandsClass):
         '''Prompt for a Jupyter (.ipynb) file and convert it to a Leo outline.'''
         try:
             import nbformat
+            assert nbformat
         except ImportError:
             g.es_print('import-jupyter-notebook requires nbformat package')
             return

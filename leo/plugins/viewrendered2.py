@@ -301,7 +301,15 @@ def show_scrolled_message(tag, kw):
         '',
         kw.get('msg')
     ])
-    vr.update(tag='show-scrolled-message', keywords={'c': c, 'force': True, 's': s, 'kind': 'rst', 'show-scrolled-message': True})
+    vr.update(
+        tag='show-scrolled-message',
+        keywords={
+            'c': c,
+            'force': True,
+            's': s,
+            'kind': 'rst',
+            'show-scrolled-message': True,
+        })
     return True
 #@+node:ekr.20140226074510.4195: ** Commands
 #@+node:ekr.20140226074510.4196: *3* g.command('preview')
@@ -761,7 +769,6 @@ class WebViewPlus(QtWidgets.QWidget):
         """Render the string html in this pane."""
             # A new method by EKR.
             # Fixes bug 136: viewrendered2 chokes on displaying @html nodes
-        c = self.c
         self.getUIconfig()
         # show_scrolled_message = keywords.get('show-scrolled-message', False)
         self.html = g.toUnicode(html)
@@ -782,7 +789,7 @@ class WebViewPlus(QtWidgets.QWidget):
         #print 'remembered scroll pos restored, re-read pos:', spos, mf.scrollBarValue(QtCore.Qt.Vertical)
     #@+node:ekr.20160325203354.1: *4* setHtml (EKR)
     def setHtml(self, s):
-        
+
         self.view.setHtml(s)
     #@+node:ekr.20140226075611.16794: *4* state_change
     def state_change(self, checked):
@@ -814,7 +821,7 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:ekr.20140226125539.16825: *4* render_helper & helper
     def render_helper(self):
         '''Rendinging helper: self.rendering is True.'''
-        c, p, pc = self.c, self.c.p, self.pc
+        p, pc = self.c.p, self.pc
         self.getUIconfig()
             # Get the UI config again, in case directly called by control.
         if got_docutils:
@@ -951,7 +958,6 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:ekr.20140226125539.16822: *7* exec_code
     def exec_code(self, code, environment):
         """Execute the code, capturing the output in stdout and stderr."""
-        c = self.c
         saveout = sys.stdout # save stdout
         saveerr = sys.stderr
         sys.stdout = bufferout = StringIO()
@@ -1067,7 +1073,7 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:peckj.20140228100832.6392: *4* md_render_helper & helper
     def md_render_helper(self):
         '''Rendinging helper: self.rendering is True.'''
-        c, p, pc = self.c, self.c.p, self.pc
+        p, pc = self.c.p, self.pc
         self.getUIconfig()
             # Get the UI config again, in case directly called by control.
         if got_markdown:
@@ -1203,7 +1209,6 @@ class WebViewPlus(QtWidgets.QWidget):
         """Execute the code, capturing the output in stdout and stderr."""
         trace = True and not g.unitTesting
         if trace: g.trace('\n', code)
-        c = self.c
         saveout = sys.stdout # save stdout
         saveerr = sys.stderr
         sys.stdout = bufferout = StringIO()
@@ -1308,7 +1313,7 @@ class WebViewPlus(QtWidgets.QWidget):
         webbrowser.open(pathname, new=0, autoraise=True)
     #@-others
 #@+node:ekr.20140226074510.4207: ** class ViewRenderedProvider (vr2)
-class ViewRenderedProvider:
+class ViewRenderedProvider(object):
     #@+others
     #@+node:ekr.20140226074510.4208: *3* __init__
     def __init__(self, c):
@@ -1454,7 +1459,7 @@ class ViewRenderedController(QtWidgets.QWidget):
     def update(self, tag, keywords):
         trace = False and not g.unitTesting
         pc = self
-        c, p = pc.c, pc.c.p
+        p = pc.c.p
         if pc.must_update(keywords):
             # Suppress updates until we change nodes.
             pc.node_changed = pc.gnx != p.v.gnx

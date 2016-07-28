@@ -2,7 +2,6 @@
 #@+node:ekr.20140727075002.18109: * @file importers/basescanner.py
 '''The BaseScanner class used by all importers in leo.plugins.importers.'''
 import leo.core.leoGlobals as g
-# import leo.core.leoImport as leoImport
 if g.isPython3:
     import io
     StringIO = io.StringIO
@@ -11,7 +10,7 @@ else:
     StringIO = StringIO.StringIO
 import time
 
-class BaseScanner:
+class BaseScanner(object):
     '''The base class for all import scanner classes.'''
     #@+others
     #@+node:ekr.20140727075002.18188: ** BaseScanner.ctor
@@ -228,7 +227,7 @@ class BaseScanner:
             for i in range(max(n1, n2)):
                 ok = self.compareHelper(lines1, lines2, i, self.strict)
                 if not ok:
-                    bad_1i, bad_i2 = i, i
+                    bad_i1, bad_i2 = i, i # bug fix: 2016/05/19.
                     break
         # Unit tests do not generate errors unless the mismatch line does not match.
         if g.app.unitTesting:
@@ -563,7 +562,7 @@ class BaseScanner:
         body = body1 + body2
         if trace: g.trace('body: %s' % repr(body))
         tail = body[len(body.rstrip()):]
-        if not '\n' in tail:
+        if '\n' not in tail:
             self.warning(
                 '%s %s does not end with a newline; one will be added\n%s' % (
                 self.functionSpelling, self.sigId, g.get_line(s, codeEnd)))
@@ -791,17 +790,19 @@ class BaseScanner:
     #@+node:ekr.20140727075002.18225: *3* BaseScanner.undentBody
     def undentBody(self, s, ignoreComments=True):
         '''Remove the first line's leading indentation from all lines of s.'''
-        trace = False
-        if trace: g.trace('before...\n', g.listToString(g.splitLines(s)))
+        trace = False and not g.unitTesting
+        verbose = False
+        if trace and verbose: g.trace('before...\n', g.listToString(g.splitLines(s)))
         if self.isRst:
             return s # Never unindent rst code.
         # Calculate the amount to be removed from each line.
         undentVal = self.getLeadingIndent(s, 0, ignoreComments=ignoreComments)
+        if trace: g.trace(undentVal, g.splitLines(s)[0].rstrip())
         if undentVal == 0:
             return s
         else:
             result = self.undentBy(s, undentVal)
-            if trace: g.trace('after...\n', g.listToString(g.splitLines(result)))
+            if trace and verbose: g.trace('after...\n', g.listToString(g.splitLines(result)))
             return result
     #@+node:ekr.20140727075002.18226: *3* BaseScanner.undentBy
     def undentBy(self, s, undentVal):

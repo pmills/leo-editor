@@ -3,14 +3,16 @@
 '''The @auto importer for Jupyter (.ipynb) files.'''
 import re
 import leo.core.leoGlobals as g
+trace_import = False
 try:
     import nbformat
 except ImportError:
-    g.es_print('import-jupyter-notebook requires nbformat package')
+    if trace_import:
+        g.es_print('import-jupyter-notebook requires nbformat package')
     nbformat = None
 #@+others
 #@+node:ekr.20160412101537.2: ** class Import_IPYNB
-class Import_IPYNB:
+class Import_IPYNB(object):
     '''A class to import .ipynb files.'''
 
     #@+others
@@ -56,7 +58,7 @@ class Import_IPYNB:
         self.indent_cells()
         c.selectPosition(self.root)
         c.redraw()
-    #@+node:ekr.20160412103110.1: *4* run: @auto entry & helpers
+    #@+node:ekr.20160412103110.1: *4* run: @auto entry
     def run(self, s, parent, parse_body=False, prepass=False):
         '''
         @auto entry point.
@@ -64,32 +66,25 @@ class Import_IPYNB:
         '''
         c = self.c
         fn = parent.atAutoNodeName()
-        if c and fn and not prepass and g.os_path_exists(fn):
-            if nbformat:
-                changed = c.isChanged()
-                self.import_file(fn, parent)
-                # Similar to BaseScanner.run.
-                parent.b = (
-                    '@nocolor-node\n\n' +
-                    'Note: This node\'s body text is ignored when writing this file.\n\n' +
-                    'The @others directive is not required\n'
-                )
-                for p in parent.self_and_subtree():
-                    p.clearDirty()
-                c.setChanged(changed)
-            else:
-                # Fallback: read entire file into parent.b.
-                g.es_print('nbformat not available for', color='red')
-                g.es_print('@auto %s' % g.shortFileName(fn))
-                with open(fn) as f:
-                    s = f.read()
-                parent.b = '@killcolor\n\n' + s.rstrip() + '\n'
+        # g.trace(prepass, fn)
+        if c and fn and not prepass:
+            changed = c.isChanged()
+            self.import_file(fn, parent)
+            # Similar to BaseScanner.run.
+            parent.b = (
+                '@nocolor-node\n\n' +
+                'Note: This node\'s body text is ignored when writing this file.\n\n' +
+                'The @others directive is not required\n'
+            )
+            for p in parent.self_and_subtree():
+                p.clearDirty()
+            c.setChanged(changed)
         elif not c or not fn:
             g.trace('can not happen', c, fn)
     #@+node:ekr.20160412115123.1: *3* Scanners
     #@+node:ekr.20160412101537.4: *4* do_any & helpers
     def do_any(self, key, val):
-        
+
         # if key == 'output_type': g.trace(val.__class__.__name__)
         if key == 'source':
             self.do_source(key, val)
@@ -104,7 +99,7 @@ class Import_IPYNB:
             self.do_other(key, val)
     #@+node:ekr.20160412101537.5: *5* do_dict
     def do_dict(self, key, d):
-        
+
         assert self.is_dict(d), d.__class__.__name__
         keys = list(d.keys())
         is_cell = self.parent == self.cell
@@ -132,7 +127,7 @@ class Import_IPYNB:
         self.parent = old_parent
     #@+node:ekr.20160412101537.6: *5* do_other
     def do_other(self, key, val):
-        
+
         if key == 'execution_count' and val is None:
             pass # The exporter will create the proper value.
         else:
@@ -144,7 +139,7 @@ class Import_IPYNB:
                 p.b = repr(val)
     #@+node:ekr.20160412101537.7: *5* do_string
     def do_string(self, key, val):
-        
+
         assert g.isString(val)
         is_cell = self.parent == self.cell
         if is_cell and key == 'cell_type':
@@ -223,7 +218,7 @@ class Import_IPYNB:
             # Perhaps this should be a user option, 
             # but splitting adds signifincant whitespace.
             # The user can always split nodes manually if desired.
-        i0, last, parent = 0, p.copy(), p.copy()
+        i0, last = 0, p.copy()
         if not s.strip():
             return
         lines = g.splitLines(s)
@@ -327,7 +322,7 @@ class Import_IPYNB:
     #@+node:ekr.20160412101537.17: *3* Utils
     #@+node:ekr.20160412101537.18: *4* error
     def error(self, s):
-        
+
         g.es_print('error: %s' % (s), color='red')
     #@+node:ekr.20160412101537.19: *4* get_code_language
     def get_code_language(self, d):
@@ -356,7 +351,7 @@ class Import_IPYNB:
         return fn
     #@+node:ekr.20160412101537.21: *4* is_dict
     def is_dict(self, obj):
-        
+
         return isinstance(obj, (dict, nbformat.NotebookNode))
     #@+node:ekr.20160412101537.22: *4* is_empty_code
     def is_empty_code(self, cell):
@@ -373,17 +368,17 @@ class Import_IPYNB:
         return False
     #@+node:ekr.20160412101537.23: *4* new_node
     def new_node(self, h):
-        
+
         parent = self.parent or self.root
         p = parent.insertAsLastChild()
         p.h = h
         return p
     #@+node:ekr.20160412101537.24: *4* parse
     def parse(self, fn):
-        
+
         if g.os_path_exists(fn):
             with open(fn) as f:
-                payload_source = f.name
+                # payload_source = f.name
                 payload = f.read()
             nb = nbformat.reads(payload, as_version=4)
                 # nbformat.NO_CONVERT: no conversion

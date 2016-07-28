@@ -6,11 +6,24 @@
 #@+node:ekr.20120219194520.10463: ** << imports >> (leoApp)
 import leo.core.leoGlobals as g
 import leo.core.leoExternalFiles as leoExternalFiles
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
+try:
+    import flake8
+except ImportError:
+    flake8 = None
 import glob
 import os
 import optparse
+try:
+    import pyflakes
+except ImportError:
+    pyflakes = None
 import string
 import sys
+import time
 import traceback
 import zipfile
 import platform
@@ -48,6 +61,127 @@ def toggle_idle_time_events(event):
         g.disableIdleTimeHook()
     else:
         g.enableIdleTimeHook()
+#@+node:ekr.20160517133001.1: *3* flake8 command
+@g.command('flake8')
+def flake8_command(event):
+    '''
+    Run flake8 on all nodes of the selected tree,
+    or the first @<file> node in an ancestor.
+    '''
+    #@+others
+    #@+node:ekr.20160517133049.1: *4* class Flake8Command
+    class Flake8Command(object):
+        '''A class to run flake8 on all Python @<file> nodes in c.p's tree.'''
+
+        def __init__(self, c, quiet=False):
+            '''ctor for Flake8Command class.'''
+            self.c = c
+            self.quiet = quiet
+            self.seen = [] # List of checked paths.
+
+        #@+others
+        #@+node:ekr.20160517133049.2: *5* flake8.check_all
+        def check_all(self, paths):
+            '''Run flake8 on all paths.'''
+            from flake8 import engine, main
+            config_file = self.get_flake8_config()
+            if config_file:
+                style = engine.get_style_guide(
+                    parse_argv=False,
+                    config_file=config_file,
+                )
+                report = style.check_files(paths=paths)
+                # Set statistics here, instead of from the command line.
+                options = style.options
+                options.statistics = True
+                options.total_errors = True
+                # options.benchmark = True
+                main.print_report(report, style)
+        #@+node:ekr.20160517133049.3: *5* flake8.find
+        def find(self, p):
+            '''Return True and add p's path to self.seen if p is a Python @<file> node.'''
+            found = False
+            if p.isAnyAtFileNode():
+                aList = g.get_directives_dict_list(p)
+                path = c.scanAtPathDirectives(aList)
+                fn = p.anyAtFileNodeName()
+                if fn.endswith('.py'):
+                    fn = g.os_path_finalize_join(path, fn)
+                    if fn not in self.seen:
+                        self.seen.append(fn)
+                        found = True
+            return found
+        #@+node:ekr.20160517133049.4: *5* flake8.get_flake8_config
+        def get_flake8_config(self):
+            '''Return the path to the pylint configuration file.'''
+            trace = False and not g.unitTesting
+            join = g.os_path_finalize_join
+            dir_table = (
+                g.app.homeDir,
+                join(g.app.homeDir, '.leo'),
+                join(g.app.loadDir, '..', '..', 'leo', 'test'),
+            )
+            if g.isPython3:
+                base_table = ('flake8', 'flake8.txt')
+            else:
+                base_table = ('flake8',)
+            for base in base_table:
+                for path in dir_table:
+                    fn = g.os_path_abspath(join(path, base))
+                    if g.os_path_exists(fn):
+                        if trace: g.trace('found:', fn)
+                        return fn
+            if not g.unitTesting:
+                g.es_print('no flake8 configuration file found in\n%s' % (
+                    '\n'.join(dir_table)))
+            return None
+        #@+node:ekr.20160517133049.5: *5* flake8.run
+        def run(self, p=None):
+            '''Run flake8 on all Python @<file> nodes in c.p's tree.'''
+            c = self.c
+            root = p or c.p
+            # Make sure Leo is on sys.path.
+            leo_path = g.os_path_finalize_join(g.app.loadDir, '..')
+            if leo_path not in sys.path:
+                sys.path.append(leo_path)
+            # Run flake8 on all Python @<file> nodes in root's tree.
+            t1 = time.clock()
+            found = False
+            for p in root.self_and_subtree():
+                found |= self.find(p)
+            # Look up the tree if no @<file> nodes were found.
+            if not found:
+                for p in root.parents():
+                    if self.find(p):
+                        found = True
+                        break
+            # If still not found, expand the search if root is a clone.
+            if not found:
+                isCloned = any([p.isCloned() for p in root.self_and_parents()])
+                # g.trace(isCloned,root.h)
+                if isCloned:
+                    for p in c.all_positions():
+                        if p.isAnyAtFileNode():
+                            isAncestor = any([z.v == root.v for z in p.self_and_subtree()])
+                            # g.trace(isAncestor,p.h)
+                            if isAncestor and self.find(p):
+                                break
+            paths = list(set(self.seen))
+            if paths:
+                self.check_all(paths)
+            g.es_print('flake8: %s file%s in %s' % (
+                len(paths), g.plural(paths), g.timeSince(t1)))
+        #@-others
+    #@-others
+        # define class Flake8Command.
+    c = event.get('c')
+    if c:
+        if c.isChanged():
+            c.save()
+        if flake8:
+            Flake8Command(c).run()
+        else:
+            g.es_print('can not import flake8')
 #@+node:ekr.20150514125218.4: *3* join-leo-irc
 @g.command('join-leo-irc')
 def join_leo_irc(event=None):
@@ -80,7 +214,7 @@ def pylint_command(event):
     '''
     #@+others
     #@+node:ekr.20150514125218.8: *4* class PylintCommand
-    class PylintCommand:
+    class PylintCommand(object):
         '''A class to run pylint on all Python @<file> nodes in c.p's tree.'''
 
         def __init__(self, c):
@@ -125,20 +259,17 @@ def pylint_command(event):
             g.es_print('no pylint configuration file found in\n%s' % (
                 '\n'.join(table)))
             return None
-        #@+node:ekr.20150514125218.11: *5* run
+        #@+node:ekr.20150514125218.11: *5* pylint.run
         def run(self):
             '''Run Pylint on all Python @<file> nodes in c.p's tree.'''
             c, root = self.c, self.c.p
-            try:
-                import time
-                from pylint import lint
-                # in pythonN/Lib/site-packages.
-            except ImportError:
-                g.warning('can not import pylint')
-                return
             rc_fn = self.get_rc_file()
             if not rc_fn:
                 return
+            # Make sure Leo is on sys.path.
+            leo_path = g.os_path_finalize_join(g.app.loadDir, '..')
+            if leo_path not in sys.path:
+                sys.path.append(leo_path)
             # Run lint on all Python @<file> nodes in root's tree.
             t1 = time.clock()
             found = False
@@ -191,8 +322,103 @@ def pylint_command(event):
         if c.isChanged():
             c.save()
         PylintCommand(c).run()
+#@+node:ekr.20160516072613.1: *3* pyflakes command
+@g.command('pyflakes')
+def pyflakes_command(event):
+    '''
+    Run pyflakes on all nodes of the selected tree,
+    or the first @<file> node in an ancestor.
+    '''
+    #@+others
+    #@+node:ekr.20160516072613.2: *4* class PyflakesCommand
+    class PyflakesCommand(object):
+        '''A class to run pyflakes on all Python @<file> nodes in c.p's tree.'''
+
+        def __init__(self, c):
+            '''ctor for PyflakesCommand class.'''
+            self.c = c
+            self.seen = [] # List of checked paths.
+
+        #@+others
+        #@+node:ekr.20160516072613.6: *5* pyflakes.check_all
+        def check_all(self, paths):
+            '''Run pyflakes on fn.'''
+            from pyflakes import api, reporter
+            for fn in sorted(paths):
+                # Report the file name.
+                sfn = g.shortFileName(fn)
+                s = g.readFileIntoEncodedString(fn, silent=False)
+                if not s.strip():
+                    return
+                r = reporter.Reporter(
+                    errorStream=sys.stderr,
+                    warningStream=sys.stderr,
+                    )
+                errors = api.check(s, sfn, r)
+                if False and errors:
+                    # Annoying.
+                    print('%s error%s in %s' % (errors, g.plural(errors), fn))
+        #@+node:ekr.20160516072613.3: *5* pyflakes.find
+        def find(self, p):
+            '''Return True and add p's path to self.seen if p is a Python @<file> node.'''
+            found = False
+            if p.isAnyAtFileNode():
+                aList = g.get_directives_dict_list(p)
+                path = c.scanAtPathDirectives(aList)
+                fn = p.anyAtFileNodeName()
+                if fn.endswith('.py'):
+                    fn = g.os_path_finalize_join(path, fn)
+                    if fn not in self.seen:
+                        self.seen.append(fn)
+                        found = True
+            return found
+        #@+node:ekr.20160516072613.5: *5* pyflakes.run
+        def run(self, p=None):
+            '''Run Pyflakes on all Python @<file> nodes in c.p's tree.'''
+            c = self.c
+            root = p or c.p
+            # Make sure Leo is on sys.path.
+            leo_path = g.os_path_finalize_join(g.app.loadDir, '..')
+            if leo_path not in sys.path:
+                sys.path.append(leo_path)
+            # Run pyflakes on all Python @<file> nodes in root's tree.
+            t1 = time.clock()
+            found = False
+            for p in root.self_and_subtree():
+                found |= self.find(p)
+            # Look up the tree if no @<file> nodes were found.
+            if not found:
+                for p in root.parents():
+                    if self.find(p):
+                        found = True
+                        break
+            # If still not found, expand the search if root is a clone.
+            if not found:
+                isCloned = any([p.isCloned() for p in root.self_and_parents()])
+                if isCloned:
+                    for p in c.all_positions():
+                        if p.isAnyAtFileNode():
+                            isAncestor = any([z.v == root.v for z in p.self_and_subtree()])
+                            if isAncestor and self.find(p):
+                                break
+            paths = list(set(self.seen))
+            if paths:
+                self.check_all(paths)
+            g.es_print('pyflakes: %s file%s in %s' % (
+                len(paths), g.plural(paths), g.timeSince(t1)))
+        #@-others
+    #@-others
+        # define class PyFlakesCommand.
+    c = event.get('c')
+    if c:
+        if c.isChanged():
+            c.save()
+        if pyflakes:
+            PyflakesCommand(c).run()
+        else:
+            g.es_print('can not import pyflakes')
 #@+node:ekr.20120209051836.10241: ** class LeoApp
-class LeoApp:
+class LeoApp(object):
     """A class representing the Leo application itself.
 
     Ivars of this class are Leo's global variables."""
@@ -486,7 +712,7 @@ class LeoApp:
         self.language_delims_dict = {
             # Internally, lower case is used for all language names.
             # Keys are languages, values are 1,2 or 3-tuples of delims.
-            "actionscript"       : "// /* */", #jason 2003-07-03
+            "actionscript"       : "// /* */", # jason 2003-07-03
             "ada"                : "--",
             "ada95"              : "--",
             "ahk"                : ";",
@@ -501,7 +727,7 @@ class LeoApp:
             "assembly_parrot"    : "#",
             "assembly_r2000"     : "#",
             "assembly_x86"       : ";",
-            "autohotkey"         : "; /* */", #TL - AutoHotkey language
+            "autohotkey"         : "; /* */", # TL - AutoHotkey language
             "awk"                : "#",
             "b"                  : "// /* */",
             "batch"              : "REM_", # Use the REM hack.
@@ -639,7 +865,7 @@ class LeoApp:
             "verilog"            : "// /* */",
             "vhdl"               : "--",
             "vim"                : "\"",
-            "vimoutline"         : "#", #TL 8/25/08 Vim's outline plugin
+            "vimoutline"         : "#", # TL 8/25/08 Vim's outline plugin
             "xml"                : "<!-- -->",
             "xsl"                : "<!-- -->",
             "xslt"               : "<!-- -->",
@@ -670,7 +896,7 @@ class LeoApp:
 
         # Keys are languages, values are extensions.
         self.language_extension_dict = {
-            "actionscript"  : "as", #jason 2003-07-03
+            "actionscript"  : "as", # jason 2003-07-03
             "ada"           : "ada",
             "ada95"         : "ada",
             "ahk"           : "ahk",
@@ -680,7 +906,7 @@ class LeoApp:
             "applescript"   : "scpt",
             "asp"           : "asp",
             "aspect_j"      : "aj",
-            "autohotkey"    : "ahk", #TL - AutoHotkey language
+            "autohotkey"    : "ahk", # TL - AutoHotkey language
             "awk"           : "awk",
             "b"             : "b",
             "batch"         : "bat", # Leo 4.5.1.
@@ -799,7 +1025,7 @@ class LeoApp:
             "verilog"       : "v",
             "vhdl"          : "vhd", # Only one extension is valid: .vhdl
             "vim"           : "vim",
-            "vimoutline"    : "otl", #TL 8/25/08 Vim's outline plugin
+            "vimoutline"    : "otl", # TL 8/25/08 Vim's outline plugin
             "xml"           : "xml",
             "xsl"           : "xsl",
             "xslt"          : "xsl",
@@ -832,7 +1058,7 @@ class LeoApp:
             "ahk":      "autohotkey",
             "aj":       "aspect_j",
             "apdl":     "apdl",
-            "as":       "actionscript", #jason 2003-07-03
+            "as":       "actionscript", # jason 2003-07-03
             "asp":      "asp",
             "awk":      "awk",
             "b":        "b",
@@ -904,7 +1130,7 @@ class LeoApp:
             # "nsi":      "nsis2",
             "nw":       "noweb",
             "occ":      "occam",
-            "otl":      "vimoutline", #TL 8/25/08 Vim's outline plugin
+            "otl":      "vimoutline", # TL 8/25/08 Vim's outline plugin
             "p":        "pascal",
             # "p":      "pop11", # Conflicts with pascal.
             "php":      "php",
@@ -1052,12 +1278,12 @@ class LeoApp:
         if sys.platform.startswith('win'):
             sysVersion = 'Windows '
             try:
-                #v = os.sys.getwindowsversion()
-                #sysVersion += ', '.join([str(z) for z in v])
-                ## peckj 20140416: determine true OS architecture
-                ## the following code should return the proper architecture
-                ## regardless of whether or not the python architecture matches
-                ## the OS architecture (i.e. python 32-bit on windows 64-bit will return 64-bit)
+                # v = os.sys.getwindowsversion()
+                # sysVersion += ', '.join([str(z) for z in v])
+                # peckj 20140416: determine true OS architecture
+                # the following code should return the proper architecture
+                # regardless of whether or not the python architecture matches
+                # the OS architecture (i.e. python 32-bit on windows 64-bit will return 64-bit)
                 v = platform.win32_ver()
                 release, winbuild, sp, ptype = v
                 true_platform = os.environ['PROCESSOR_ARCHITECTURE']
@@ -1091,7 +1317,7 @@ class LeoApp:
         app = self
         argName = app.guiArgName
         if g.in_bridge:
-             # print('createDefaultGui: g.in_bridge: %s' % g.in_bridge)
+            # print('createDefaultGui: g.in_bridge: %s' % g.in_bridge)
             return # The bridge will create the gui later.
         if app.gui:
             return # This method can be called twice if we had to get .leoID.txt.
@@ -1324,12 +1550,9 @@ class LeoApp:
             g.app.createDefaultGui(fileName='g.app.setLeoId', verbose=True)
         if g.app.gui is None: # Neither gui could be created: this should never happen.
             g.es_debug("Please enter LeoID (e.g. your username, 'johndoe'...)")
-            # pylint: disable=undefined-variable
-            # raw_input does not exist in Python 3.
-            if g.isPython3:
-                leoid = input('LeoID: ')
-            else:
-                leoid = raw_input('LeoID: ')
+            f = builtins.input if g.isPython3 else builtins.raw_input
+                # Suppress pyflakes complaint.
+            leoid = f('LeoID: ')
         else:
             leoid = g.app.gui.runAskLeoIDDialog()
         # Bug fix: 2/6/05: put result in g.app.leoID.
@@ -1433,7 +1656,6 @@ class LeoApp:
     #@+node:ekr.20120427064024.10064: *4* app.checkForOpenFile
     def checkForOpenFile(self, c, fn):
         '''Warn if fn is already open and add fn to already_open_files list.'''
-        trace = True and not g.unitTesting
         d, tag = g.app.db, 'open-leo-files'
         if d is None or g.app.unitTesting or g.app.batchMode or g.app.reverting:
             return
@@ -1505,7 +1727,7 @@ class LeoApp:
                 text="Ok")
     #@-others
 #@+node:ekr.20120209051836.10242: ** class LoadManager
-class LoadManager:
+class LoadManager(object):
     '''A class to manage loading .leo files, including configuration files.'''
     #@+others
     #@+node:ekr.20120214060149.15851: *3*  LM.ctor
@@ -1961,7 +2183,6 @@ class LoadManager:
 
         The caller must init the c.config object.
         '''
-        trace = (False or g.trace_startup) and not g.unitTesting
         lm = self
         if not fn: return None
         giveMessage = (
@@ -2204,8 +2425,11 @@ class LoadManager:
         import leo.core.leoPlugins as leoPlugins
         import leo.core.leoSessions as leoSessions
         # Import leoIPython only if requested.  The import is quite slow.
+        self.setStdStreams()
         if g.app.useIpython:
             import leo.core.leoIPython as leoIPython
+                # This launches the IPython Qt Console.  It *is* required.
+            assert leoIPython # suppress pyflakes/flake8 warning.
         # Make sure we call the new leoPlugins.init top-level function.
         leoPlugins.init()
         # Force the user to set g.app.leoID.
@@ -2404,6 +2628,79 @@ class LoadManager:
             else:
                 result.append(z)
         return result
+    #@+node:ekr.20160718072648.1: *5* LM.setStdStreams
+    def setStdStreams(self):
+        '''
+        Make sure that stdout and stderr exist.
+        This is an issue when running Leo with pythonw.exe.
+        '''
+        # pdb requires sys.stdin, which doesn't exist when using pythonw.exe.
+        # import pdb ; pdb.set_trace()
+        import sys
+        import leo.core.leoGlobals as g
+        
+        # Define class LeoStdOut
+        #@+others
+        #@+node:ekr.20160718091844.1: *6* class LeoStdOut
+        class LeoStdOut:
+            '''A class to put stderr & stdout to Leo's log pane.'''
+
+            def __init__(self, kind):
+                self.kind = kind
+                g.es_print = self.write
+                g.pr = self.write
+
+            def flush(*args, **keys):
+                pass
+                
+            #@+others
+            #@+node:ekr.20160718102306.1: *7* LeoStdOut.write
+            def write(self, *args, **keys):
+                '''Put all non-keyword args to the log pane, as in g.es.'''
+                trace = False
+                    # Tracing will lead to unbounded recursion unless
+                    # sys.stderr has been redirected on the command line.
+                if trace:
+                    for z in args:
+                        sys.stderr.write('arg: %r\n' % z)
+                    for z in keys:
+                        sys.stderr.write('key: %r\n' % z)
+                app = g.app
+                if not app or app.killed: return
+                if app.gui and app.gui.consoleOnly: return
+                log = app.log
+                # Compute the effective args.
+                d = {
+                    'color': None,
+                    'commas': False,
+                    'newline': True,
+                    'spaces': True,
+                    'tabName': 'Log',
+                }
+                # Handle keywords for g.pr and g.es_print.
+                d = g.doKeywordArgs(keys, d)
+                color = d.get('color')
+                if color == 'suppress': return
+                elif log and color is None:
+                    color = g.actualColor('black')
+                color = g.actualColor(color)
+                tabName = d.get('tabName') or 'Log'
+                s = g.translateArgs(args, d)
+                if app.batchMode:
+                    if log:
+                        log.put(s)
+                elif log and app.logInited:
+                    # from_redirect is the big difference between this and g.es.
+                    log.put(s, color=color, tabName=tabName, from_redirect=True)
+                else:
+                    app.logWaiting.append((s, color),)
+            #@-others
+        #@-others
+
+        if not sys.stdout:
+            sys.stdout = sys.__stdout__ = LeoStdOut('stdout')
+        if not sys.stderr:
+            sys.stderr = sys.__stderr__ = LeoStdOut('stderr')
     #@+node:ekr.20120219154958.10487: *4* LM.doPostPluginsInit & helpers
     def doPostPluginsInit(self):
         '''Create a Leo window for each file in the lm.files list.'''
@@ -2534,7 +2831,7 @@ class LoadManager:
                     import Tkinter as Tk
                     #@+<< define emergency dialog class >>
                     #@+node:ekr.20120219154958.10492: *5* << define emergency dialog class >>
-                    class EmergencyDialog:
+                    class EmergencyDialog(object):
                         """A class that creates an Tkinter dialog with a single OK button."""
                         #@+others
                         #@+node:ekr.20120219154958.10493: *6* __init__ (emergencyDialog)
@@ -2690,7 +2987,7 @@ class LoadManager:
         if theFile:
             readAtFileNodesFlag = bool(previousSettings)
             # The log is not set properly here.
-            ok = lm.readOpenedLeoFile(c, gui, fn, readAtFileNodesFlag, theFile)
+            ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag, theFile)
                 # Call c.fileCommands.openLeoFile to read the .leo file.
             if not ok: return None
         else:
@@ -2855,7 +3152,7 @@ class LoadManager:
                 g.error("can not open:", fn)
             return None
     #@+node:ekr.20120223062418.10412: *6* LM.readOpenedLeoFile
-    def readOpenedLeoFile(self, c, gui, fn, readAtFileNodesFlag, theFile):
+    def readOpenedLeoFile(self, c, fn, readAtFileNodesFlag, theFile):
         # New in Leo 4.10: The open1 event does not allow an override of the init logic.
         assert theFile
         # lm = self
@@ -2869,9 +3166,20 @@ class LoadManager:
         else:
             g.app.closeLeoWindow(c.frame, finish_quit=self.more_cmdline_files is False)
         return ok
+    #@+node:ekr.20160430063406.1: *3* LM.revertCommander
+    def revertCommander(self, c):
+        '''Revert c to the previously saved contents.'''
+        lm = self
+        fn = c.mFileName
+        # Re-read the file.
+        theFile = lm.openLeoOrZipFile(fn)
+        if theFile:
+            c.fileCommands.initIvars()
+            c.fileCommands.getLeoFile(theFile, fn, checkOpenFiles=False)
+                # Closes the file.
     #@-others
 #@+node:ekr.20120223062418.10420: ** class PreviousSettings
-class PreviousSettings:
+class PreviousSettings(object):
     '''A class holding the settings and shortcuts dictionaries
     that are computed in the first pass when loading local
     files and passed to the second pass.'''
@@ -2888,7 +3196,7 @@ class PreviousSettings:
 
     __str__ = __repr__
 #@+node:ekr.20120225072226.10283: ** class RecentFilesManager
-class RecentFilesManager:
+class RecentFilesManager(object):
     '''A class to manipulate leoRecentFiles.txt.'''
 
     def __init__(self):

@@ -7,7 +7,6 @@
 '''
 leoShadow.py
 
-
 This code allows users to use Leo with files which contain no sentinels
 and still have information flow in both directions between outlines and
 derived files.
@@ -19,8 +18,6 @@ When Leo first reads an @shadow we create a file without sentinels in the regula
 
 The slightly hard thing to do is to pick up changes from the file without
 sentinels, and put them into the file with sentinels.
-
-
 
 Settings:
 - @string shadow_subdir (default: .leo_shadow): name of the shadow directory.
@@ -40,7 +37,7 @@ import unittest
 #@-<< imports >>
 #@+others
 #@+node:ekr.20080708094444.80: ** class ShadowController
-class ShadowController:
+class ShadowController(object):
     '''A class to manage @shadow files'''
     #@+others
     #@+node:ekr.20080708094444.79: *3*  x.ctor
@@ -358,7 +355,6 @@ class ShadowController:
         Preprocess public lines, adding newlines as needed.
         This happens before the diff.
         '''
-        x, marker = self, self.marker
         result = []
         for line in lines:
             if not line.endswith('\n'):
@@ -390,7 +386,6 @@ class ShadowController:
         to the private file (with_sentinels)
         '''
         trace, verbose = False and not g.unitTesting, False
-        import leo.core.leoAtFile as leoAtFile
         x = self; at = self.c.atFileCommands
         at.errors = 0
         if trace: g.trace('*** header scanned: encoding:', at.encoding)
@@ -702,7 +697,7 @@ class ShadowController:
             return self.p and self.p.h or '@test-shadow: no self.p'
         #@-others
     #@+node:ekr.20090529061522.5727: *3* class x.Marker
-    class Marker:
+    class Marker(object):
         '''A class representing comment delims in @shadow files.'''
         #@+others
         #@+node:ekr.20090529061522.6257: *4* ctor & repr

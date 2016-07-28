@@ -8,6 +8,10 @@ Run the unit tests in test.leo using the Execute Script command.
 #@+node:ekr.20051104075904.1: ** << imports >> (leoTest)
 import leo.core.leoGlobals as g
 import leo.core.leoGui as leoGui # For UnitTestGui.
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 import doctest
 import gc
 import glob
@@ -29,165 +33,6 @@ if g.app: # Make sure we can import this module stand-alone.
 else:
     newAtFile = False
 #@+others
-#@+node:ekr.20120220070422.10420: ** Top-level functions (leoTest)
-#@+node:ekr.20051104075904.97: *3* factorial (a test of doctests)
-# Some of these will fail now for Python 2.x.
-
-def factorial(n):
-    """Return the factorial of n, an exact integer >= 0.
-
-    If the result is small enough to fit in an int, return an int.
-    Else return a long.
-
-    >>> [factorial(n) for n in range(6)]
-    [1, 1, 2, 6, 24, 120]
-    >>> factorial(30)
-    265252859812191058636308480000000
-    >>> factorial(-1)
-    Traceback (most recent call last):
-        ...
-    ValueError: n must be >= 0
-
-    Factorials of floats are OK, but the float must be an exact integer:
-    >>> factorial(30.1)
-    Traceback (most recent call last):
-        ...
-    ValueError: n must be exact integer
-    >>> factorial(30.0)
-    265252859812191058636308480000000
-
-    It must also not be ridiculously large:
-    >>> factorial(1e100)
-    Traceback (most recent call last):
-        ...
-    OverflowError: n too large
-    """
-    import math
-    if not n >= 0:
-        raise ValueError("n must be >= 0")
-    if math.floor(n) != n:
-        raise ValueError("n must be exact integer")
-    if n + 1 == n: # catch a value like 1e300
-        raise OverflowError("n too large")
-    result = 1
-    factor = 2
-    while factor <= n:
-        try:
-            result *= factor
-        except OverflowError:
-            result *= long(factor)
-        factor += 1
-    return result
-#@+node:ekr.20051104075904.17: *3* runGC & helpers (apparently not used)
-lastObjectCount = 0
-lastObjectsDict = {}
-lastTypesDict = {}
-lastFunctionsDict = {}
-# Adapted from similar code in leoGlobals.g.
-
-def runGc(disable=False):
-    message = "runGC"
-    if gc is None:
-        g.pr("@gc: can not import gc")
-        return
-    gc.enable()
-    set_debugGc()
-    gc.collect()
-    printGc(message=message)
-    if disable:
-        gc.disable()
-    # makeObjectList(message)
-
-runGC = runGc
-#@+node:ekr.20051104075904.18: *4* enableGc
-def set_debugGc():
-    gc.set_debug(
-        gc.DEBUG_STATS | # prints statistics.
-        # gc.DEBUG_LEAK | # Same as all below.
-        # gc.DEBUG_COLLECTABLE
-        # gc.DEBUG_UNCOLLECTABLE
-        gc.DEBUG_INSTANCES |
-        gc.DEBUG_OBJECTS
-        # gc.DEBUG_SAVEALL
-    )
-#@+node:ekr.20051104075904.19: *4* makeObjectList
-def makeObjectList(message):
-    # WARNING: this id trick is not proper: newly allocated objects can have the same address as old objects.
-    global lastObjectsDict
-    objects = gc.get_objects()
-    newObjects = [o for o in objects if not id(o) in lastObjectsDict]
-    lastObjectsDict = {}
-    for o in objects:
-        lastObjectsDict[id(o)] = o
-    g.pr("%25s: %d new, %d total objects" % (message, len(newObjects), len(objects)))
-#@+node:ekr.20051104075904.20: *4* printGc
-def printGc(message=None):
-    '''Called from unit tests.'''
-    if not message:
-        message = g.callers(2)
-    global lastObjectCount
-    n = len(gc.garbage)
-    n2 = len(gc.get_objects())
-    delta = n2 - lastObjectCount
-    g.pr('-' * 30)
-    g.pr("garbage: %d" % n)
-    g.pr("%6d =%7d %s" % (delta, n2, "totals"))
-    #@+<< print number of each type of object >>
-    #@+node:ekr.20051104075904.21: *5* << print number of each type of object >>
-    global lastTypesDict
-    typesDict = {}
-    for obj in gc.get_objects():
-        n = typesDict.get(type(obj), 0)
-        typesDict[type(obj)] = n + 1
-    # Create the union of all the keys.
-    keys = {}
-    for key in lastTypesDict:
-        if key not in typesDict:
-            keys[key] = None
-    for key in sorted(keys):
-        n1 = lastTypesDict.get(key, 0)
-        n2 = typesDict.get(key, 0)
-        delta2 = n2 - n1
-        if delta2 != 0:
-            g.pr("%+6d =%7d %s" % (delta2, n2, key))
-    lastTypesDict = typesDict
-    typesDict = {}
-    #@-<< print number of each type of object >>
-    if 0:
-        #@+<< print added functions >>
-        #@+node:ekr.20051104075904.22: *5* << print added functions >>
-        import types
-        import inspect
-        global lastFunctionsDict
-        funcDict = {}
-        for obj in gc.get_objects():
-            if isinstance(obj, types.FunctionType):
-                key = repr(obj) # Don't create a pointer to the object!
-                funcDict[key] = None
-                if key not in lastFunctionsDict:
-                    g.pr('\n', obj)
-                    args, varargs, varkw, defaults = inspect.getargspec(obj)
-                    g.pr("args", args)
-                    if varargs: g.pr("varargs", varargs)
-                    if varkw: g.pr("varkw", varkw)
-                    if defaults:
-                        g.pr("defaults...")
-                        for s in defaults: g.pr(s)
-        lastFunctionsDict = funcDict
-        funcDict = {}
-        #@-<< print added functions >>
-    lastObjectCount = n2
-    return delta
-#@+node:ekr.20051104075904.23: *4* printGcRefs
-def printGcRefs(verbose=True):
-    refs = gc.get_referrers(g.app.windowList[0])
-    g.pr('-' * 30)
-    if verbose:
-        g.pr("refs of", g.app.windowList[0])
-        for ref in refs:
-            g.pr(type(ref))
-    else:
-        g.pr("%d referrers" % len(refs))
 #@+node:ekr.20051104075904.70: ** class EditBodyTestCase
 class EditBodyTestCase(unittest.TestCase):
     """Data-driven unit tests for Leo's edit body commands."""
@@ -229,13 +74,24 @@ class EditBodyTestCase(unittest.TestCase):
         try:
             # Don't call the Undoer if we expect no change.
             if not tm.compareOutlines(self.before, self.after, compareHeadlines=False, report=False):
-                assert tm.compareOutlines(self.tempNode, self.after, compareHeadlines=False), '%s: before undo1' % commandName
+                assert tm.compareOutlines(
+                    self.tempNode,
+                    self.after,
+                    compareHeadlines=False), '%s: before undo1' % commandName
                 c.undoer.undo()
-                assert tm.compareOutlines(self.tempNode, self.before, compareHeadlines=False), '%s: after undo1' % commandName
+                assert tm.compareOutlines(
+                    self.tempNode,
+                    self.before,
+                    compareHeadlines=False), '%s: after undo1' % commandName
                 c.undoer.redo()
-                assert tm.compareOutlines(self.tempNode, self.after, compareHeadlines=False), '%s: after redo' % commandName
+                assert tm.compareOutlines(
+                    self.tempNode,
+                    self.after,
+                    compareHeadlines=False), '%s: after redo' % commandName
                 c.undoer.undo()
-                assert tm.compareOutlines(self.tempNode, self.before, compareHeadlines=False), '%s: after undo2' % commandName
+                assert tm.compareOutlines(
+                    self.tempNode,
+                    self.before, compareHeadlines=False), '%s: after undo2' % commandName
         except Exception:
             self.fail()
             raise
@@ -292,7 +148,7 @@ class GeneralTestCase(unittest.TestCase):
     #@+others
     #@+node:ekr.20051104075904.6: *3* __init__ (GeneralTestCase)
     def __init__(self, c, p, setup_script=None):
-         # Init the base class.
+        '''Ctor for the GeneralTestCase class.'''
         unittest.TestCase.__init__(self)
         self.c = c
         self.p = p.copy()
@@ -320,7 +176,7 @@ class GeneralTestCase(unittest.TestCase):
         script = g.getScript(c, p).strip()
         if self.setup_script:
             script = self.setup_script + '\n' + script
-        tm.assert_(script)
+        tm.assertTrue(script)
         if c.shortFileName() == 'dynamicUnitTest.leo':
             c.write_script_file = True
         # New in Leo 4.4.3: always define the entries in g.app.unitTestDict.
@@ -343,7 +199,7 @@ class GeneralTestCase(unittest.TestCase):
             if g.isPython3:
                 exec(compile(script, scriptFile, 'exec'), d)
             else:
-                execfile(scriptFile, d)
+                builtins.execfile(scriptFile, d)
         else:
             exec(script, d)
     #@+node:ekr.20051104075904.11: *3* shortDescription
@@ -383,7 +239,7 @@ class ImportExportTestCase(unittest.TestCase):
         command = getattr(c, commandName) # Will fail if command does not exist.
         command(event=None)
         failedMethod = g.app.unitTestDict.get("fail")
-        self.failIf(failedMethod, failedMethod)
+        self.assertFalse(failedMethod, failedMethod)
     #@+node:ekr.20051104075904.83: *3* runTest
     def runTest(self):
         # """Import Export Test Case"""
@@ -445,8 +301,159 @@ class ImportExportTestCase(unittest.TestCase):
         g.app.gui = self.oldGui
         c.selectPosition(self.old_p)
     #@-others
+#@+node:ekr.20160518074224.1: ** class LinterTable
+class LinterTable():
+    '''A class to encapsulate lists of leo modules under test.'''
+    def __init__(self):
+        '''Ctor for LinterTable class.'''
+        # Define self. relative to leo.core.leoGlobals
+        self.loadDir = g.os_path_finalize_join(g.__file__, '..', '..')
+        # g.trace('LinterTable', self.loadDir)
+
+    #@+others
+    #@+node:ekr.20160518074545.2: *3* commands
+    def commands(self):
+        '''Return list of all command modules in leo/commands.'''
+        pattern = g.os_path_finalize_join(self.loadDir, 'commands', '*.py')
+        return self.get_files(pattern)
+    #@+node:ekr.20160518074545.3: *3* core
+    def core(self):
+        '''Return list of all of Leo's core files.'''
+        pattern = g.os_path_finalize_join(self.loadDir, 'core', 'leo*.py')
+        aList = self.get_files(pattern)
+        for fn in ['runLeo.py',]:
+            aList.append(g.os_path_finalize_join(self.loadDir, 'core', fn))
+        return sorted(aList)
+    #@+node:ekr.20160518074545.4: *3* external
+    def external(self):
+        '''Return list of files in leo/external'''
+        pattern = g.os_path_finalize_join(self.loadDir, 'external', 'leo*.py')
+        aList = self.get_files(pattern)
+        remove = [
+            'leoSAGlobals.py',
+            'leoftsindex.py',
+        ]
+        remove = [g.os_path_finalize_join(self.loadDir, 'external', fn) for fn in remove]
+        return sorted([z for z in aList if z not in remove])
+    #@+node:ekr.20160518074545.5: *3* gui_plugins
+    def gui_plugins(self):
+        '''Return list of all of Leo's gui-related files.'''
+        pattern = g.os_path_finalize_join(self.loadDir, 'plugins', 'qt_*.py')
+        aList = self.get_files(pattern)
+        # These are not included, because they don't start with 'qt_':
+        add = ['free_layout.py', 'nested_splitter.py',]
+        remove = [
+            'qt_main.py', # auto-generated file.
+        ]
+        for fn in add:
+            aList.append(g.os_path_finalize_join(self.loadDir, 'plugins', fn))
+        remove = [g.os_path_finalize_join(self.loadDir, 'plugins', fn) for fn in remove]
+        return sorted(set([z for z in aList if z not in remove]))
+    #@+node:ekr.20160518074545.6: *3* modes
+    def modes(self):
+        '''Return list of all files in leo/modes'''
+        pattern = g.os_path_finalize_join(self.loadDir, 'modes', '*.py')
+        return self.get_files(pattern)
+    #@+node:ekr.20160518074545.7: *3* ignores (not used!)
+    def ignores(self):
+        return (
+            '__init__', 'FileActions',
+            # 'UNL', # in plugins table.
+            'active_path', 'add_directives', 'attrib_edit',
+            'backlink', 'base64Packager', 'baseNativeTree', 'bibtex', 'bookmarks',
+            'codewisecompleter', 'colorize_headlines', 'contextmenu',
+            'ctagscompleter', 'cursesGui', 'datenodes', 'debugger_pudb',
+            'detect_urls', 'dtest', 'empty_leo_file', 'enable_gc', 'initinclass',
+            'leo_to_html', 'leo_interface', 'leo_pdf', 'leo_to_rtf',
+            'leoOPML', 'leoremote', 'lineNumbers',
+            'macros', 'mime', 'mod_autosave', 'mod_framesize', 'mod_leo2ascd',
+            # 'mod_scripting', # in plugins table.
+            'mod_speedups', 'mod_timestamp',
+            'nav_buttons', 'nav_qt', 'niceNosent', 'nodeActions', 'nodebar',
+            'open_shell', 'open_with', 'outline_export', 'quit_leo',
+            'paste_as_headlines', 'plugins_menu', 'pretty_print', 'projectwizard',
+            'qt_main', 'qt_quicksearch', 'qt_commands',
+            'quickMove', 'quicksearch', 'redirect_to_log', 'rClickBasePluginClasses',
+            'run_nodes', # Changed thread.allocate_lock to threading.lock().acquire()
+            'rst3',
+            # 'scrolledmessage', # No longer exists.
+            'setHomeDirectory', 'slideshow', 'spydershell', 'startfile',
+            'testRegisterCommand', 'todo',
+            # 'toolbar', # in plugins table.
+            'trace_gc_plugin', 'trace_keys', 'trace_tags',
+            'vim', 'xemacs',
+        )
+    #@+node:ekr.20160518074545.8: *3* plugins
+    def plugins(self):
+        '''Return a list of all important plugins.'''
+        aList = []
+        for theDir in ('', 'importers', 'writers'):
+            pattern = g.os_path_finalize_join(self.loadDir, 'plugins', theDir, '*.py')
+            aList.extend(self.get_files(pattern))
+            # Don't use get_files here.
+            # for fn in glob.glob(pattern):
+                # sfn = g.shortFileName(fn)
+                # if sfn != '__init__.py':
+                    # sfn = os.sep.join([theDir, sfn]) if theDir else sfn
+                    # aList.append(sfn)
+        remove = [
+            # 2016/05/20: *do* include gui-related plugins.
+            # This allows the -a option not to doubly-include gui-related plugins.
+                # 'free_layout.py', # Gui-related.
+                # 'nested_splitter.py', # Gui-related.
+            'gtkDialogs.py', # Many errors, not important.
+            'leofts.py', # Not (yet) in leoPlugins.leo.
+            'qtGui.py', # Dummy file
+            'qt_main.py', # Created automatically.
+        ]
+        remove = [g.os_path_finalize_join(self.loadDir, 'plugins', fn) for fn in remove]
+        aList = sorted([z for z in aList if z not in remove])
+        # Remove all gui related items.
+        # for z in sorted(aList):
+            # if z.startswith('qt_'):
+                # aList.remove(z)
+        # g.trace('\n'.join(aList))
+        return sorted(set(aList))
+    #@+node:ekr.20160520093506.1: *3* get_files
+    def get_files(self, pattern):
+        '''Return the list of absolute file names matching the pattern.'''
+        return sorted([
+            fn for fn in glob.glob(pattern)
+                if g.os_path_isfile(fn) and g.shortFileName(fn) != '__init__.py'])
+    #@+node:ekr.20160518074545.9: *3* get_files_for_scope
+    def get_files_for_scope(self, scope, fn):
+        '''Return a list of absolute filenames for external linters.'''
+        d = {
+            'all':      [self.core, self.commands, self.external, self.plugins, self.modes],
+            'commands': [self.commands],
+            'core':     [self.core, self.commands, self.external, self.gui_plugins],
+            'external': [self.external],
+            'file':     [fn],
+            'gui':      [self.gui_plugins],
+            'modes':    [self.modes],
+            'plugins':  [self.plugins],
+        }
+        functions = d.get(scope)
+        paths = []
+        if functions:
+            for func in functions:
+                files = func()
+                for fn in files:
+                    fn = g.os_path_abspath(fn)
+                    if g.os_path_exists(fn):
+                        if g.os_path_isfile(fn):
+                            paths.append(fn)
+                    else:
+                        print('does not exist: %s' % fn)
+            paths = sorted(set(paths))
+            # g.trace('\n'+'\n'.join('%2s %s' % (i+1,z) for i,z in enumerate(paths)))
+            return paths
+        else:
+            print('LinterTable.get_table: bad scope', scope)
+            return []
+    #@-others
 #@+node:ekr.20070627140344: ** class RunTestExternallyHelperClass
-class RunTestExternallyHelperClass:
+class RunTestExternallyHelperClass(object):
     '''A helper class to run tests externally.'''
     #@+others
     #@+node:ekr.20070627140344.1: *3*  ctor: RunTestExternallyHelperClass
@@ -586,7 +593,7 @@ class RunTestExternallyHelperClass:
         os.spawnve(os.P_NOWAIT, sys.executable, args, env)
     #@-others
 #@+node:ekr.20120220070422.10417: ** class TestManager
-class TestManager:
+class TestManager(object):
     '''A controller class to encapuslate test-runners.'''
     #@+others
     #@+node:ekr.20120220070422.10418: *3*  ctor (TestManager)
@@ -721,7 +728,7 @@ class TestManager:
                 if g.isPython3:
                     exec(compile(script, scriptFile, 'exec'), d)
                 else:
-                    execfile(scriptFile, d)
+                    builtins.execfile(scriptFile, d)
             else:
                 exec(script + '\n', d)
             testclass = g.app.scriptDict.get('testclass')
@@ -765,7 +772,7 @@ class TestManager:
                 if g.isPython3:
                     exec(compile(script, scriptFile, 'exec'), d)
                 else:
-                    execfile(scriptFile, d)
+                    builtins.execfile(scriptFile, d)
             else:
                 exec(script + '\n', d)
             suite = g.app.scriptDict.get("suite")
@@ -1103,17 +1110,20 @@ class TestManager:
             untangleInputP.moveToNext()
             inputSet[untangleInputP.h] = untangleInputP.b
             if trace_test:
-                g.es("test file name: %s\ntest file contents: %s" % (untangleInputP.h, untangleInputP.b))
+                g.es("test file name: %s\ntest file contents: %s" % (
+                    untangleInputP.h, untangleInputP.b))
         c.tangleCommands.untangle(event=None, p=rootTestToChangeP)
         try:
             assert tm.compareOutlines(rootTestToChangeP, rootResultP), "Expected outline not created"
             c.tangleCommands.tangle(event=None, p=rootTestToChangeP)
             inputSetList = sorted(inputSet)
             resultList = sorted(c.tangleCommands.tangle_output)
-            assert inputSetList == resultList, "Expected tangled file list %s, got %s" % (repr(resultList), repr(inputSetList))
+            assert inputSetList == resultList, "Expected tangled file list %s, got %s" % (
+                repr(resultList), repr(inputSetList))
             for t in inputSet:
                 result = g.toUnicode(c.tangleCommands.tangle_output[t])
-                assert inputSet[t] == result, "Expected %s with content %s, got %s" % (t, inputSet[t], result)
+                assert inputSet[t] == result, "Expected %s with content %s, got %s" % (
+                    t, inputSet[t], result)
         finally:
             rootTestToChangeP.doDelete()
     #@+node:ekr.20131111140646.16544: *4* TM.runVimTest
@@ -1628,6 +1638,166 @@ class TestManager:
         s = df.stringOutput
         return s
     #@-others
+#@+node:ekr.20120220070422.10420: ** Top-level functions (leoTest)
+#@+node:ekr.20051104075904.97: *3* leoTest.py: factorial (a test of doctests)
+# Some of these will fail now for Python 2.x.
+
+def factorial(n):
+    """Return the factorial of n, an exact integer >= 0.
+
+    If the result is small enough to fit in an int, return an int.
+    Else return a long.
+
+    >>> [factorial(n) for n in range(6)]
+    [1, 1, 2, 6, 24, 120]
+    >>> factorial(30)
+    265252859812191058636308480000000
+    >>> factorial(-1)
+    Traceback (most recent call last):
+        ...
+    ValueError: n must be >= 0
+
+    Factorials of floats are OK, but the float must be an exact integer:
+    >>> factorial(30.1)
+    Traceback (most recent call last):
+        ...
+    ValueError: n must be exact integer
+    >>> factorial(30.0)
+    265252859812191058636308480000000
+
+    It must also not be ridiculously large:
+    >>> factorial(1e100)
+    Traceback (most recent call last):
+        ...
+    OverflowError: n too large
+    """
+    import math
+    if not n >= 0:
+        raise ValueError("n must be >= 0")
+    if math.floor(n) != n:
+        raise ValueError("n must be exact integer")
+    if n + 1 == n: # catch a value like 1e300
+        raise OverflowError("n too large")
+    result = 1
+    factor = 2
+    while factor <= n:
+        try:
+            result *= factor
+        except OverflowError:
+            f = builtins.int if g.isPython3 else builtins.long
+            result *= f(factor)
+        factor += 1
+    return result
+#@+node:ekr.20051104075904.17: *3* leoTest.py:runGC & helpers (apparently not used)
+lastObjectCount = 0
+lastObjectsDict = {}
+lastTypesDict = {}
+lastFunctionsDict = {}
+# Adapted from similar code in leoGlobals.g.
+
+def runGc(disable=False):
+    message = "runGC"
+    if gc is None:
+        g.pr("@gc: can not import gc")
+        return
+    gc.enable()
+    set_debugGc()
+    gc.collect()
+    printGc(message=message)
+    if disable:
+        gc.disable()
+    # makeObjectList(message)
+
+runGC = runGc
+#@+node:ekr.20051104075904.18: *4* enableGc
+def set_debugGc():
+    gc.set_debug(
+        gc.DEBUG_STATS | # prints statistics.
+        # gc.DEBUG_LEAK | # Same as all below.
+        # gc.DEBUG_COLLECTABLE
+        # gc.DEBUG_UNCOLLECTABLE
+        gc.DEBUG_INSTANCES |
+        gc.DEBUG_OBJECTS
+        # gc.DEBUG_SAVEALL
+    )
+#@+node:ekr.20051104075904.19: *4* makeObjectList
+def makeObjectList(message):
+    # WARNING: this id trick is not proper: newly allocated objects can have the same address as old objects.
+    global lastObjectsDict
+    objects = gc.get_objects()
+    newObjects = [o for o in objects if not id(o) in lastObjectsDict]
+    lastObjectsDict = {}
+    for o in objects:
+        lastObjectsDict[id(o)] = o
+    g.pr("%25s: %d new, %d total objects" % (message, len(newObjects), len(objects)))
+#@+node:ekr.20051104075904.20: *4* printGc
+def printGc(message=None):
+    '''Called from unit tests.'''
+    if not message:
+        message = g.callers(2)
+    global lastObjectCount
+    n = len(gc.garbage)
+    n2 = len(gc.get_objects())
+    delta = n2 - lastObjectCount
+    g.pr('-' * 30)
+    g.pr("garbage: %d" % n)
+    g.pr("%6d =%7d %s" % (delta, n2, "totals"))
+    #@+<< print number of each type of object >>
+    #@+node:ekr.20051104075904.21: *5* << print number of each type of object >>
+    global lastTypesDict
+    typesDict = {}
+    for obj in gc.get_objects():
+        n = typesDict.get(type(obj), 0)
+        typesDict[type(obj)] = n + 1
+    # Create the union of all the keys.
+    keys = {}
+    for key in lastTypesDict:
+        if key not in typesDict:
+            keys[key] = None
+    for key in sorted(keys):
+        n1 = lastTypesDict.get(key, 0)
+        n2 = typesDict.get(key, 0)
+        delta2 = n2 - n1
+        if delta2 != 0:
+            g.pr("%+6d =%7d %s" % (delta2, n2, key))
+    lastTypesDict = typesDict
+    typesDict = {}
+    #@-<< print number of each type of object >>
+    if 0:
+        #@+<< print added functions >>
+        #@+node:ekr.20051104075904.22: *5* << print added functions >>
+        import types
+        import inspect
+        global lastFunctionsDict
+        funcDict = {}
+        for obj in gc.get_objects():
+            if isinstance(obj, types.FunctionType):
+                key = repr(obj) # Don't create a pointer to the object!
+                funcDict[key] = None
+                if key not in lastFunctionsDict:
+                    g.pr('\n', obj)
+                    args, varargs, varkw, defaults = inspect.signature(obj)
+                    g.pr("args", args)
+                    if varargs: g.pr("varargs", varargs)
+                    if varkw: g.pr("varkw", varkw)
+                    if defaults:
+                        g.pr("defaults...")
+                        for s in defaults: g.pr(s)
+        lastFunctionsDict = funcDict
+        funcDict = {}
+        #@-<< print added functions >>
+    lastObjectCount = n2
+    return delta
+#@+node:ekr.20051104075904.23: *4* printGcRefs
+def printGcRefs(verbose=True):
+    refs = gc.get_referrers(g.app.windowList[0])
+    g.pr('-' * 30)
+    if verbose:
+        g.pr("refs of", g.app.windowList[0])
+        for ref in refs:
+            g.pr(type(ref))
+    else:
+        g.pr("%d referrers" % len(refs))
 #@-others
 #@@language python
 #@@tabwidth -4

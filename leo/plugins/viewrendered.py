@@ -442,7 +442,7 @@ def update_rendering_pane(event):
         if vr:
             vr.update(tag='view', keywords={'c': c, 'force': True})
 #@+node:tbrown.20110629084915.35149: ** class ViewRenderedProvider (vr)
-class ViewRenderedProvider:
+class ViewRenderedProvider(object):
     #@+others
     #@+node:tbrown.20110629084915.35154: *3* __init__
     def __init__(self, c):
@@ -465,7 +465,7 @@ class ViewRenderedProvider:
             return vr
     #@-others
 #@+node:ekr.20110317024548.14375: ** class ViewRenderedController (QWidget)
-if QtWidgets:
+if QtWidgets: # NOQA
 
     class ViewRenderedController(QtWidgets.QWidget):
         '''A class to control rendering in a rendering pane.'''
@@ -598,7 +598,7 @@ if QtWidgets:
             '''Update the vr pane.'''
             verbose = False
             pc = self
-            c, p = pc.c, pc.c.p
+            p = pc.c.p
             if pc.must_update(keywords):
                 if trace:
                     if verbose: g.trace('===== updating', keywords)
@@ -800,7 +800,6 @@ if QtWidgets:
                     mdext = [x.strip() for x in mdext.split(',')]
                     s = markdown(s, mdext)
                     s = g.toUnicode(s)
-                    show = True
                 except SystemMessage as sm:
                     msg = sm.args[0]
                     if 'SEVERE' in msg or 'FATAL' in msg:
@@ -908,7 +907,6 @@ if QtWidgets:
                     s = publish_string(s, writer_name='html')
                     if trace: g.trace('after docutils', len(s))
                     s = g.toUnicode(s) # 2011/03/15
-                    show = True
                 except SystemMessage as sm:
                     # g.trace(sm,sm.args)
                     msg = sm.args[0]

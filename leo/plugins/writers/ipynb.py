@@ -1,14 +1,12 @@
 #@+leo-ver=5-thin
 #@+node:ekr.20160412101901.1: * @file writers/ipynb.py
 '''The @auto write code for jupyter (.ipynb) files.'''
-# py--lint: disable=unused-import
 import re
 import sys
 import leo.core.leoGlobals as g
-### import leo.plugins.writers.basewriter as basewriter
 #@+others
 #@+node:ekr.20160412101845.2: ** class Export_IPYNB
-class Export_IPYNB:
+class Export_IPYNB(object):
     '''A class to export outlines to .ipynb files.'''
 
     #@+others
@@ -34,7 +32,6 @@ class Export_IPYNB:
         Entry point for export-jupyter-notebook
         Import the given .ipynb file.
         '''
-        trace = True # and not g.unitTesting
         self.root = root
         self.indent = 0
         self.lines = []
@@ -88,9 +85,9 @@ class Export_IPYNB:
             s = s + ','
         line = '%s%s' % (' '*self.indent, s)
         self.lines.append(line)
-        
+
     def put_key_string(self, key, s):
-        
+
         self.put('"%s": "%s"' % (key, self.clean(s)))
 
     def put_key_val(self, key, val, indent=False):
@@ -100,7 +97,7 @@ class Export_IPYNB:
             self.indent += 1
     #@+node:ekr.20160412101845.6: *4* put_any_non_cell_data
     def put_any_non_cell_data(self, p, exclude=None):
-        
+
         if self.is_cell(p):
             return # put_cell handles this.
         assert p.h.startswith('#'), p.h
@@ -268,7 +265,7 @@ class Export_IPYNB:
         self.indent -= 1
         if key:
             self.put(key)
-        
+
     def put_indent(self, key=None):
         '''Put the key and then decrease the indentation level.'''
         if key:

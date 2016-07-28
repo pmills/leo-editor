@@ -6,7 +6,7 @@ import string
 import leo.core.leoGlobals as g
 #@+others
 #@+node:ekr.20070317085437: ** class ChapterController
-class ChapterController:
+class ChapterController(object):
     '''A per-commander controller that manages chapters and related nodes.'''
     #@+others
     #@+node:ekr.20070530075604: *3* Birth
@@ -45,28 +45,16 @@ class ChapterController:
         '''Create the box in the icon area.'''
         trace = (False or g.trace_startup) and not g.unitTesting
         if trace: g.es_debug('(cc)')
-        cc, c = self, self.c
+        cc = self
         cc.createIcon()
-        # Create the main chapter
         if trace: g.trace('===== ChapterController.finishCreate')
-        # Usually done in cc.setAllChapterNames.
-        if not cc.chaptersDict.get('main'):
-            cc.chaptersDict['main'] = Chapter(c, cc, 'main')
-            cc.makeCommand('main')
-        for p in c.all_unique_positions():
-            chapterName, binding = self.parseHeadline(p)
-            if chapterName:
-                if cc.chaptersDict.get(chapterName):
-                    self.error('duplicate chapter name: %s' % chapterName)
-                else:
-                    cc.chaptersDict[chapterName] = Chapter(c, cc, chapterName)
-                    cc.makeCommand(chapterName, binding)
+        cc.setAllChapterNames()
+            # Create all chapters.
         # Fix bug: https://github.com/leo-editor/leo-editor/issues/31
         cc.initing = False
-        # Always select the main chapter.
-        # It can be alarming to open a small chapter in a large .leo file.
         cc.selectChapterByName('main', collapse=False)
-            # 2010/10/09: an important bug fix!
+            # Always select the main chapter.
+            # It can be alarming to open a small chapter in a large .leo file.
     #@+node:ekr.20160411145155.1: *4* cc.makeCommand
     def makeCommand(self, chapterName, binding=None):
         '''Make chapter-select-<chapterName> command.'''
@@ -94,8 +82,9 @@ class ChapterController:
                 finally:
                     cc.selectChapterLockout = False
             else:
+                # Possible, but not likely.
                 cc.note('no such chapter: %s' % name)
-                
+
         # Always bind the command without a shortcut.
         # This will create the command bound to any existing settings.
         bindings = (None, binding) if binding else (None,)
@@ -132,40 +121,34 @@ class ChapterController:
     def selectChapterByName(self, name, collapse=True):
         '''Select a chapter.  Return True if a redraw is needed.'''
         trace = False and not g.unitTesting
+        cc = self
         if self.selectChapterLockout:
             if trace: g.trace('lockout', g.callers())
             return
-        cc, c = self, self.c
         if g.isInt(name):
             return cc.note('PyQt5 chapaters not supported')
         chapter = cc.getChapter(name)
         if not chapter:
             g.es_print('no such @chapter node: %s' % name)
             return
-            # chapter = cc.chaptersDict[name] = Chapter(c, cc, name)
-            # chapter.p = c.p
         try:
-            self.selectChapterLockout = True
+            cc.selectChapterLockout = True
             cc.selectChapterByNameHelper(chapter, collapse=collapse)
-            c.redraw(chapter.p) # 2016/04/20.
         finally:
-            self.selectChapterLockout = False
+            cc.selectChapterLockout = False
     #@+node:ekr.20090306060344.2: *4* cc.selectChapterByNameHelper
     def selectChapterByNameHelper(self, chapter, collapse=True):
+        '''Select the chapter, and redraw if necessary.'''
         trace = False and not g.unitTesting
         cc, c = self, self.c
-        if trace:
-            g.trace('===== %s' % chapter)
-            # g.trace('main', cc.getChapter('main'))
+        if trace: g.trace('===== %s' % chapter)
         if not cc.selectedChapter and chapter.name == 'main':
             chapter.p = c.p
             if trace: g.trace('main already selected:', chapter)
             return
         if chapter == cc.selectedChapter:
             chapter.p = c.p
-            if trace:
-                g.trace('already selected:', chapter)
-                # g.trace('main', cc.getChapter('main'))
+            if trace: g.trace('already selected:', chapter)
             return
         if cc.selectedChapter:
             if trace: g.trace('unselecting:', cc.selectedChapter)
@@ -192,6 +175,9 @@ class ChapterController:
                 # Compare vnodes, not positions.
                 if p.v != c.p.v:
                     p.contract()
+        c.redraw(chapter.p)
+            # Fix part of #265.
+            # Redraw only here, when we are sure it is needed.
     #@+node:ekr.20070317130648: *3* cc.Utils
     #@+node:ekr.20070320085610: *4* cc.error/note/warning
     def error(self, s):
@@ -281,7 +267,7 @@ class ChapterController:
         # Similar to g.sanitize_filename, but simpler.
         result = []
         for ch in s.strip():
-            if ch in string.ascii_letters:
+            if ch in (string.ascii_letters + string.digits):
                 result.append(ch)
             elif ch in ' \t':
                 result.append('-')
@@ -309,7 +295,7 @@ class ChapterController:
             g.callers(2))
         if not chapter and not selChapter:
             if trace: g.trace('*** selecting main chapter')
-            return 
+            return
         if not p:
             if trace: g.trace('no p')
             return
@@ -349,15 +335,18 @@ class ChapterController:
         c, cc, result = self.c, self, []
         sel_name = cc.selectedChapter and cc.selectedChapter.name or 'main'
         seen = set()
-        cc.makeCommand('main')
-            # This binds any existing bindings to chapter-select-main.
-        for p in c.all_positions():
+        if 'main' not in cc.chaptersDict:
+            cc.chaptersDict['main'] = Chapter(c, cc, 'main')
+            cc.makeCommand('main')
+                # This binds any existing bindings to chapter-select-main.
+        for p in c.all_unique_positions():
             chapterName, binding = self.parseHeadline(p)
-            if chapterName:
-                if p.v not in seen:
-                    seen.add(p.v)
-                    if chapterName != sel_name:
-                        result.append(chapterName)
+            if chapterName and p.v not in seen:
+                seen.add(p.v)
+                if chapterName != sel_name:
+                    result.append(chapterName)
+                if chapterName not in cc.chaptersDict:
+                    cc.chaptersDict[chapterName] = Chapter(c, cc, chapterName)
                     cc.makeCommand(chapterName, binding)
         if 'main' not in result and sel_name != 'main':
             result.append('main')
@@ -366,7 +355,7 @@ class ChapterController:
         return result
     #@-others
 #@+node:ekr.20070317085708: ** class Chapter
-class Chapter:
+class Chapter(object):
     '''A class representing the non-gui data of a single chapter.'''
     #@+others
     #@+node:ekr.20070317085708.1: *3* chapter.__init__
@@ -411,7 +400,7 @@ class Chapter:
     #@+node:ekr.20070423102603.1: *4* chapter.chapterSelectHelper
     def chapterSelectHelper(self, w=None, selectEditor=True):
         trace = False and not g.unitTesting
-        c, cc, name = self.c, self.cc, self.name
+        c, cc = self.c, self.cc
         if trace: g.trace('-----------', self, 'w:', bool(w))
         cc.selectedChapter = self
         if self.name == 'main':
@@ -458,7 +447,7 @@ class Chapter:
         '''Return a valid position p such that p.v == v.'''
         trace = False and not g.unitTesting
         verbose = False
-        c, cc, name = self.c, self.cc, self.name
+        c, name = self.c, self.name
         # Bug fix: 2012/05/24: Search without root arg in the main chapter.
         if name == 'main' and c.positionExists(p1):
             return p1
@@ -533,7 +522,6 @@ class Chapter:
             p = root or c.p
             c.setCurrentPosition(p)
         if trace: g.trace(c.hoistStack)
-
     #@-others
 #@-others
 #@@language python

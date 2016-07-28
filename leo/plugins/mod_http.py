@@ -62,7 +62,7 @@ Saving bookmarks from browser to Leo
 
 To do this, add a bookmark to the browser with the following URL / Location::
 
-    javascript:w=window; d=w.document; ln=[];if(w.location.href.indexOf('one-tab')>-1){el=d.querySelectorAll('a');for (i in el){ln.push({url:el[i].href,txt:el[i].innerHTML});};};w.open('http://localhost:8130/_/add/bkmk/?&name=' + escape(d.title) + '&selection=' + escape(window.getSelection()) + '&ln=' + escape(JSON.stringify(ln)) + '&url=' + escape(w.location.href),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=yes, copyhistory=no, width=800, height=300, status=no");void(0);
+    javascript:w=window; d=w.document; ln=[];if(w.location.href.indexOf('one-tab')>-1){el=d.querySelectorAll('a');for (i in el){ln.push({url:el[i].href,txt:el[i].innerHTML});};};w.open('http://localhost:8130/_/add/bkmk/?&name=' + escape(d.title) + '&selection=' + escape(window.getSelection()) + '&ln=' + escape(JSON.stringify(ln)) + '&url=' + escape(w.location.href),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=yes, copyhistory=no, width=800, height=300, status=no");void(0); # NOQA
 
 and edit the port (8130 in the example above) to match the port you're using for
 mod_http.
@@ -115,19 +115,21 @@ The basic form is::
 The query parameters are:
 
 ``cmd`` (required)
-    A valid python snippet for Leo to execute.  Executed by
-    the ``vs-eval`` command in the ``valuespace`` plug-in.  Can be
-    specified multiple times, each is executed in order.  May contain
-    newlines, see examples.
+    A valid python snippet for Leo to execute. Executed by the ``vs-eval``
+    command in the ``valuespace`` plug-in. Can be specified multiple times, each
+    is executed in order. May contain newlines, see examples.
+
 ``c`` (optional)
-    Which currently loaded outline to use, can be an integer, starting
-    from zero, or the full path+filename, or just the base filename.
-    Defaults to 0 (zero), i.e. the "first" open outline.
+    Which currently loaded outline to use, can be an integer, starting from
+    zero, or the full path+filename, or just the base filename. Defaults to 0
+    (zero), i.e. the "first" open outline.
+
 ``enc`` (optional)
-    Encoding for response, 'str', 'repr', or 'json'.  Used to render
-    the returned value.
+    Encoding for response, 'str', 'repr', or 'json'. Used to render the returned
+    value.
+
 ``mime_type`` (optional)
-    Defaults to ``text/plain``.  Could be useful to use ``text/html`` etc.
+    Defaults to ``text/plain``. Could be useful to use ``text/html`` etc.
 
 A special variant url is::
 
@@ -142,8 +144,8 @@ This command::
 
     curl http://localhost:8130/_/exec/?cmd='c.bringToFront()' >/dev/null
 
-will raise the Leo window, or at least make the window manager signal the
-need to raise it.
+will raise the Leo window, or at least make the window manager signal the need
+to raise it.
 
 ::
 
@@ -264,7 +266,7 @@ def init():
         getGlobalConfiguration()
         if config.http_active:
             try:
-                s = Server(config.http_ip, config.http_port, RequestHandler)
+                Server(config.http_ip, config.http_port, RequestHandler)
             except socket.error as e:
                 g.es("mod_http server initialization failed (%s:%s): %s" % (
                     config.http_ip, config.http_port, e))
@@ -302,7 +304,7 @@ def getGlobalConfiguration():
 def plugin_wrapper(tag, keywords):
     if g.app.killed:
         return
-    first = True
+    # first = True
     while loop(config.http_timeout):
         pass
 #@+node:bwmulder.20050326191345.1: *3* onFileOpen (not used) (mod_http.py)
@@ -312,7 +314,7 @@ def onFileOpen(tag, keywords):
     wasactive = config.http_active
     getConfiguration(c)
     if config.http_active and not wasactive: # Ok for unit testing:
-        s = Server('', config.http_port, RequestHandler)
+        Server('', config.http_port, RequestHandler)
         asyncore.read = a_read
         g.registerHandler("idle", plugin_wrapper)
         g.es("http serving enabled on port %s, version %s" % (
@@ -337,7 +339,7 @@ def getConfiguration(c):
     if new_rst2_http_attributename:
         config.rst2_http_attributename = new_rst2_http_attributename
 #@+node:bwmulder.20050326191345: ** class config
-class config:
+class config(object):
     http_active = False
     http_timeout = 0
     http_ip = '127.0.0.1'
@@ -683,7 +685,7 @@ class leo_interface(object):
             f.write("</h2>\n")
     #@-others
 #@+node:tbrown.20110930093028.34530: ** class LeoActions
-class LeoActions:
+class LeoActions(object):
     """
     A place to collect other URL based actions like saving bookmarks from
     the browser. Conceptually this stuff could go in class leo_interface
@@ -899,7 +901,7 @@ class LeoActions:
         return f
     #@-others
 #@+node:tbrown.20150729112701.1: ** class ExecHandler
-class ExecHandler:
+class ExecHandler(object):
     """
     Quasi-RPC GET based interface
     """
@@ -1251,7 +1253,7 @@ def poll(timeout=0.0):
         #@+node:EKR.20040517080250.41: *4* << try r, w, e = select.select >>
         try:
             r, w, e = select.select(r, w, e, timeout)
-        except select.error as err:
+        except select.error: # as err:
             # if err[0] != EINTR:
                 # raise
             # else:

@@ -30,6 +30,7 @@ else:
         isQt5 = False
         try:
             from PyQt4 import Qt
+            assert Qt # for pyflakes
         except ImportError:
             if strict:
                 print('leoQt.py: can not import either PyQt4 or PyQt5.')
@@ -45,6 +46,7 @@ if fail:
     phonon = uic = None
     qt_version = '<no version>'
     printsupport = None
+    assert QUrl # for pyflakes
 elif isQt5:
     try:
         from PyQt5 import QtCore
@@ -60,6 +62,7 @@ else:
         from PyQt4 import QtCore
         from PyQt4 import QtGui
         from PyQt4.QtCore import QUrl
+        assert QUrl # for pyflakes.
         QtConst = QtCore.Qt
         QtWidgets = QtGui
         printsupport = QtWidgets
@@ -108,11 +111,28 @@ elif isQt5:
     try:
         from PyQt5 import QtWebKit
     except ImportError:
-        QtWebKit = None
+        # 2016/07/13: Reinhard: Support pyqt 5.6...
+        try:
+            from PyQt5 import QtWebEngineCore as QtWebKit
+        except ImportError:
+            QtWebKit = None
     try:
         import PyQt5.QtWebKitWidgets as QtWebKitWidgets
     except ImportError:
-        QtWebKitWidgets = None
+        try:
+            # 2016/07/13: Reinhard: Support pyqt 5.6...
+            import PyQt5.QtWebEngineWidgets as QtWebKitWidgets
+            QtWebKitWidgets.QWebView = QtWebKitWidgets.QWebEngineView
+            # 2016/07/20: Per
+            # https://groups.google.com/d/msg/leo-editor/J_wVIzqQzXg/KmXMxJSAAQAJ
+            # used by richtext.py
+            QtWebKit.QWebSettings = QtWebKitWidgets.QWebEngineSettings
+            # used by viewrendered(2|3).py, bigdash.py
+            QtWebKitWidgets.QWebPage = QtWebKitWidgets.QWebEnginePage
+            # used by viewrendered(2|3).py
+            QtWebKitWidgets.QWebSettings = QtWebKitWidgets.QWebEngineSettings
+        except ImportError:
+            QtWebKitWidgets = None
 else:
     try:
         QString = QtCore.QString

@@ -126,7 +126,7 @@ def OnBodyKey(tag,keywords):
     ch=keywords.get("ch")
 
     # handle the @run "\r" body key
-    if ch == "\r" and g.match_word(h,0,"@run") and RunNode != None and RunNode==p:
+    if ch == "\r" and g.match_word(h,0,"@run") and RunNode and RunNode==p:
         try:
             In.write(p.b.encode(Encoding))
             In.flush()
@@ -268,7 +268,7 @@ def CloseProcess(c):
     RunNode = None
 
     # Reset the working dir.
-    if WorkDir != None:
+    if WorkDir is not None:
         os.chdir(WorkDir)
         WorkDir = None
 
@@ -356,17 +356,17 @@ def OpenProcess(p):
     # In,OutThread.File,ErrThread.File	= os.popen3(command,"t")
     #### OutThread.File,In,ErrThread.File = os.popen3(command,"t")
 
-    PIPE = subprocess.PIPE
-    proc = subprocess.Popen(command, shell=True) # , # bufsize=bufsize,
-    #     stdin=PIPE,stdout=PIPE,stderr=PIPE) # ,close_fds=True)
-
+    # PIPE = subprocess.PIPE
+    proc = subprocess.Popen(command, shell=True)
+        # bufsize=bufsize,
+        # stdin=PIPE,
+        # stdout=PIPE,
+        # stderr=PIPE) ,close_fds=True)
     In             = proc.stdin
     OutThread.File = proc.stdout
     ErrThread.File = proc.stderr
-
     OutThread.start()
     ErrThread.start()
-
     # Mark and select the node.
     RunNode.setMarked()
     c = RunNode.v.context
@@ -383,10 +383,9 @@ def UpdateText(t,wcolor="black"):
             if t.Text != "\n":
                 g.es(t.Text,color=wcolor)
             t.Text=""
-        else:
-            if t.isAlive() == False:
-                t.TextLock.release()
-                return False
+        elif not t.isAlive():
+            t.TextLock.release()
+            return False
         t.TextLock.release()
 
     return True

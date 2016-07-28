@@ -22,7 +22,7 @@ class LeoSessionException(Exception):
 #@+node:ekr.20120420054855.14349: ** class SessionManager
 # These were top-level nodes of leotools.py
 
-class SessionManager:
+class SessionManager(object):
     #@+others
     #@+node:ekr.20120420054855.14351: *3*  ctor (LeoSessionController)
     def __init__(self):
@@ -111,7 +111,7 @@ class SessionManager:
         else:
             print('can not save session: no leo.session file')
     #@-others
-#@+node:ekr.20120420054855.14375: ** Commands
+#@+node:ekr.20120420054855.14375: ** Commands (leoSession.py)
 #@+node:ekr.20120420054855.14388: *3* session-clear
 @g.command('session-clear')
 def session_clear_command(event):

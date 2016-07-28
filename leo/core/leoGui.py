@@ -13,9 +13,13 @@ Plugins may define their own gui classes by setting g.app.gui.
 import leo.core.leoGlobals as g
 import leo.core.leoFrame as leoFrame
     # for NullGui and StringTextWrapper.
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 #@+others
 #@+node:ekr.20031218072017.3720: ** class LeoGui
-class LeoGui:
+class LeoGui(object):
     """The base class of all gui classes.
 
     Subclasses are expected to override all do-nothing methods of this class.
@@ -103,7 +107,9 @@ class LeoGui:
         self.oops()
 
     def runAskYesNoCancelDialog(self, c, title,
-        message=None, yesMessage="Yes", noMessage="No", yesToAllMessage=None, defaultButton="Yes"):
+        message=None, yesMessage="Yes", noMessage="No",
+        yesToAllMessage=None, defaultButton="Yes"
+    ):
         """Create and run an askYesNoCancel dialog ."""
         self.oops()
 
@@ -234,7 +240,7 @@ class LeoGui:
         pass
     #@-others
 #@+node:ekr.20070228160107: ** class LeoKeyEvent
-class LeoKeyEvent:
+class LeoKeyEvent(object):
     '''A gui-independent wrapper for gui events.'''
     #@+others
     #@+node:ekr.20110605121601.18846: *3* LeoKeyEvent.__init__
@@ -409,7 +415,9 @@ class NullGui(LeoGui):
         return self.simulateDialog("yesNoDialog", "no")
 
     def runAskYesNoCancelDialog(self, c, title,
-        message=None, yesMessage="Yes", noMessage="No", yesToAllMessage=None, defaultButton="Yes"):
+        message=None, yesMessage="Yes", noMessage="No",
+        yesToAllMessage=None, defaultButton="Yes"
+    ):
         return self.simulateDialog("yesNoCancelDialog", "cancel")
     #@+node:ekr.20100521090440.5893: *3* onActivateEvent/onDeactivateEvent (NullGui)
     def onActivateEvent(self, *args, **keys):
@@ -425,7 +433,7 @@ class NullGui(LeoGui):
         return val
     #@-others
 #@+node:ekr.20080707150137.5: ** class NullScriptingControllerClass
-class NullScriptingControllerClass:
+class NullScriptingControllerClass(object):
     '''A default, do-nothing class to be overridden by mod_scripting or other plugins.
 
     This keeps pylint happy.'''
@@ -474,7 +482,7 @@ class UnitTestGui(NullGui):
         if g.isPython3:
             return str(s)
         else:
-            return unicode(s)
+            return builtins.unicode(s)
     #@-others
 #@-others
 #@@language python

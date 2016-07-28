@@ -103,7 +103,7 @@ def onCreate(tag, keys):
     if c:
         c.opmlController = OpmlController(c)
 #@+node:ekr.20060904141220: ** class NodeClass
-class NodeClass:
+class NodeClass(object):
     '''
     A class representing one outline element.
 
@@ -135,7 +135,7 @@ class NodeClass:
         print('attrs: %s' % self.attributes.values())
     #@-others
 #@+node:ekr.20060904103412.6: ** class OpmlController
-class OpmlController:
+class OpmlController(object):
     '''The controller class for this plugin.'''
     #@+others
     #@+node:ekr.20060904103412.7: *3* oc.__init__
@@ -350,7 +350,7 @@ class OpmlController:
             defaultextension=".opml")
         c.bringToFront()
         if fileName and len(fileName) > 0:
-            c2 = self.readFile(fileName)
+            self.readFile(fileName)
         else:
             c.bodyWantsFocus()
     #@+node:ekr.20060904103721.1: *3* oc.writeFile
@@ -389,7 +389,7 @@ class OpmlController:
             c.opmlCommands.writeFile(fileName)
     #@-others
 #@+node:ekr.20060919172012.2: ** class PutToOPML
-class PutToOPML:
+class PutToOPML(object):
     '''Write c.p's tree as OPML, using the owner's put method.'''
 
     def __init__(self, owner):
@@ -465,7 +465,7 @@ class PutToOPML:
         self.put('\n</body>')
     #@+node:ekr.20060919172012.6: *3* putOPMLNode
     def putOPMLNode(self, p):
-        c = self.c
+
         indent = ' ' * (4 * p.level()) # Always use 4-space indents.
         body = p.bodyString() or ''; head = p.headString() or ''
         attrFormat = ' %s="%s"'

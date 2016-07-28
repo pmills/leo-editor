@@ -93,6 +93,21 @@ Nodes can be added and removed from the display with the following mouse actions
 **shift-left-click on bookmark**
     Add the current node as a *child* of the clicked bookmark,
     and display the clicked bookmarks children.
+**control-alt-shift-left-click on bookmark**
+    Goto and hoist
+
+The above as a table::
+
+    SAC
+    --- goto, or, ON BACKGROUND, add
+    --+ delete
+    -+- edit bookmark in tree (ON BACKGROUND, edit from top of bookmark tree)
+    -++ link bookmark to current node
+    +-- add as child bookmark, show children
+    +-+ rename bookmark
+    ++- show child bookmarks without changing selected node
+    +++ goto and hoist 
+
 
 The ``@setting`` ``@int bookmarks-levels = 1`` sets the number of levels of
 hierarchy shown in the bookmarks pane. By default, the @setting @int
@@ -105,16 +120,16 @@ bookmarks::
      B2
   C
 
-you'd just see A B C, with B underlined, indicating it has
-children, and when you click B, one of two things happens.
+you'd just see A B C, with B underlined, indicating it has children, and when
+you click B, one of two things happens.
 
-With bookmarks_levels = 1 (the default) the effect of clicking on B
-depends on whether or not B is itself a bookmark (contains an URL)
-or just an organizer node (no body).
+With bookmarks_levels = 1 (the default) the effect of clicking on B depends on
+whether or not B is itself a bookmark (contains an URL) or just an organizer
+node (no body).
 
-If it's just an organizer node, clicking it immediately shows its
-children.  If it contains an URL itself, the first click makes Leo
-navigate to that URL, a subsequent click shows the children.
+If it's just an organizer node, clicking it immediately shows its children. If
+it contains an URL itself, the first click makes Leo navigate to that URL, a
+subsequent click shows the children.
 
 Note that this first click / second click behavior only applies with
 @int bookmarks_levels = 1.
@@ -166,18 +181,32 @@ Create a new outline with the following nodes, as simple top level nodes::
     bunting
     @bookmarks
 
-(pro-tip, with the paste_as_headlines plugin active, you can just copy the above and use `Edit -> Paste as headlines`, you'll need to promote them to top level again though).
+(pro-tip, with the paste_as_headlines plugin active, you can just copy the above
+and use `Edit -> Paste as headlines`, you'll need to promote them to top level
+again though).
 
-Select the ``@bookmarks`` node and then Alt-X `bookmarks-show`, which should create a new empty pane above the body pane.  Select the ``aardvarks`` node and click in the new empty pane, repeat
-for the ``bats`` node.
+Select the ``@bookmarks`` node and then Alt-X `bookmarks-show`, which should
+create a new empty pane above the body pane. Select the ``aardvarks`` node and
+click in the new empty pane, repeat for the ``bats`` node.
 
-Squish the new empty pane up so it's just high enough to hold the two bookmarks, or "tabs", and
-then right click a pane divider and save this layout as "Tabs" or whatever you want to call it.
+Squish the new empty pane up so it's just high enough to hold the two bookmarks,
+or "tabs", and then right click a pane divider and save this layout as "Tabs" or
+whatever you want to call it.
 
-So now you have two tabs which jump between two nodes.  Click the ``aardvarks`` tab, then
-select the ``apples`` node.  Now shift-click the ``aardvarks`` tab.  Now you are entering sub tabs of the ``aardvarks`` tab.  You might want to repeat the ``aardvarks`` tab at this level, just select the node and click in the empty space in the bookmarks pane to repeat it here.  You could add ``autos`` at this level too.
+So now you have two tabs which jump between two nodes. Click the ``aardvarks``
+tab, then select the ``apples`` node. Now shift-click the ``aardvarks`` tab. Now
+you are entering sub tabs of the ``aardvarks`` tab. You might want to repeat the
+``aardvarks`` tab at this level, just select the node and click in the empty
+space in the bookmarks pane to repeat it here. You could add ``autos`` at this
+level too.
 
-How the 'tabs' are displayed (one or more levels at once etc.) and how you edit them are described in the earlier parts of these docs.  For example at the top level the first time you click the ``aardvarks`` tab it just shows you the ``aardvarks`` node, it requires a second click to see its subtabs (aardvarks, apples, and autos), because the top level ``aardvarks`` tab is both a bookmark and an organizer node.  If you want it to be just and organizer node, alt-click it to edit the bookmark node itself, and delete the body text (UNL) there.
+How the 'tabs' are displayed (one or more levels at once etc.) and how you edit
+them are described in the earlier parts of these docs. For example at the top
+level the first time you click the ``aardvarks`` tab it just shows you the
+``aardvarks`` node, it requires a second click to see its subtabs (aardvarks,
+apples, and autos), because the top level ``aardvarks`` tab is both a bookmark
+and an organizer node. If you want it to be just and organizer node, alt-click
+it to edit the bookmark node itself, and delete the body text (UNL) there.
 
 '''
 #@-<< docstring >>
@@ -363,7 +392,10 @@ def cmd_use_other_outline(event):
         splitter.add_adjacent(bmd.w, 'bodyFrame', 'above')
 #@+node:ekr.20140917180536.17896: ** class FlowLayout
 class FlowLayout(QtWidgets.QLayout):
-    """from http://ftp.ics.uci.edu/pub/centos0/ics-custom-build/BUILD/PyQt-x11-gpl-4.7.2/examples/layouts/flowlayout.py"""
+    """
+    from http://ftp.ics.uci.edu/pub/centos0/ics-custom-build/BUILD/
+    PyQt-x11-gpl-4.7.2/examples/layouts/flowlayout.py
+    """
     #@+others
     #@+node:ekr.20140917180536.17897: *3* __init__
     def __init__(self, parent=None, margin=0, spacing=-1):
@@ -386,6 +418,7 @@ class FlowLayout(QtWidgets.QLayout):
     #@+node:ekr.20140917180536.17900: *3* insertWidget
     def insertWidget(self, index, item):
         x = QtWidgets.QWidgetItem(item)
+        assert x # for pyflakes
         # item.setParent(x)
         # self.itemList.insert(index, x)
     #@+node:ekr.20140917180536.17901: *3* count
@@ -434,8 +467,14 @@ class FlowLayout(QtWidgets.QLayout):
         lineHeight = 0
         for item in self.itemList:
             wid = item.widget()
-            spaceX = self.spacing() + wid.style().layoutSpacing(QtWidgets.QSizePolicy.PushButton, QtWidgets.QSizePolicy.PushButton, QtCore.Qt.Horizontal)
-            spaceY = self.spacing() + wid.style().layoutSpacing(QtWidgets.QSizePolicy.PushButton, QtWidgets.QSizePolicy.PushButton, QtCore.Qt.Vertical)
+            spaceX = self.spacing() + wid.style().layoutSpacing(
+                QtWidgets.QSizePolicy.PushButton,
+                QtWidgets.QSizePolicy.PushButton,
+                QtCore.Qt.Horizontal)
+            spaceY = self.spacing() + wid.style().layoutSpacing(
+                QtWidgets.QSizePolicy.PushButton,
+                QtWidgets.QSizePolicy.PushButton,
+                QtCore.Qt.Vertical)
             nextX = x + item.sizeHint().width() + spaceX
             if nextX - spaceX > rect.right() and lineHeight > 0:
                 x = rect.x()
@@ -463,7 +502,7 @@ class FlowLayout(QtWidgets.QLayout):
         self._margin = margin
     #@-others
 #@+node:tbrown.20110712100955.18924: ** class BookMarkDisplay
-class BookMarkDisplay:
+class BookMarkDisplay(object):
     """Manage a pane showing bookmarks"""
 
     Bookmark = namedtuple('Bookmark', 'head url ancestors siblings children v')
@@ -548,7 +587,7 @@ class BookMarkDisplay:
         c.redraw()
         self.current = nd.v
         self.show_list(self.get_list())
-    #@+node:tbrown.20131227100801.23859: *3* button_clicked
+    #@+node:tbnorth.20160502105134.1: *3* button_clicked
     def button_clicked(self, event, bm, but, up=False):
         """button_clicked - handle a button being clicked
 
@@ -587,6 +626,10 @@ class BookMarkDisplay:
         # Alt-Shift => navigate in bookmarks without changing nodes
         no_move = mods == (QtCore.Qt.AltModifier | QtCore.Qt.ShiftModifier)
 
+        # Alt-Control-Shift => hoist outline after going to node
+        hoist = mods == (QtCore.Qt.AltModifier | QtCore.Qt.ControlModifier |
+            QtCore.Qt.ShiftModifier)
+
         # otherwise, look up the bookmark
         self.upwards = up
         self.second = not up and self.current == bm.v
@@ -595,6 +638,9 @@ class BookMarkDisplay:
         self.show_list(self.get_list(), up=up)
         if bm.url and not up and not no_move:
             g.handleUrl(bm.url, c=self.c)
+            if hoist:
+                self.c.hoist()
+
     #@+node:tbrown.20140807091931.30231: *3* button_menu
     def button_menu(self, event, bm, but, up=False):
         """button_menu - handle a button being right-clicked
@@ -688,7 +734,7 @@ class BookMarkDisplay:
         result = []
 
         def recurse_bm(node, result, ancestors=None):
-            
+
             if ancestors is None: ancestors = []
 
             for p in node.children():
@@ -771,7 +817,7 @@ class BookMarkDisplay:
                 self.background_clicked(event, links))
             top.setMinimumSize(10,10)  # so there's something to click when empty
 
-            size_policy = QtWidgets.QSizePolicy(\
+            size_policy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Expanding,
                 QtWidgets.QSizePolicy.Expanding
             )
@@ -790,12 +836,12 @@ class BookMarkDisplay:
 
                 if bm.url:
                     but.setToolTip(bm.url)
-        
+
                 # pylint: disable=undefined-variable
                 # 'but' *is* defined.
                 but.mouseReleaseEvent = (lambda event, bm=bm, but=but:
                     self.button_clicked(event, bm, but))
-                    
+
                 layout.addWidget(but)
 
                 showing = False
@@ -825,16 +871,15 @@ class BookMarkDisplay:
 
         if self.levels:  # drop excess levels
             if ((
-                    not self.second and
-                    current_url and
-                    current_url.strip() and
-                    self.levels == 1
-                 or
-                    up or self.upwards
-                ) and
-                  current_level < self.w.layout().count() and
-                  self.levels < self.w.layout().count()
-                ):
+                not self.second and
+                current_url and
+                current_url.strip() and
+                self.levels == 1 or
+                up or self.upwards
+            ) and
+                current_level < self.w.layout().count() and
+                self.levels < self.w.layout().count()
+            ):
                 # hide last line, of children, if none are current
                 self.w.layout().takeAt(self.w.layout().count()-1).widget().deleteLater()
 
@@ -844,10 +889,10 @@ class BookMarkDisplay:
                 next_row = self.w.layout().itemAt(1).widget().layout()
                 but = QtWidgets.QPushButton('^')
                 bm = showing_chain.pop(0)
-                
+
                 # but.mouseReleaseEvent = (lambda event, bm=bm, but=but:
                     # self.button_clicked(event, bm, but, up=True))
-        
+
                 def mouseReleaseHandler2(event, bm=bm, but=but):
                     self.button_clicked(event, bm, but, up=True)
 
@@ -958,7 +1003,7 @@ class BookMarkDisplay:
         self.show_list(self.get_list())
     #@-others
 #@+node:tbrown.20110712121053.19746: ** class BookMarkDisplayProvider
-class BookMarkDisplayProvider:
+class BookMarkDisplayProvider(object):
     #@+others
     #@+node:tbrown.20110712121053.19747: *3* __init__
     def __init__(self, c):

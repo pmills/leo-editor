@@ -5,7 +5,7 @@ import leo.core.leoGlobals as g
 import sys
 #@+others
 #@+node:ekr.20031218072017.3750: ** class LeoMenu
-class LeoMenu:
+class LeoMenu(object):
     """The base class for all Leo menus."""
     #@+others
     #@+node:ekr.20120124042346.12938: *3* LeoMenu.Birth
@@ -1158,7 +1158,7 @@ class LeoMenu:
         trace = False
         try:
             menu = self.getMenu(menuName)
-            if menu == None:
+            if menu is None:
                 if trace and not g.app.menuWarningsGiven and not g.app.gui.isNullGui:
                     g.es_print(g.app.gui.guiName(), g.callers())
                     g.es_print("menu does not exist: %s" % (menuName))
@@ -1198,20 +1198,20 @@ class LeoMenu:
     def createOpenWithMenuFromTable(self, table):
         '''
         Table is a list of dictionaries, created from @openwith settings nodes.
-        
+
         This menu code uses these keys:
-        
+
             'name':     menu label.
             'shortcut': optional menu shortcut.
-        
+
         efc.open_temp_file uses these keys:
-       
+
             'args':     the command-line arguments to be used to open the file.
             'ext':      the file extension.
             'kind':     the method used to open the file, such as subprocess.Popen.
         '''
         # trace = False and not g.unitTesting
-        c, k = self.c, self.c.k
+        k = self.c.k
         if not table: return
         g.app.openWithTable = table # Override any previous table.
         # Delete the previous entry.
@@ -1251,7 +1251,7 @@ class LeoMenu:
         Create an entry in the Open with Menu from the table, a list of dictionaries.
 
         Each dictionary d has the following keys:
-       
+
         'args':     the command-line arguments used to open the file.
         'ext':      not used here: used by efc.open_temp_file.
         'kind':     not used here: used by efc.open_temp_file.

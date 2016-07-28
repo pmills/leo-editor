@@ -440,7 +440,8 @@ class quickMove(object):
         for mover, button in qm.buttons:
             if (mover.target == v and
                 (not type_ or mover.type_ == type_) and
-                (not first or mover.which == first)):  # TNB untested .first -> .which
+                (not first or mover.which == first)
+            ):  # TNB untested .first -> .which
                 cnt += 1
                 v.u['quickMove']['buttons'].append(
                     {'first':mover.which, 'type': mover.type_})
@@ -819,7 +820,7 @@ class quickMove(object):
             # other lines are just ignored
 
         g.app.db['_quickmove']['global_targets'] = [
-            {'name': name, 'unl': unl} for name, unl in new
+            {'name': name2, 'unl': unl2} for name2, unl2 in new
         ]
         # make sure g.app.db knows it's been changed
         g.app.db['_quickmove'] = g.app.db['_quickmove']
@@ -828,7 +829,7 @@ class quickMove(object):
     #@-others
 
 #@+node:tbrown.20070117104409.5: ** class quickMoveButton
-class quickMoveButton:
+class quickMoveButton(object):
 
     """contains target data and function for moving node"""
 

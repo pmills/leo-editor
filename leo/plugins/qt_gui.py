@@ -21,7 +21,8 @@ import sys
 if 1:
     # This defines the commands defined by @g.command.
     # pylint: disable=unused-import
-    import leo.plugins.qt_commands
+    import leo.plugins.qt_commands as qt_commands
+    assert qt_commands
 #@-<< imports >>
 #@+others
 #@+node:ekr.20110605121601.18134: ** init
@@ -80,7 +81,6 @@ class LeoQtGui(leoGui.LeoGui):
         QtCore.pyqtRemoveInputHook()
         if trace: print('LeoQtGui.destroySelf: calling qtApp.Quit')
         self.qtApp.quit()
-
     #@+node:ekr.20110605121601.18485: *3* LeoQtGui.Clipboard
     def replaceClipboardWith(self, s):
         '''Replace the clipboard with the string s.'''
@@ -178,7 +178,7 @@ class LeoQtGui(leoGui.LeoGui):
     def findDialogSelectCommander(self, c):
         '''Update the Find Dialog when c changes.'''
         if self.globalFindDialog:
-            c.ftm = ftm = g.app.globalFindTabManager
+            c.ftm = g.app.globalFindTabManager
             d = self.globalFindDialog
             fn = c.shortFileName() or 'Untitled'
             d.setWindowTitle('Find in %s' % fn)
@@ -220,7 +220,10 @@ class LeoQtGui(leoGui.LeoGui):
         c.in_qt_dialog = False
     #@+node:ekr.20110605121601.18496: *4* LeoQtGui.runAskDateTimeDialog
     def runAskDateTimeDialog(self, c, title,
-        message='Select Date/Time', init=None, step_min=None):
+        message='Select Date/Time',
+        init=None,
+        step_min=None
+    ):
         """Create and run a qt date/time selection dialog.
 
         init - a datetime, default now
@@ -259,8 +262,12 @@ class LeoQtGui(leoGui.LeoGui):
 
         class Calendar(QtWidgets.QDialog):
 
-            def __init__(self, parent=None, message='Select Date/Time',
-                init=None, step_min=None):
+            def __init__(self,
+                parent=None,
+                message='Select Date/Time',
+                init=None,
+                step_min=None
+            ):
                 if step_min is None: step_min = {}
                 QtWidgets.QDialog.__init__(self, parent)
                 layout = QtWidgets.QVBoxLayout()
@@ -270,8 +277,8 @@ class LeoQtGui(leoGui.LeoGui):
                 self.dt.setCalendarPopup(True)
                 layout.addWidget(self.dt)
                 buttonBox = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.Ok
-                    | QtWidgets.QDialogButtonBox.Cancel)
+                    QtWidgets.QDialogButtonBox.Ok |
+                    QtWidgets.QDialogButtonBox.Cancel)
                 layout.addWidget(buttonBox)
                 buttonBox.accepted.connect(self.accept)
                 buttonBox.rejected.connect(self.reject)
@@ -474,10 +481,13 @@ class LeoQtGui(leoGui.LeoGui):
             return s
     #@+node:ekr.20110605121601.18501: *4* LeoQtGui.runPropertiesDialog
     def runPropertiesDialog(self,
-        title='Properties', data=None, callback=None, buttons=None):
+        title='Properties',
+        data=None,
+        callback=None,
+        buttons=None
+    ):
         """Dispay a modal TkPropertiesDialog"""
         if data is None: data = {}
-        # g.trace(data)
         g.warning('Properties menu not supported for Qt gui')
         result = 'Cancel'
         return result, data
@@ -580,8 +590,13 @@ class LeoQtGui(leoGui.LeoGui):
         Gracefully deactivate the Leo window.
         Called several times for each window activation.
         '''
+        trace = False and not g.unitTesting
+        if trace:
+            g.trace(g.app.gui.get_focus())
+
         self.active = False
             # Used only by c.idle_focus_helper.
+
         if 0: # Cause problems elsewhere.
             trace = False and not g.unitTesting
             if c.exists and not self.deactivated_name:
@@ -599,8 +614,13 @@ class LeoQtGui(leoGui.LeoGui):
         Restore the focus when the Leo window is activated.
         Called several times for each window activation.
         '''
+        trace = False and not g.unitTesting
+        if trace:
+            g.trace(g.app.gui.get_focus())
+
         self.active = True
             # Used only by c.idle_focus_helper.
+
         if 0: # Cause problems elsewhere.
             trace = False and not g.unitTesting
             if c.exists and self.deactivated_name:
@@ -624,6 +644,7 @@ class LeoQtGui(leoGui.LeoGui):
         Create an event filter in obj.
         w is a wrapper object, not necessarily a QWidget.
         '''
+        # gui = self
         if 0:
             g.trace(isinstance(w, QtWidgets.QWidget),
                 hasattr(w, 'getName') and w.getName() or None,
@@ -633,7 +654,6 @@ class LeoQtGui(leoGui.LeoGui):
                 isinstance(obj, QtWidgets.QWidget), obj.__class__.__name__,
                 isinstance(w, QtWidgets.QWidget), w.__class__.__name__))
         assert isinstance(obj, QtWidgets.QWidget), obj
-        gui = self
         theFilter = qt_events.LeoQtEventFilter(c, w=w, tag=tag)
         obj.installEventFilter(theFilter)
         w.ev_filter = theFilter
@@ -659,7 +679,7 @@ class LeoQtGui(leoGui.LeoGui):
     def set_focus(self, c, w):
         """Put the focus on the widget."""
         trace = False and not g.unitTesting
-        gui = self
+        # gui = self
         if w:
             if hasattr(w, 'widget') and w.widget: w = w.widget
             if trace: g.trace('(LeoQtGui)', w.__class__.__name__, g.callers())
@@ -668,7 +688,8 @@ class LeoQtGui(leoGui.LeoGui):
     def ensure_commander_visible(self, c1):
         """Check to see if c.frame is in a tabbed ui, and if so, make sure
         the tab is visible"""
-        # START: copy from Code-->Startup & external files-->@file runLeo.py -->run & helpers-->doPostPluginsInit & helpers (runLeo.py)
+        # START: copy from Code-->Startup & external files-->
+        # @file runLeo.py -->run & helpers-->doPostPluginsInit & helpers (runLeo.py)
         # For qttabs gui, select the first-loaded tab.
         if hasattr(g.app.gui, 'frameFactory'):
             factory = g.app.gui.frameFactory
@@ -894,7 +915,12 @@ class LeoQtGui(leoGui.LeoGui):
             c.bodyWantsFocus()
 
         def executeScriptCallback(event=None,
-            b=b, c=c, buttonText=buttonText, p=p and p.copy(), script=script):
+            b=b,
+            c=c,
+            buttonText=buttonText,
+            p=p and p.copy(),
+            script=script
+        ):
             if c.disableCommandsMessage:
                 g.blue('', c.disableCommandsMessage)
             else:
@@ -1105,7 +1131,7 @@ class LeoQtGui(leoGui.LeoGui):
             QtCore.QObject.emit = new_emit
     #@-others
 #@+node:tbrown.20150724090431.1: ** class StyleClassManager
-class StyleClassManager:
+class StyleClassManager(object):
     style_sclass_property = 'style_class' # name of QObject property for styling
     #@+others
     #@+node:tbrown.20150724090431.2: *3* update_view
@@ -1235,7 +1261,7 @@ class StyleClassManager:
         self.set_sclasses(w, props)
     #@-others
 #@+node:ekr.20140913054442.17860: ** class StyleSheetManager
-class StyleSheetManager:
+class StyleSheetManager(object):
     '''A class to manage (reload) Qt style sheets.'''
     #@+others
     #@+node:ekr.20140912110338.19371: *3* ssm.__init__
@@ -1636,7 +1662,7 @@ class StyleSheetManager:
             sheet = c.p.b
             sheet = self.expand_css_constants(sheet)
             w = self.get_master_widget(c.frame.top)
-            a = w.setStyleSheet(sheet)
+            w.setStyleSheet(sheet)
     #@+node:ekr.20110605121601.18175: *3* ssm.set_style_sheets
     def set_style_sheets(self, all=True, top=None, w=None):
         '''Set the master style sheet for all widgets using config settings.'''
@@ -1666,7 +1692,7 @@ class StyleSheetManager:
             if w is None:
                 w = self.get_master_widget(top)
             if trace: g.trace(w, len(sheet))
-            a = w.setStyleSheet(sheet)
+            w.setStyleSheet(sheet)
         else:
             if trace: g.trace('no style sheet')
     #@-others

@@ -82,7 +82,7 @@ def init ():
         g.plugin_signon(__name__)
     return ok
 #@+node:ekr.20140919160020.17909: ** class BigDash
-class BigDash:
+class BigDash(object):
     #@+others
     #@+node:ekr.20140919160020.17916: *3* __init__
     def __init__(self):
@@ -139,14 +139,22 @@ class BigDash:
             s = """
     <h12>Dashboard</h2>
     <table cellspacing="10">
-    <tr><td> <b>s</b> foobar</td><td>   <i>Simple string search for "foobar" in all open documents</i></td></tr>
-    <tr><td> <b>fts init</b></td><td>   <i>Initialize full text search  (create index) for all open documents</i></td></tr>
-    <tr><td> <b>fts add</b></td><td>    <i>Add currently open, still unindexed leo files to index</i></td></tr>
-    <tr><td> <b>f</b> foo bar</td><td>   <i>Do full text search for node with terms 'foo' AND 'bar'</i></td></tr>
-    <tr><td> <b>f</b> h:foo b:bar wild?ards*</td><td>   <i>Search for foo in heading and bar in body, test wildcards</i></td></tr>
-    <tr><td> <b>help</b></td><td>       <i>Show this help</i></td></tr>
-    <tr><td> <b>stats</b></td><td>      <i>List indexed files</i></td></tr>
-    <tr><td> <b>fts refresh</b></td><td><i>re-index files</i></td></tr>
+    <tr><td> <b>s</b> foobar</td><td>
+        <i>Simple string search for "foobar" in all open documents</i></td></tr>
+    <tr><td> <b>fts init</b></td><td>
+        <i>Initialize full text search  (create index) for all open documents</i></td></tr>
+    <tr><td> <b>fts add</b></td><td>
+        <i>Add currently open, still unindexed leo files to index</i></td></tr>
+    <tr><td> <b>f</b> foo bar</td><td>
+        <i>Do full text search for node with terms 'foo' AND 'bar'</i></td></tr>
+    <tr><td> <b>f</b> h:foo b:bar wild?ards*</td><td>
+        <i>Search for foo in heading and bar in body, test wildcards</i></td></tr>
+    <tr><td> <b>help</b></td><td>
+        <i>Show this help</i></td></tr>
+    <tr><td> <b>stats</b></td><td>
+        <i>List indexed files</i></td></tr>
+    <tr><td> <b>fts refresh</b></td><td>
+        <i>re-index files</i></td></tr>
     </table>
     """
         else:
@@ -161,7 +169,7 @@ class BigDash:
 
     #@-others
 #@+node:ekr.20140919160020.17897: ** class GlobalSearch
-class GlobalSearch:
+class GlobalSearch(object):
     #@+others
     #@+node:ekr.20140919160020.17898: *3* __init__
     def __init__(self):
@@ -205,9 +213,9 @@ class GlobalSearch:
         outlines = {}
         for r in res:
             if '#' in r["parent"]:
-                file_name, node = r["parent"].split('#', 1)
+                file_name, junk = r["parent"].split('#', 1)
             else:
-                file_name, node = r["parent"], None
+                file_name = r["parent"]
             outlines.setdefault(file_name, []).append(r)
         hits.append("<p>%d hits (max. hits reported = %d)</p>"%
             (len(res), fts_max_hits))
@@ -386,7 +394,7 @@ if QtCore:
     class LeoConnector(QtCore.QObject):
         pass
 #@+node:ekr.20140920041848.17939: ** class LeoFts
-class LeoFts:
+class LeoFts(object):
     #@+others
     #@+node:ekr.20140920041848.17940: *3* __init__
     def __init__(self,gnxcache,idx_dir):
@@ -414,7 +422,7 @@ class LeoFts:
     def create(self):
 
         schema = self.schema()
-        self.ix = ix = create_in(self.idx_dir, schema)
+        self.ix = create_in(self.idx_dir, schema)
     #@+node:ekr.20140920041848.17943: *3* index_nodes (bigdash.py)
     def index_nodes(self,c):
         writer = self.ix.writer()
@@ -474,7 +482,7 @@ class LeoFts:
         self.ix.close()
     #@-others
 #@+node:ekr.20140920041848.17933: ** class GnxCache
-class GnxCache:
+class GnxCache(object):
     """ map gnx => vnode """
     #@+others
     #@+node:ekr.20140920041848.17934: *3* __init__

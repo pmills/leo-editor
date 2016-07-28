@@ -17,19 +17,38 @@ Hosted at: https://github.com/edreamleo/python-to-coffeescript
 #@+node:ekr.20160316091132.2: **   << license >> (python_to_coffeescript.py)
 #@@nocolor-node
 #@+at
-# All parts of this script are distributed under the following copyright. This is intended to be the same as the MIT license, namely that this script is absolutely free, even for commercial use, including resale. There is no GNU-like "copyleft" restriction. This license is compatible with the GPL.
+# All parts of this script are distributed under the following copyright.
+# This is intended to be the same as the MIT license, namely that this script
+# is absolutely free, even for commercial use, including resale. There is no
+# GNU-like "copyleft" restriction. This license is compatible with the GPL.
 # 
 # **Copyright 2016 by Edward K. Ream. All Rights Reserved.**
 # 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
 # 
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 # 
-# **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.**
+# **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.**
 #@-<< license >>
 #@+<< imports >>
 #@+node:ekr.20160316091132.3: **   << imports >> (python_to_coffeescript.py)
 import ast
+try:
+    import builtins # Python 3
+except ImportError:
+    import __builtin__ as builtins # Python 2.
 import glob
 import optparse
 import os
@@ -62,6 +81,38 @@ def main():
     controller.scan_options()
     controller.run()
     print('done')
+#@+node:ekr.20160523111738.1: **   unit_test
+def unit_test(raise_on_fail=True):
+    '''Run basic unit tests for this file.'''
+    import _ast
+    import leo.core.leoAst as leoAst
+    # Compute all fields to test.
+    aList = sorted(dir(_ast))
+    remove = [
+        'Interactive', 'Suite', # Not necessary.
+        'PyCF_ONLY_AST', # A constant,
+        'AST', # The base class,
+    ]
+    aList = [z for z in aList if not z[0].islower()]
+        # Remove base classe
+    aList = [z for z in aList if not z.startswith('_') and not z in remove]
+    # Now test them.
+    traverser = CoffeeScriptTraverser(controller=None)
+    errors, nodes, ops = 0,0,0
+    for z in aList:
+        if hasattr(traverser, 'do_' + z):
+            nodes += 1
+        elif leoAst._op_names.get(z):
+            ops += 1
+        else:
+            errors += 1
+            print('Missing %s visitor for: %s' % (
+                traverser.__class__.__name__,z))
+    s = '%s node types, %s op types, %s errors' % (nodes, ops, errors)
+    if raise_on_fail:
+        assert not errors, s
+    else:
+        print(s)
 #@+node:ekr.20160316091132.5: **   utility functions
 
 #
@@ -95,7 +146,7 @@ def dump_list(title, aList):
 def op_name(node,strict=True):
     '''Return the print name of an operator node.'''
     d = {
-        # Binary operators. 
+        # Binary operators.
         'Add':       '+',
         'BitAnd':    '&',
         'BitOr':     '|',
@@ -175,7 +226,7 @@ class CoffeeScriptTraverser(object):
         self.tokens_for_statement = None
         self.trailing_comment = None
         self.trailing_comment_at_lineno = None
-        
+
     #@+node:ekr.20160316091132.14: *3*  cv.format
 
     def format(self, node, s, tokens):
@@ -224,7 +275,7 @@ class CoffeeScriptTraverser(object):
             if isPython3:
                 assert isinstance(s, str)
             else:
-                assert isinstance(s, (str, unicode))
+                assert isinstance(s, (str, builtins.unicode))
             return s
     #@+node:ekr.20160316091132.17: *3* cv.Contexts
 
@@ -267,7 +318,7 @@ class CoffeeScriptTraverser(object):
             self.level -= 1
         self.class_stack.pop()
         return ''.join(result)
-    #@+node:ekr.20160316091132.19: *4* cv.FunctionDef
+    #@+node:ekr.20160316091132.19: *4* cv.FunctionDef & AsyncFunctionDef
 
     # 2: FunctionDef(identifier name, arguments args, stmt* body, expr* decorator_list)
     # 3: FunctionDef(identifier name, arguments args, stmt* body, expr* decorator_list,
@@ -300,6 +351,8 @@ class CoffeeScriptTraverser(object):
             result.append(self.visit(z))
             self.level -= 1
         return ''.join(result)
+        
+    do_AsyncFunctionDef = do_FunctionDef
     #@+node:ekr.20160316091132.20: *4* cv.Interactive
 
     def do_Interactive(self, node):
@@ -338,6 +391,16 @@ class CoffeeScriptTraverser(object):
     #
     # CoffeeScriptTraverser operands...
     #
+    #@+node:ekr.20160316091132.28: *4* cv.arg (Python3 only)
+
+    # 3: arg = (identifier arg, expr? annotation)
+
+    def do_arg(self, node):
+
+        # Visit the node.annotation to keep strings in synch.
+        if getattr(node, 'annotation', None):
+            self.visit(node.annotation)
+        return node.arg
     #@+node:ekr.20160316091132.27: *4* cv.arguments
 
     # 2: arguments = (expr* args, identifier? vararg,
@@ -381,22 +444,12 @@ class CoffeeScriptTraverser(object):
             if getattr(node, 'kwarg', None):
                 args2.append('**' + node.kwarg)
         return ','.join(args2)
-    #@+node:ekr.20160316091132.28: *4* cv.arg (Python3 only)
-
-    # 3: arg = (identifier arg, expr? annotation)
-
-    def do_arg(self, node):
-
-        # Visit the node.annotation to keep strings in synch.
-        if getattr(node, 'annotation', None):
-            self.visit(node.annotation)
-        return node.arg
     #@+node:ekr.20160316091132.29: *4* cv.Attribute
 
     # Attribute(expr value, identifier attr, expr_context ctx)
 
     def do_Attribute(self, node):
-        
+
         # Don't visit node.attr: it is always a string.
         val = self.visit(node.value)
         val = '@' if val == '@' else val + '.'
@@ -474,6 +527,15 @@ class CoffeeScriptTraverser(object):
         else:
             result.append('}')
         return ''.join(result)
+    #@+node:ekr.20160523135819.3: *4* cv.DictComp (new)
+    # DictComp(expr key, expr value, comprehension* generators)
+
+    def do_DictComp(self, node):
+        elt = self.visit(node.elt)
+        gens = [self.visit(z) for z in node.generators]
+        gens = [z if z else '<**None**>' for z in gens] # Kludge: probable bug.
+        return '%s for %s' % (elt, ''.join(gens))
+
     #@+node:ekr.20160316091132.35: *4* cv.Ellipsis
 
     def do_Ellipsis(self, node):
@@ -492,7 +554,7 @@ class CoffeeScriptTraverser(object):
         # Not used: list context.
         # self.visit(node.ctx)
         elts = [self.visit(z) for z in node.elts]
-        elst = [z for z in elts if z] # Defensive.
+        elts = [z for z in elts if z] # Defensive.
         return '[%s]' % ','.join(elts)
     #@+node:ekr.20160316091132.39: *4* cv.ListComp
 
@@ -519,6 +581,21 @@ class CoffeeScriptTraverser(object):
 
     def do_Repr(self, node):
         return 'repr(%s)' % self.visit(node.value)
+    #@+node:ekr.20160523135819.4: *4* cv.Set (new)
+    # Set(expr* elts)
+
+    def do_Set(self, node):
+        elts = [self.visit(z) for z in node.elts]
+        elts = [z for z in elts if z] # Defensive.
+        return '{%s}' % ','.join(elts)
+    #@+node:ekr.20160523135819.5: *4* cv.SetComp (new)
+    # SetComp(expr elt, comprehension* generators)
+
+    def do_SetComp(self, node):
+        elt = self.visit(node.elt)
+        gens = [self.visit(z) for z in node.generators]
+        gens = [z if z else '<**None**>' for z in gens] # Kludge: probable bug.
+        return '%s for %s' % (elt, ''.join(gens))
     #@+node:ekr.20160316091132.43: *4* cv.Slice
 
     def do_Slice(self, node):
@@ -627,7 +704,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.55: *4* cv.Assert
 
     def do_Assert(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         test = self.visit(node.test)
@@ -649,7 +726,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.57: *4* cv.AugAssign
 
     def do_AugAssign(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         s = '%s%s=%s' % (
@@ -657,24 +734,31 @@ class CoffeeScriptTraverser(object):
             op_name(node.op),
             self.visit(node.value))
         return head + self.indent(s) + tail
+    #@+node:ekr.20160523135819.2: *4* cv.Await (Python 3)
+    # Await(expr value)
+
+    def do_Await(self, node):
+
+        return self.indent('await %s\n' % (
+            self.visit(node.value)))
     #@+node:ekr.20160316091132.58: *4* cv.Break
 
     def do_Break(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         return head + self.indent('break') + tail
     #@+node:ekr.20160316091132.59: *4* cv.Continue
 
     def do_Continue(self, node):
-        
+
         head = self.leading_lines(node)
         tail = self.trailing_comment(node)
         return head + self.indent('continue') + tail
     #@+node:ekr.20160316091132.60: *4* cv.Delete
 
     def do_Delete(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         targets = [self.visit(z) for z in node.targets]
@@ -705,7 +789,7 @@ class CoffeeScriptTraverser(object):
     # Python 2.x only
 
     def do_Exec(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         body = self.visit(node.body)
@@ -727,13 +811,14 @@ class CoffeeScriptTraverser(object):
         tail = self.trailing_comment(node)
         s = '%s' % self.visit(node.value)
         return head + self.indent(s) + tail
-    #@+node:ekr.20160316091132.64: *4* cv.For
+    #@+node:ekr.20160316091132.64: *4* cv.For & AsyncFor
 
-    def do_For(self, node):
+    def do_For(self, node, async=False):
 
         result = self.leading_lines(node)
         tail = self.trailing_comment(node)
-        s = 'for %s in %s:' % (
+        s = '%sfor %s in %s:' % (
+            'async ' if async else '',
             self.visit(node.target),
             self.visit(node.iter))
         result.append(self.indent(s + tail))
@@ -749,10 +834,13 @@ class CoffeeScriptTraverser(object):
                 result.append(self.visit(z))
                 self.level -= 1
         return ''.join(result)
+        
+    def do_AsyncFor(self, node):
+        return self.do_For(node, async=True)
     #@+node:ekr.20160316091132.65: *4* cv.Global
 
     def do_Global(self, node):
-        
+
         head = self.leading_lines(node)
         tail = self.trailing_comment(node)
         s = 'global %s' % ','.join(node.names)
@@ -780,7 +868,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.67: *4* cv.Import & helper
 
     def do_Import(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         names = []
@@ -820,7 +908,7 @@ class CoffeeScriptTraverser(object):
     # 3: Nonlocal(identifier* names)
 
     def do_Nonlocal(self, node):
-        
+
         # https://www.python.org/dev/peps/pep-3104/
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
@@ -829,7 +917,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.70: *4* cv.Pass
 
     def do_Pass(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         return head + self.indent('pass') + tail
@@ -838,7 +926,7 @@ class CoffeeScriptTraverser(object):
     # Python 2.x only
 
     def do_Print(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         vals = []
@@ -852,13 +940,16 @@ class CoffeeScriptTraverser(object):
         s = 'print(%s)' % ','.join(vals)
         return head + self.indent(s) + tail
     #@+node:ekr.20160316091132.72: *4* cv.Raise
+    # Raise(expr? type, expr? inst, expr? tback)    Python 2
+    # Raise(expr? exc, expr? cause)                 Python 3
 
     def do_Raise(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         args = []
-        for attr in ('type', 'inst', 'tback'):
+        attrs = ('exc', 'cause') if g.isPython3 else ('type', 'inst', 'tback')
+        for attr in attrs:
             if getattr(node, attr, None) is not None:
                 args.append(self.visit(getattr(node, attr)))
         s = 'raise %s' % ', '.join(args) if args else 'raise'
@@ -866,7 +957,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.73: *4* cv.Return
 
     def do_Return(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         if node.value:
@@ -943,7 +1034,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.76: *4* cv.TryFinally
 
     def do_TryFinally(self, node):
-        
+
         result = self.leading_lines(node)
         tail = self.trailing_comment(node)
         result.append(self.indent('try:' + tail))
@@ -961,7 +1052,7 @@ class CoffeeScriptTraverser(object):
     #@+node:ekr.20160316091132.77: *4* cv.While
 
     def do_While(self, node):
-        
+
         result = self.leading_lines(node)
         tail = self.trailing_comment(node)
         s = 'while %s:' % self.visit(node.test)
@@ -978,20 +1069,20 @@ class CoffeeScriptTraverser(object):
                 result.append(self.visit(z))
                 self.level -= 1
         return ''.join(result)
-    #@+node:ekr.20160316091132.78: *4* cv.With
+    #@+node:ekr.20160316091132.78: *4* cv.With & AsyncWith (Python 3)
 
-    # 2:  With(expr context_expr, expr? optional_vars, 
+    # 2:  With(expr context_expr, expr? optional_vars,
     #          stmt* body)
     # 3:  With(withitem* items,
     #          stmt* body)
     # withitem = (expr context_expr, expr? optional_vars)
 
-    def do_With(self, node):
+    def do_With(self, node, async=False):
 
         result = self.leading_lines(node)
         tail = self.trailing_comment(node)
         vars_list = []
-        result.append(self.indent('with '))
+        result.append(self.indent('%swith ' % ('async ' if async else '')))
         if getattr(node, 'context_expression', None):
             result.append(self.visit(node.context_expresssion))
         if getattr(node, 'optional_vars', None):
@@ -1016,10 +1107,14 @@ class CoffeeScriptTraverser(object):
             result.append(self.visit(z))
             self.level -= 1
         return ''.join(result) + tail
+        
+    def do_AsyncWith(self, node):
+        return self.do_With(node, async=True)
+
     #@+node:ekr.20160316091132.79: *4* cv.Yield
 
     def do_Yield(self, node):
-        
+
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
         if getattr(node, 'value', None) is not None:
@@ -1032,7 +1127,7 @@ class CoffeeScriptTraverser(object):
     # 3: YieldFrom(expr value)
 
     def do_YieldFrom(self, node):
-        
+
         # https://www.python.org/dev/peps/pep-0380/
         head = self.leading_string(node)
         tail = self.trailing_comment(node)
@@ -1048,7 +1143,7 @@ class LeoGlobals(object):
     #@+node:ekr.20160316091132.81: *3* class NullObject (Python Cookbook)
 
 
-    class NullObject:
+    class NullObject(object):
         """
         An object that does nothing, and does it very well.
         From the Python cookbook, recipe 5.23
@@ -1065,7 +1160,7 @@ class LeoGlobals(object):
     #@+node:ekr.20160316091132.82: *3* class ReadLinesClass
 
 
-    class ReadLinesClass:
+    class ReadLinesClass(object):
         """A class whose next method provides a readline method for Python's tokenize module."""
 
         def __init__(self, s):
@@ -1251,11 +1346,11 @@ class LeoGlobals(object):
         def u(self, s):
             '''Return s, converted to unicode from Qt widgets.'''
             # pylint: disable = undefined-variable
-            return unicode(s)
+            return builtins.unicode(s)
 
         def ue(self, s, encoding):
             # pylint: disable = undefined-variable
-            return unicode(s, encoding)
+            return builtins.unicode(s, encoding)
     #@-others
 #@+node:ekr.20160316091132.95: ** class MakeCoffeeScriptController
 
@@ -1307,7 +1402,6 @@ class MakeCoffeeScriptController(object):
         if os.path.exists(out_fn) and not self.overwrite:
             print('file exists: %s' % out_fn)
         elif not dir_ or os.path.exists(dir_):
-            t1 = time.clock()
             if s is None:
                 s = open(fn).read()
             readlines = g.ReadLinesClass(s).next
@@ -1592,7 +1686,7 @@ class TokenSync(object):
             kind = token_module.tok_name[t1].lower()
             srow, scol = t3
             erow, ecol = t4
-            line = erow-1 if kind == 'string' else srow-1 
+            line = erow-1 if kind == 'string' else srow-1
             result[line].append(token)
             if trace: g.trace('%3s %s' % (line, self.dump_token(token)))
         assert len(self.lines) + 1 == len(result), len(result)
@@ -1634,7 +1728,7 @@ class TokenSync(object):
         else:
             t1, t2, t3, t4, t5 = token
             kind = g.toUnicode(token_module.tok_name[t1].lower())
-            raw_val = g.toUnicode(t5)
+            # raw_val = g.toUnicode(t5)
             val = g.toUnicode(t2)
             if verbose:
                 return 'token: %10s %r' % (kind, val)
@@ -1664,12 +1758,12 @@ class TokenSync(object):
         '''Return the node of node's tree with the largest lineno field.'''
 
         class LineWalker(ast.NodeVisitor):
-            
+
             def __init__ (self):
                 '''Ctor for LineWalker class.'''
                 self.node = None
                 self.lineno = -1
-                
+
             def visit(self, node):
                 '''LineWalker.visit.'''
                 if hasattr(node, 'lineno'):
@@ -1681,11 +1775,11 @@ class TokenSync(object):
                         self.visit(z)
                 else:
                     self.generic_visit(node)
-     
+
         w = LineWalker()
         w.visit(node)
         return w.node
-                
+
     #@+node:ekr.20160316091132.121: *3* ts.leading_lines
 
     def leading_lines(self, node):
@@ -1754,7 +1848,7 @@ class TokenSync(object):
         '''Return the value of the token.'''
         t1, t2, t3, t4, t5 = token
         return g.toUnicode(t5)
-        
+
     def token_val(self, token):
         '''Return the raw value of the token.'''
         t1, t2, t3, t4, t5 = token
@@ -1762,7 +1856,7 @@ class TokenSync(object):
     #@+node:ekr.20160316091132.126: *3* ts.tokens_for_statement
 
     def tokens_for_statement(self, node):
-        
+
         assert isinstance(node, ast.AST), node
         name = node.__class__.__name__
         if hasattr(node, 'lineno'):
@@ -1771,8 +1865,8 @@ class TokenSync(object):
         else:
             g.trace('no lineno', name)
 
-        
-        
+
+
     #@+node:ekr.20160316091132.127: *3* ts.trailing_comment
 
     def trailing_comment(self, node):

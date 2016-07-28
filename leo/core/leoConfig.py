@@ -13,7 +13,7 @@ from copy import deepcopy
 #@-<< imports >>
 #@+<< class ParserBaseClass >>
 #@+node:ekr.20041119203941.2: ** << class ParserBaseClass >>
-class ParserBaseClass:
+class ParserBaseClass(object):
     """The base class for settings parsers."""
     #@+<< ParserBaseClass data >>
     #@+node:ekr.20041121130043: *3* << ParserBaseClass data >>
@@ -234,7 +234,6 @@ class ParserBaseClass:
     #@+node:ekr.20131114051702.16545: *4* doOutlineData & helper (new in Leo 4.11.1)
     def doOutlineData(self, p, kind, name, val):
         # New in Leo 4.11: do not strip lines.
-        c = self.c
         data = self.getOutlineDataHelper(p)
         self.set(p, kind, name, data)
     #@+node:ekr.20131114051702.16546: *5* getOutlineDataHelper
@@ -606,52 +605,43 @@ class ParserBaseClass:
     def doMode(self, p, kind, name, val):
         '''Parse an @mode node and create the enter-<name>-mode command.'''
         trace = False and not g.unitTesting
-        c, k = self.c, self.c.k
-        if g.new_modes:
-            aList = []
-            for line in g.splitLines(p.b):
-                line = line.strip()
-                if line and not g.match(line, 0, '#'):
-                    name2, si = self.parseShortcutLine('*mode-setting*', line)
-                    aList.append((name2, si),)
-            k.modeController.makeMode(name, aList)
-        else:
-            name1 = name
-            # g.trace('%20s' % (name),c.fileName())
-            modeName = self.computeModeName(name)
-            d = g.TypedDictOfLists(
-                name='modeDict for %s' % (modeName),
-                keyType=type('commandName'), valType=g.ShortcutInfo)
-            s = p.b
-            lines = g.splitLines(s)
-            for line in lines:
-                line = line.strip()
-                if line and not g.match(line, 0, '#'):
-                    name, si = self.parseShortcutLine('*mode-setting*', line)
-                    assert g.isShortcutInfo(si), si
-                    if not name:
-                        # An entry command: put it in the special *entry-commands* key.
-                        d.add('*entry-commands*', si)
-                    elif si is not None:
-                        # A regular shortcut.
-                        si.pane = modeName
-                        aList = d.get(name, [])
-                        for z in aList:
-                            assert g.isShortcutInfo(z), z
-                        # Important: use previous bindings if possible.
-                        key2, aList2 = c.config.getShortcut(name)
-                        for z in aList2:
-                            assert g.isShortcutInfo(z), z
-                        aList3 = [z for z in aList2 if z.pane != modeName]
-                        if aList3:
-                            # g.trace('inheriting',[b.val for b in aList3])
-                            aList.extend(aList3)
-                        aList.append(si)
-                        d.replace(name, aList)
-                # Restore the global shortcutsDict.
-                if trace: g.trace(d.dump())
-                # Create the command, but not any bindings to it.
-                self.createModeCommand(modeName, name1, d)
+        c = self.c
+        name1 = name
+        # g.trace('%20s' % (name),c.fileName())
+        modeName = self.computeModeName(name)
+        d = g.TypedDictOfLists(
+            name='modeDict for %s' % (modeName),
+            keyType=type('commandName'), valType=g.ShortcutInfo)
+        s = p.b
+        lines = g.splitLines(s)
+        for line in lines:
+            line = line.strip()
+            if line and not g.match(line, 0, '#'):
+                name, si = self.parseShortcutLine('*mode-setting*', line)
+                assert g.isShortcutInfo(si), si
+                if not name:
+                    # An entry command: put it in the special *entry-commands* key.
+                    d.add('*entry-commands*', si)
+                elif si is not None:
+                    # A regular shortcut.
+                    si.pane = modeName
+                    aList = d.get(name, [])
+                    for z in aList:
+                        assert g.isShortcutInfo(z), z
+                    # Important: use previous bindings if possible.
+                    key2, aList2 = c.config.getShortcut(name)
+                    for z in aList2:
+                        assert g.isShortcutInfo(z), z
+                    aList3 = [z for z in aList2 if z.pane != modeName]
+                    if aList3:
+                        # g.trace('inheriting',[b.val for b in aList3])
+                        aList.extend(aList3)
+                    aList.append(si)
+                    d.replace(name, aList)
+            # Restore the global shortcutsDict.
+            if trace: g.trace(d.dump())
+            # Create the command, but not any bindings to it.
+            self.createModeCommand(modeName, name1, d)
     #@+node:ekr.20070411101643.1: *4* doOpenWith (ParserBaseClass)
     def doOpenWith(self, p, kind, name, val):
         # g.trace(self.c.shortFileName(),'kind',kind,'name',name,'val',val)
@@ -991,7 +981,7 @@ class ParserBaseClass:
     def traverse(self):
         '''Traverse the entire settings tree.'''
         trace = False and not g.unitTesting
-        c, k = self.c, self.c.k
+        c = self.c
         self.settingsDict = g.TypedDict(
             name='settingsDict for %s' % (c.shortFileName()),
             keyType=type('settingName'), valType=g.GeneralSetting)
@@ -1027,7 +1017,7 @@ class ParserBaseClass:
 #@-<< class ParserBaseClass >>
 #@+others
 #@+node:ekr.20041119203941: ** class GlobalConfigManager
-class GlobalConfigManager:
+class GlobalConfigManager(object):
     """A class to manage configuration settings."""
     #@+<< GlobalConfigManager class data >>
     #@+node:ekr.20041122094813: *3* << GlobalConfigManager class data >>
@@ -1169,12 +1159,10 @@ class GlobalConfigManager:
         self.inited = False
         self.menusList = []
         self.menusFileName = ''
-        if g.new_modes:
-            pass # Use k.ModeController instead.
-        else:
-            self.modeCommandsDict = g.TypedDict(
-                name='modeCommandsDict',
-                keyType=type('commandName'), valType=g.TypedDictOfLists)
+        self.modeCommandsDict = g.TypedDict(
+            name='modeCommandsDict',
+            keyType=type('commandName'),
+            valType=g.TypedDictOfLists)
         # Inited later...
         self.panes = None
         self.sc = None
@@ -1352,7 +1340,7 @@ class GlobalConfigManager:
         if type1 in shortcuts or type2 in shortcuts:
             g.trace('oops: type in shortcuts')
         return (
-            type1 == None or type2 == None or
+            type1 is None or type2 is None or
             type1.startswith('string') and type2 not in shortcuts or
             type1 == 'int' and type2 == 'size' or
             (type1 in shortcuts and type2 in shortcuts) or
@@ -1508,7 +1496,7 @@ class GlobalConfigManager:
         # raise stopIteration
     #@-others
 #@+node:ekr.20041118104831.1: ** class LocalConfigManager
-class LocalConfigManager:
+class LocalConfigManager(object):
     """A class to hold config settings for commanders."""
     #@+others
     #@+node:ekr.20120215072959.12472: *3* c.config.Birth
@@ -1686,7 +1674,7 @@ class LocalConfigManager:
         if type1 in shortcuts or type2 in shortcuts:
             g.trace('oops: type in shortcuts')
         return (
-            type1 == None or type2 == None or
+            type1 is None or type2 is None or
             type1.startswith('string') and type2 not in shortcuts or
             type1 == 'int' and type2 == 'size' or
             (type1 in shortcuts and type2 in shortcuts) or
@@ -1807,7 +1795,7 @@ class LocalConfigManager:
     #@+node:ekr.20120215072959.12538: *5* c.config.getSettingSource
     def getSettingSource(self, setting):
         '''return the name of the file responsible for setting.'''
-        c, d = self.c, self.settingsDict
+        d = self.settingsDict
         if d:
             assert g.isTypedDict(d), d
             si = d.get(setting)
@@ -2112,8 +2100,10 @@ class SettingsFinder(object):
         if which == 'cancel' or not value:
             return
         unl = value and value.unl
-        if g.os_path_realpath(value.path) == g.os_path_realpath(g.os_path_join(
-            g.app.loadManager.computeGlobalConfigDir(), 'leoSettings.leo')):
+        if (
+            g.os_path_realpath(value.path) == g.os_path_realpath(g.os_path_join(
+            g.app.loadManager.computeGlobalConfigDir(), 'leoSettings.leo')
+        )):
             msg = ("The setting '@{specific}' is in the Leo global configuration "
             "file 'leoSettings.leo'\nand should probably be copied to "
             "'myLeoSettings.leo' before editing.\n"

@@ -7,7 +7,7 @@ import leo.core.leoGlobals as g
 # import os
 #@+others
 #@+node:ekr.20150625050355.1: ** class GoToCommands
-class GoToCommands:
+class GoToCommands(object):
     '''A class implementing goto-global-line.'''
     #@+others
     #@+node:ekr.20100216141722.5621: *3* goto.ctor
@@ -33,7 +33,7 @@ class GoToCommands:
             lines = g.splitLines(s)
             if trace:
                 g.trace('sentinels', sentinels)
-                aList = ['%3s %s' % (i, s) for i, s in enumerate(lines)]
+                aList = ['%3s %s' % (i, s2) for i, s2 in enumerate(lines)]
                 g.trace('n: %s script: ...\n%s' % (n, ''.join(aList)))
             # Step 2: scan the lines for line n.
             if sentinels:
@@ -80,7 +80,7 @@ class GoToCommands:
         '''
         Scan a list of lines containing sentinels, looking for the node and
         offset within the node of the n'th (zero-based) line.
-        
+
         Only non-sentinel lines increment the global line count, but
         @+node sentinels reset the offset within the node.
 

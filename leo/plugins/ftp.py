@@ -3,11 +3,9 @@
 '''Uploading of file by ftp.'''
 
 # 0.1 05.01.2011 by Ivanov Dmitriy.
-
 import leo.core.leoGlobals as g
 import leo.core.leoPlugins as leoPlugins
 from leo.core.leoQt import QtGui
-
 import json
 import os
 from ftplib import FTP
@@ -25,17 +23,14 @@ def init ():
 #@+node:ekr.20110110105526.5468: ** onCreate
 def onCreate (tag, keys):
     c = keys.get('c')
-    if not c: return
-#@+at
-# here I want to check, whether the node @data ftp exists in the file, that is being opened. If it exists, create a button and register
-#@@c
-    p = g.findTopLevelNode(c, '@data ftp')
-    if p != None:
-        controller = pluginController(c)
-
-
+    if c:
+        # Check whether the node @data ftp exists in the file being opened.
+        # If so, create a button and register.
+        p = g.findTopLevelNode(c, '@data ftp')
+        if p:
+            pluginController(c)
 #@+node:ekr.20110110105526.5469: ** class pluginController
-class pluginController:
+class pluginController(object):
 
     #@+others
     #@+node:ekr.20110110105526.5470: *3* __init__(pluginController, ftp.py)
@@ -57,11 +52,11 @@ class pluginController:
 
         g.es("upload started")
         p = g.findTopLevelNode(c, '@data ftp')
-        if p != None:
+        if p:
             files = json.loads(p.b)
-    #@+at
-    # credentials - array of (host, pass) of server, to while the files must be uploaded I suggest, that the locations must be the same
-    #@@c
+
+            # credentials - array of (host, pass) of server,
+            # to while the files must be uploaded I suggest that the locations must be the same.
             credentials = files[0]
 
             for element in credentials:

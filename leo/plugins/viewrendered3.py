@@ -121,17 +121,16 @@ rendering must be specified by putting it in a ``@md`` node.
 Special Renderings
 ===================
 
-As stated above, the rendering pane renders body text as reStructuredText
-by default, with all Leo directives removed. However, if the body text
-starts with ``<`` (after removing directives), the body text is rendered as
-html.
+As stated above, the rendering pane renders body text as reStructuredText by
+default, with all Leo directives removed. However, if the body text starts with
+``<`` (after removing directives), the body text is rendered as html.
 
 This plugin renders @md, @image, @html, @movie, @networkx and @svg nodes as
 follows:
 
-**Note**: For @image, @movie and @svg nodes, either the headline or the
-first line of body text may contain a filename. If relative, the filename
-is resolved relative to Leo's load directory.
+**Note**: For @image, @movie and @svg nodes, either the headline or the first
+line of body text may contain a filename. If relative, the filename is resolved
+relative to Leo's load directory.
 
 - ``@md`` renderes the body text as markdown, as described above.
 
@@ -153,8 +152,9 @@ is resolved relative to Leo's load directory.
 - ``@networkx`` is non-functional at present.  It is intended to
   render the body text as a [networkx](http://networkx.lanl.gov/) graph.
 
-- ``@svg`` renders the file as a (possibly animated!) svg [Scalable Vector Image](http://en.wikipedia.org/wiki/Scalable_Vector_Graphics).
-  
+- ``@svg`` renders the file as a (possibly animated!) svg
+  [Scalable Vector Image](http://en.wikipedia.org/wiki/Scalable_Vector_Graphics).
+
   **Note**: if the first character of the body text is ``<`` after removing
   Leo directives, the contents of body pane is taken to be an svg image.
 
@@ -525,7 +525,7 @@ def update_rendering_pane(event):
             vr.update(tag='view', keywords={'c': c, 'force': True})
 
 #@+node:ekr.20160331123847.27: ** class ViewRenderedController3 (QWidget)
-if QtWidgets:
+if QtWidgets: # NOQA
 
     class ViewRenderedController3(QtWidgets.QWidget):
         '''A class to control rendering in a rendering pane.'''
@@ -662,7 +662,7 @@ if QtWidgets:
         def update(self, tag, keywords):
             '''Update the vr pane.'''
             pc = self
-            c, p = pc.c, pc.c.p
+            p = pc.c.p
             if pc.must_update(keywords):
                 if trace:
                     if verbose: g.trace('===== updating', keywords)
@@ -704,22 +704,7 @@ if QtWidgets:
                         g.es_exception()
                         pc.deactivate()
                     if sb:
-                        pc.scrollbar_pos_dict[p.v] = sb.sliderPosition()
-                # Saving scroll position for QWebView used in new html_class
-                #            elif w.__class__ == pc.html_class:
-                #                # The widge may no longer exist.
-                #                mf = None
-                #                try:
-                #                    mf = w.view.page().mainFrame()
-                #                except Exception:
-                #                    g.es_exception()
-                #                    pc.deactivate()
-                #                if mf:
-                #                    pos = mf.scrollBarValue(QtCore.Qt.Vertical)
-                #                    pc.scrollbar_pos_dict[p.v] = pos
-                #                    print 'saved1 scroll pos', pos
-                # Will be called at idle time.
-                # if trace: g.trace('no update')
+                        self.w.save_scroll_position()
         #@+node:ekr.20160331123847.37: *4* vr3.embed_widget & helper
         def embed_widget(self, w, delete_callback=None):
             '''Embed widget w in the free_layout splitter.'''
@@ -909,21 +894,16 @@ if QtWidgets:
                         mdext = [x.strip() for x in mdext.split(',')]
                         s = markdown(s, mdext)
                         s = g.toUnicode(s)
-                        show = True
                     except SystemMessage as sm:
                         msg = sm.args[0]
                         if 'SEVERE' in msg or 'FATAL' in msg:
                             s = 'MD error:\n%s\n\n%s' % (msg, s)
                 sb = w.verticalScrollBar()
                 if sb:
-                    d = pc.scrollbar_pos_dict
                     if pc.node_changed:
-                        # Set the scrollbar.
-                        pos = d.get(p.v, sb.sliderPosition())
-                        sb.setSliderPosition(pos)
+                        self.w.restore_scroll_position()
                     else:
-                        # Save the scrollbars
-                        d[p.v] = pos = sb.sliderPosition()
+                        self.w.save_scroll_position()
                 # 2016/03/25: honor @language md.
                 colorizer = c.frame.body.colorizer
                 language = colorizer.scanColorDirectives(p)
@@ -936,9 +916,9 @@ if QtWidgets:
                         w.zoomIn(4) # Doesn't work.
                 else:
                     w.setPlainText(s)
-                if sb and pos:
+                if sb and p:
                     # Restore the scrollbars
-                    sb.setSliderPosition(pos)
+                    sb.setSliderPosition(p)
         #@+node:ekr.20160331123847.44: *4* vr3.update_movie
         def update_movie(self, s, keywords):
             '''Update a movie in the vr pane.'''
@@ -999,7 +979,6 @@ if QtWidgets:
         def update_rst(self, s, keywords, force_rst=False):
             '''Update rst in the vr pane.'''
             pc = self
-            verbose = True
             if trace: g.trace(len(s))
             if VR3:
                 # Do this regardless of whether we show the widget or not.
@@ -1053,7 +1032,6 @@ if QtWidgets:
                         s = publish_string(s, writer_name='html')
                         if trace: g.trace('after docutils:', len(s))
                         s = g.toUnicode(s) # 2011/03/15
-                        show = True
                     except SystemMessage as sm:
                         # g.trace(sm,sm.args)
                         msg = sm.args[0]
@@ -1061,22 +1039,18 @@ if QtWidgets:
                             s = 'RST error:\n%s\n\n%s' % (msg, s)
                 sb = w.verticalScrollBar()
                 if sb:
-                    d = pc.scrollbar_pos_dict
                     if pc.node_changed:
-                        # Set the scrollbar.
-                        pos = d.get(p.v, sb.sliderPosition())
-                        sb.setSliderPosition(pos)
+                        self.w.restore_scroll_position()
                     else:
-                        # Save the scrollbars
-                        d[p.v] = pos = sb.sliderPosition()
+                        self.w.save_scroll_position()
                 if trace: g.trace('setHtml: language=%s, default=%s, force_rst=%s' % (
                     language, pc.default_kind, force_rst))
                 w.setHtml(s)
                 if pc.default_kind == 'big':
                     w.zoomIn(4) # Doesn't work.
-                if sb and pos:
+                if sb and p:
                     # Restore the scrollbars
-                    sb.setSliderPosition(pos)
+                    sb.setSliderPosition(p)
         #@+node:ekr.20160331123847.47: *4* vr3.update_svg
         # http://doc.trolltech.com/4.4/qtsvg.html
         # http://doc.trolltech.com/4.4/painting-svgviewer.html
@@ -1250,15 +1224,15 @@ if QtWidgets:
             return '%s\n%s\n\n' % (s, ch * n)
         #@-others
 #@+node:ekr.20160331123847.23: ** class ViewRenderedProvider3
-class ViewRenderedProvider3:
-    
+class ViewRenderedProvider3(object):
+
     def __init__(self, c):
         '''Ctor for ViewRenderedProvider3 class.'''
         self.c = c
-    
+
     def ns_provides(self):
         return [('Viewrendered3', vr3_ns_id)]
-        
+
     def ns_provide(self, id_):
         global controllers
         if id_ == vr3_ns_id:
@@ -1406,7 +1380,7 @@ class WebViewPlus(QtWidgets.QWidget):
         # Layouts
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setContentsMargins(0, 0, 0, 0) # Remove the default 11px margins
-        vlayout.setSpacing( 0 );  # remove spacing between content widgets
+        vlayout.setSpacing( 0 )  # remove spacing between content widgets
         vlayout.addWidget(self.toolbar)
         vlayout.addWidget(view)
         self.setLayout(vlayout)
@@ -1535,9 +1509,7 @@ class WebViewPlus(QtWidgets.QWidget):
         if self.lock_mode_action.isChecked(): # Just become active
             self.plock = self.pc.c.p.copy() # make a copy of node position
             self.plockmode = self.get_mode() # copy current node's md/rst state
-            if self.pr:
-                self.pc.scrollbar_pos_dict[self.pr.v] = self.view.page().\
-                mainFrame().scrollBarValue(QtCore.Qt.Vertical)
+            self.save_scroll_position()
         else:
             self.render_delegate()
                 # Render again since root node may have changed now
@@ -1592,7 +1564,6 @@ class WebViewPlus(QtWidgets.QWidget):
         """Render the string html in this pane."""
             # A new method by EKR.
             # Fixes bug 136: viewrendered2 chokes on displaying @html nodes
-        c = self.c
         self.getUIconfig()
         # show_scrolled_message = keywords.get('show-scrolled-message', False)
         self.html = g.toUnicode(html)
@@ -1609,11 +1580,24 @@ class WebViewPlus(QtWidgets.QWidget):
             spos = 0
         else:
             spos = d.get(self.pr.v, mf.scrollBarValue(QtCore.Qt.Vertical))
+            if spos == -1:  # stick to bottom of page
+                spos = mf.scrollBarMaximum(QtCore.Qt.Vertical)
         mf.setScrollBarValue(QtCore.Qt.Vertical, spos)
-        #print 'remembered scroll pos restored, re-read pos:', spos, mf.scrollBarValue(QtCore.Qt.Vertical)
+    #@+node:tbnorth.20160718112948.1: *4* wvp.save_scroll_position
+    def save_scroll_position(self):
+        # Save scroll bar position for (possibly) new node
+        if not self.pr:
+            return
+        mf = self.view.page().mainFrame()
+        spos = mf.scrollBarValue(QtCore.Qt.Vertical)
+        if spos == mf.scrollBarMaximum(QtCore.Qt.Vertical):
+            # make scrollbar stick to bottom of page, 
+            # see restore_scroll_position()
+            spos = -1
+        self.pc.scrollbar_pos_dict[self.pr.v] = spos
     #@+node:ekr.20160331124028.36: *4* wvp.setHtml (EKR)
     def setHtml(self, s):
-        
+
         self.view.setHtml(s)
     #@+node:ekr.20160331124028.37: *4* wvp.state_change
     def state_change(self, checked):
@@ -1644,7 +1628,7 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:ekr.20160331124028.40: *4* wvp.render_helper & helper
     def render_helper(self):
         '''Rendering helper: self.rendering is True.'''
-        c, p, pc = self.c, self.c.p, self.pc
+        p, pc = self.c.p, self.pc
         self.getUIconfig()
             # Get the UI config again, in case directly called by control.
         if got_docutils:
@@ -1683,9 +1667,7 @@ class WebViewPlus(QtWidgets.QWidget):
             path = os.path.dirname(path)
         if os.path.isdir(path):
             os.chdir(path)
-        # Need to save position of last node before rendering
-        ps = mf.scrollBarValue(QtCore.Qt.Vertical)
-        pc.scrollbar_pos_dict[self.last_node.v] = ps
+        self.save_scroll_position()
         # Which node should be rendered?
         self.getUIconfig()  # Update the state of self.lock_mode
         if self.lock_mode:
@@ -1796,7 +1778,7 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:ekr.20160331124028.46: *7* wvp.exec_code
     def exec_code(self, code, environment):
         """Execute the code, capturing the output in stdout and stderr."""
-        c = self.c
+        # c = self.c
         saveout = sys.stdout # save stdout
         saveerr = sys.stderr
         sys.stdout = bufferout = StringIO()
@@ -1931,7 +1913,7 @@ class WebViewPlus(QtWidgets.QWidget):
     #@+node:ekr.20160331124028.52: *4* wvp.md_render_helper & helper
     def md_render_helper(self):
         '''Rendinging helper: self.rendering is True.'''
-        c, p, pc = self.c, self.c.p, self.pc
+        p, pc = self.c.p, self.pc
         self.getUIconfig()
             # Get the UI config again, in case directly called by control.
         if got_markdown:
@@ -1968,9 +1950,7 @@ class WebViewPlus(QtWidgets.QWidget):
             path = os.path.dirname(path)
         if os.path.isdir(path):
             os.chdir(path)
-        # Need to save position of last node before rendering
-        ps = mf.scrollBarValue(QtCore.Qt.Vertical)
-        pc.scrollbar_pos_dict[self.last_node.v] = ps
+        self.save_scroll_position()
         # Which node should be rendered?
         self.getUIconfig()  # Update the state of self.lock_mode
         if self.lock_mode:
@@ -2068,7 +2048,7 @@ class WebViewPlus(QtWidgets.QWidget):
         """Execute the code, capturing the output in stdout and stderr."""
         trace = True and not g.unitTesting
         if trace: g.trace('\n', code)
-        c = self.c
+        # c = self.c
         saveout = sys.stdout # save stdout
         saveerr = sys.stderr
         sys.stdout = bufferout = StringIO()

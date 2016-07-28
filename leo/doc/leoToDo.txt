@@ -3,48 +3,62 @@
 .. @@language rest # override the default .txt coloring.
 .. @@wrap
 .. @+all
-.. @+node:ekr.20131121211048.16378: ** More screenshots!
-Different font sizes, coloring schemes, plugins, etc.
-.. @+node:ekr.20160325051602.1: ** To Do: 5.3
+.. @+node:ekr.20160403043354.1: ** To do: 5.4
 @language rest
 @wrap
 
-5: Everything assigned to 5.3
-Some can wait until after 5.3-b1
-https://github.com/leo-editor/leo-editor/issues?q=is%3Aopen+is%3Aissue+milestone%3A5.3
+Everything assigned to 5.4
+https://github.com/leo-editor/leo-editor/issues?q=is%3Aopen+is%3Aissue+milestone%3A5.4
+.. @+node:ekr.20160506101850.1: *3* Apply mypy to Leo
+.. @+node:ekr.20160429064536.1: *3* 5.4 Bugs & enhancements
+The remaining bugs are more like enhancements.
+.. @+node:ekr.20160430150528.1: *4* #128: Javascript importer should be rewritten
+https://github.com/leo-editor/leo-editor/issues/128
 
-All recent activity
-https://github.com/leo-editor/leo-editor/issues?utf8=%E2%9C%93&q=is%3Aissue+isort%3Aupdated-desc+
+The plan: get this common idiom to work properly:
 
-.. @+node:ekr.20160419052003.1: *3* Bug re @string initial_split_orientation
-@string initial_split_orientation = horizontal no effect.
-.. @+node:ekr.20160418172314.1: *3* #264: Solution to #261 needs improvement
-https://github.com/leo-editor/leo-editor/issues/264
+var express = require('express');
+var app = express.createServer(express.logger());
 
-The problem is that if you go from the initial layout to a custom layout and then back to "Default", the copy of the initial layout you saved to easily switch to the initial layout, you get a layout the *looks* like the default, but has no splitter 'splitter_2', the splitters are unnamed.
+app.get('/', function(request, response) {
+response.send('Hello World!');
+});
 
-So rather than searching for the splitter called splitter_2, you'd need to search for the splitter containing the two panes usually separated by splitter 2.
-.. @+node:ekr.20160405070335.1: *3* #237: Session-snapshot-load doesn't load network drives
-@language rest
-@wrap
+var port = process.env.PORT || 5000;
+app.listen(port, function() {
+console.log("Listening on " + port);
+});
+.. @+node:ekr.20160506103345.1: *5* A bad idea: convert to coffeescript
+There would be no way to get round-tripping.
 
-https://github.com/leo-editor/leo-editor/issues/237
+Convert to coffeescript
+http://js2.coffee/
 
-In Windows operating systems, the UNC name format is:
+There is also a "coffee" command-line utility.
+It's installed on my system.
+http://coffeescript.org/documentation/docs/command.html
 
-    \\servername\sharename\path\filename
+To install coffeescript:
 
-Python: Accessing Windows mapped network drive with known URL, but unknown drive letter
-http://stackoverflow.com/questions/12730025/python-accessing-windows-mapped-network-drive-with-known-url-but-unknown-drive
-.. @+node:ekr.20160418070509.1: *3* 4 Later
-Some of these may wait until after 5.3-b1.
-.. @+node:ekr.20151231100231.1: *4* #180: goto-prev-history-node bugged with bookmarks
-https://github.com/leo-editor/leo-editor/issues/180
+    npm install -g coffee-script
+    
+The corresponding coffeescript is:
 
-Terry:
-I suspect this is not really a bookmark specific problem. Rather, the point in code execution where visited positions are recorded for goto-prev-history-node is too "high", so that a lot of things which change the selected node are missed by it.
+express = require('express')
+app = express.createServer(express.logger())
+app.get '/', (request, response) ->
+  response.send 'Hello World!'
+  return
+port = process.env.PORT or 5000
+app.listen port, ->
+  console.log 'Listening on ' + port
+  return
+.. @+node:ekr.20160413081725.1: *4* Revise colorizer for markdown
+# Use rest colorizer as a template.
+.. @+node:ekr.20151231101050.1: *4* #127: Bracket matching is buggy
+https://github.com/leo-editor/leo-editor/issues/127
 
-What is the definition of visiting a node? It could be giving focus to the body editor, but that would be confusing, so it seems it should be having the tree drawn with a node selected counts as visiting the node.
+Javascript and perl need more work.
 .. @+node:ekr.20160405110731.1: *4* #189: Better support for UNL navigation of Leo's code
 https://github.com/leo-editor/leo-editor/issues/189
 
@@ -90,27 +104,44 @@ I do this kind of thing by keeping buttons in @files...
 so changes made in one outline are automatically propagated to other
 outlines next time they're reloaded.  You just reference the files
 in each outline where you want those buttons.
-.. @+node:ekr.20160418065622.1: *4* #252: Wishlist: goto-next clone activate chapter view
-https://github.com/leo-editor/leo-editor/issues/252
-.. @+node:ekr.20160413081725.1: *4* Revise colorizer for markdown
-- Make sure it is called.
-- Use rest colorizer as a template.
-.. @+node:ekr.20160403043354.1: ** To do: 5.4
+.. @+node:ekr.20160506104241.1: *4* #283: Show global line number in lower left status bar
+https://github.com/leo-editor/leo-editor/issues/283
+.. @+node:ekr.20160506104405.1: *4* #283: Improve automatic creation of myLeoSettings.leo
+https://github.com/leo-editor/leo-editor/issues/282
+
+Terry: I think automatically creating the file is worth keeping.  We could add a popup to tell the user it was just created if we wanted it to be more obvious.
+
+Without automagic creation, the new user must correctly layout a Leo
+settings file.
+
+  @settings
+    @enabled-plugins
+    @shortcuts
+
+etc. before they can change any settings, which I think is too much of
+a barrier.
+
+It does not copy all of leoSettings.leo, which would be a bad
+idea.  It just copies key bindings and enabled-plugins.
+
+It should be created in ~/.leo/myLeoSettings.leo, that's worked fine so
+far.
+.. @+node:ekr.20160505042139.1: *4* #284: More flexible imports for .json files
+https://github.com/leo-editor/leo-editor/issues/284
+
+Create a class that helps json import scripts.
+
+Original discussion:
+https://groups.google.com/d/msg/leo-editor/k0TS8JGxNiA/GleSjF2lAgAJ
+
+A helper class, JSON_Import_Helper (jih) would contain all the general code. You could say that this helper class is conceptually similar to the RecursiveImportController class.
+
+Client scripts would tell the jih class what elements are to create outline structure, which elements should be ignored, and which elements are to create headline text, body text, or even may uA's.
+.. @+node:ekr.20160318112838.1: *3* 5.4 Next
 @language rest
 @wrap
 
-Everything assigned to 5.4
-https://github.com/leo-editor/leo-editor/issues?q=is%3Aopen+is%3Aissue+milestone%3A5.4
-.. @+node:ekr.20151231095651.1: *3* Bugs: 5.4
-@language rest
-@wrap
-.. @+node:ekr.20151231095917.1: *4* #201: Leo does not work with PyQt5 5.5.0
-https://github.com/leo-editor/leo-editor/issues/201
-.. @+node:ekr.20141017110114.18267: *4* @data qt-scintilla-styles only works in leoSetting.leo
-- @data qt-scintilla-styles *only* works in leoSetting.leo, not myLeoSettings.leo.
-.. @+node:ekr.20120219152142.34262: *4* Fix bug: Revert moves the reverted tab to the right
-And Leo hangs afterwards when closing!
-.. @+node:ekr.20160406111546.1: *3* First: 5.4
+Some of these may not happen.
 .. @+node:ekr.20160318113006.1: *4* API's for icons, attributes & windows
 Must be easy to use.
 
@@ -124,36 +155,6 @@ d = p.u.get(plugin_name, {})
 d['duration'] = 5
 p.u[plugin_name] = d
 .. @+node:ekr.20080802070659.11: *5* Make node attributes visible, and supported by Leo's core
-.. @+node:ekr.20151231101050.1: *4* #127: Bracket matching is buggy
-https://github.com/leo-editor/leo-editor/issues/127
-
-Javascript and perl need more work.
-.. @+node:ekr.20130805080841.21380: *5* #1222947: javascript import bug (Hard)
-@language javascript
-
-https://groups.google.com/forum/#!topic/leo-editor/dmC8iIKlF7g
-
-Bug 
-https://bugs.launchpad.net/leo-editor/+bug/1222947
-
-Here is the test file::
-
-    var express = require('express');
-     
-    var app = express.createServer(express.logger());
-     
-    app.get('/', function(request, response) {
-    response.send('Hello World!');
-    });
-     
-    var port = process.env.PORT || 5000;
-    app.listen(port, function() {
-    console.log("Listening on " + port);
-    });
-.. @+node:ekr.20160318113142.1: *4* Add coffeescript importer
-# https://pypi.python.org/pypi/CoffeeScript/1.1.2
-import coffeescript
-g.es(coffeescript)
 .. @+node:ekr.20160404213305.1: *4* 4 Import problems
 .. @+node:ekr.20130806072439.20380: *5* auto-rst error? need more robust?
 From: HaveF <iamaplayer@gmail.com>
@@ -363,12 +364,15 @@ There is no easy way to do this at present, but it's probably reasonable to disa
 non-strict languages.
 
 Please file a wishlist bug for this.  Thanks.
-.. @+node:ekr.20150801060026.1: *4* leotutor.leo
-.. @+node:ekr.20160318112838.1: *3* Next: 5.4
-@language rest
-@wrap
+.. @+node:ekr.20160327111800.1: *4* Support jedi auto-completion (& valuespace)
+- jedi is available in the
+- Can we use live code inside Leo?
 
-Some of these may not happen.
+Terry: valuespace remarks
+https://groups.google.com/d/msg/leo-editor/u5fToKw2wEU/Cl1Wy3whAgAJ
+
+Terry: autocomplete code looks at objects in c.vs namespace
+https://groups.google.com/d/msg/leo-editor/u5fToKw2wEU/2ag8PH3oAAAJ
 .. @+node:ekr.20160325152551.1: *4* Add new, simple, rst/md commands
 - Use # to prevent headlines from being included.
 - Use some, but not all, rst3 settings.
@@ -407,16 +411,10 @@ createColorPicker
     - Some key to shift back to the nav pane.
 - Focus to Nav pane should select search area.
     - Something like ctrl-Enter shouild go back to Nav pane.
-.. @+node:ekr.20160327112237.1: *4* Read/write files in json format
-.. @+node:ekr.20160327111800.1: *4* Support jedi auto-completion
-- jedi is available in the
-- Can we use live code inside Leo?
-
-Terry: valuespace remarks
-https://groups.google.com/d/msg/leo-editor/u5fToKw2wEU/Cl1Wy3whAgAJ
-
-Terry: autocomplete code looks at objects in c.vs namespace
-https://groups.google.com/d/msg/leo-editor/u5fToKw2wEU/2ag8PH3oAAAJ
+.. @+node:ekr.20150801060026.1: *4* leotutor.leo
+.. @+node:ekr.20160515143249.1: *4* @subcommander
+Registers subcommander
+.. @+node:ekr.20160515143329.1: *4* @listen(channel_name)
 .. @+node:ekr.20160315141751.1: *3* Code Academy: possible topics
 @language rest
 @wrap
@@ -515,6 +513,8 @@ You're going to get some journalists excited, and those are your reviews.
 
 Encourage them to write in with their unique uses, and publicize them. I bet people are doing things with Leo you never dreamed of, and some of those things might be the itch some journalist wants to scratch.
 .. @+node:ekr.20150412034943.1: *4* Show what rST & css can do in Leo
+.. @+node:ekr.20131121211048.16378: *3* * More screenshots!
+Different font sizes, coloring schemes, plugins, etc.
 .. @+node:ekr.20140704052551.17951: *3* Code
 .. @+node:ekr.20130806072439.21341: *4* * Node pipes
 From: Kent Tenney <ktenney@gmail.com>
@@ -2361,6 +2361,48 @@ Personally I think Leo could navigate cyclic graphs, see http://leo.zwiki.org/Gr
 I'd like Leo to be able to behave like CmapTools, http://cmap.ihmc.us/ but maybe it can, essentially, and it's really a matter of defining some new interface bells and whistles.
 .. @+node:ekr.20150516123559.1: *4* Doc parts should colorize like rst/md by default
 This seems more difficult than I thought.
+.. @+node:ekr.20160503093454.2: *4* Ignore URL's in scripts?
+@language rest
+@wrap
+
+From: HaveF <iamaplayer@gmail.com>
+
+I write a script (say, @button button-1) in leo-file-A.leo, and reuse it by copy(ctrl+shift+c) the button to leo-file-B.leo.
+
+When I'm working on leo-file-B.leo, I may have ideas to improve the @button button-1, but at that time(working on leo-file-B.leo), I may forget where the original place of @button button-1 is. Even I store the original scripts in the default workbook.leo is a tedious work to deal with(open it, locate where the original script is, update it...)
+
+After I add the @url at the first line of @button button-1, I can decide if the improvements what I made on leo-file-B.leo's @button button-1 should or shouldn't be merged to the original and upstream @button button-1(in leo-file-A.leo) easily by just a click.
+
+And if I work on leo-file-C.leo, I want to use the same script, but I just only remember I use the script in the leo-file-B.leo instead of original place. With @url I can easily jump to original place, and copy it to leo-file-C.leo.
+
+Using @url in the leo script, I can make the scripts consistency and
+diversity at same time.
+
+===== Feature request
+
+At present, you can use this idea by comment the @url line after jump. If @url isn't comment, the leo-editor will say... SyntaxError: invalid syntax at the @url line.
+
+Maybe it is a good idea to omit the @url line in the script when executing script?
+
+===== EKR
+
+Yes.  I think this is a good idea.  A similar idea occurred to me when looking at @rclick nodes.  
+
+At present, the context_menu plugin contains an ugly hack:  it allows an @rclick node to *follow* an @button node.  This is needed at present when the @button node contains @others: the @rclick node can't be part of the script "pulled in" by @others.
+
+It would be much more elegant to ignore @rclick nodes when computing the script.  This would require a change to the @others logic, but I think it is worthwhile.
+
+===== Terry Brown <terry_n_brown@yahoo.com>
+
+I do this kind of thing by keeping buttons in @files...
+
+@file ~/.leo/gen  # general utility buttons
+@file ~/.leo/dml  # tools for editing an XML dialect I use
+@file ~/.leo/sql  # tools for editing SQL / interacting with server
+
+so changes made in one outline are automatically propagated to other
+outlines next time they're reloaded.  You just reference the files
+in each outline where you want those buttons.
 .. @+node:ekr.20150311051910.4: *4* Improve recovered nodes operation
 - Detect changes in root node, if possible.
 - Detect changes in headlines, if possible.
@@ -5551,4 +5593,5 @@ https://bugs.launchpad.net/leo-editor/+bug/914221
 Summary of a *long* discussion: this may be a docutils issue, and does not
 seem easy to fix.
 .. @-all
+.. @@nosearch
 .. @-leo

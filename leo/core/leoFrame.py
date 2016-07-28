@@ -50,7 +50,7 @@ import time
 # These classes are for documentation and unit testing.
 # They are the base class for no class.
 #@+node:ekr.20140904043623.18535: *3* class ColorizerAPI
-class ColorizerAPI:
+class ColorizerAPI(object):
     '''The required API of c.frame.body.colorizer.'''
 
     def __init__(self, c, widget): pass
@@ -71,7 +71,7 @@ class ColorizerAPI:
 
     def write_colorizer_cache(self, p): pass
 #@+node:ekr.20140904043623.18576: *3* class StatusLineAPI
-class StatusLineAPI:
+class StatusLineAPI(object):
     '''The required API for c.frame.statusLine.'''
 
     def __init__(self, c, parentFrame): pass
@@ -92,7 +92,7 @@ class StatusLineAPI:
 
     def update(self): pass
 #@+node:ekr.20140907201613.18663: *3* class TreeAPI
-class TreeAPI:
+class TreeAPI(object):
     '''The required API for c.frame.tree.'''
 
     def __init__(self, frame): pass
@@ -195,7 +195,7 @@ class WrapperAPI(object):
 
     def selectAllText(self, insert=None): pass
 
-    def setAllText(self, s): pass
+    def setAllText(self, s, h=None): pass
 
     def setFocus(self): pass # Required: sets the focus to wrapper.widget.
 
@@ -213,7 +213,7 @@ class WrapperAPI(object):
 
     def toPythonIndexRowCol(self, index): return (0, 0, 0)
 #@+node:ekr.20140904043623.18552: ** class IconBarAPI
-class IconBarAPI:
+class IconBarAPI(object):
     '''The required API for c.frame.iconBar.'''
 
     def __init__(self, c, parentFrame): pass
@@ -756,7 +756,8 @@ class LeoFrame(object):
         self.es_newlines = 0 # newline count for this log stream
         self.openDirectory = ""
         self.saved = False # True if ever saved
-        self.splitVerticalFlag, self.ratio, self.secondary_ratio = True, 0.5, 0.5 # Set by initialRatios later.
+        self.splitVerticalFlag = True
+            # Set by initialRatios later.
         self.startupWindow = False # True if initially opened window
         self.stylesheet = None # The contents of <?xml-stylesheet...?> line.
         self.tab_width = 0 # The tab width in effect in this pane.
@@ -780,17 +781,17 @@ class LeoFrame(object):
     def initialRatios(self):
         c = self.c
         s = c.config.get("initial_split_orientation", "string")
-        verticalFlag = s == None or (s != "h" and s != "horizontal")
+        verticalFlag = s is None or (s != "h" and s != "horizontal")
         if verticalFlag:
             r = c.config.getRatio("initial_vertical_ratio")
-            if r == None or r < 0.0 or r > 1.0: r = 0.5
+            if r is None or r < 0.0 or r > 1.0: r = 0.5
             r2 = c.config.getRatio("initial_vertical_secondary_ratio")
-            if r2 == None or r2 < 0.0 or r2 > 1.0: r2 = 0.8
+            if r2 is None or r2 < 0.0 or r2 > 1.0: r2 = 0.8
         else:
             r = c.config.getRatio("initial_horizontal_ratio")
-            if r == None or r < 0.0 or r > 1.0: r = 0.3
+            if r is None or r < 0.0 or r > 1.0: r = 0.3
             r2 = c.config.getRatio("initial_horizontal_secondary_ratio")
-            if r2 == None or r2 < 0.0 or r2 > 1.0: r2 = 0.8
+            if r2 is None or r2 < 0.0 or r2 > 1.0: r2 = 0.8
         # g.trace(r,r2)
         return verticalFlag, r, r2
     #@+node:ekr.20031218072017.3690: *4* longFileName & shortFileName
@@ -1211,7 +1212,7 @@ class LeoLog(object):
     def __init__(self, frame, parentFrame):
         '''Ctor for LeoLog class.'''
         self.frame = frame
-        self.c = c = frame and frame.c or None
+        self.c = frame and frame.c or None
         self.enabled = True
         self.newlines = 0
         self.isNull = False
@@ -1303,7 +1304,7 @@ class LeoLog(object):
         return list(self.frameDict.values())
     #@+node:ekr.20070302094848.9: *3* LeoLog.numberOfVisibleTabs
     def numberOfVisibleTabs(self):
-        return len([val for val in list(self.frameDict.values()) if val != None])
+        return len([val for val in list(self.frameDict.values()) if val is not None])
     #@+node:ekr.20070302101304: *3* LeoLog.put & putnl
     # All output to the log stream eventually comes here.
 
@@ -1693,13 +1694,15 @@ class LeoTree(object):
         c = self.c
         call_event_handlers = p != old_p
         if call_event_handlers:
-            select = not g.doHook("select1", c=c, new_p=p, old_p=old_p, new_v=p, old_v=old_p)
+            select = not g.doHook("select1",
+                c=c, new_p=p, old_p=old_p,
+                new_v=p, old_v=old_p)
         else:
             select = True
         if select:
             self.revertHeadline = p.h
             c.frame.setWrap(p)
-            w = c.frame.body.wrapper.widget
+            # w = c.frame.body.wrapper.widget
             btc = c.bigTextController
             if btc:
                 if btc.should_add_buttons(old_p, p):
@@ -1707,7 +1710,7 @@ class LeoTree(object):
                 elif btc.should_go_away(p):
                     btc.go_away()
             self.set_body_text_after_select(p, old_p, traceTime)
-            c.nodeHistory.update(p) # Remember this position.
+            c.nodeHistory.update(p)
         if traceTime:
             delta_t = time.time() - t1
             if False or delta_t > 0.1:
@@ -1715,24 +1718,36 @@ class LeoTree(object):
     #@+node:ekr.20090608081524.6109: *6* LeoTree.set_body_text_after_select
     def set_body_text_after_select(self, p, old_p, traceTime, force=False):
         '''Set the text after selecting a node.'''
-        trace = False and force and not g.unitTesting
-        if traceTime: t1 = time.time()
+        trace = False and not g.unitTesting
+        trace_pass = False
+        trace_time = (True or traceTime)
+        if trace_time: t1 = time.clock()
         # Always do this.  Otherwise there can be problems with trailing newlines.
         c = self.c
         w = c.frame.body.wrapper
         s = p.v.b # Guaranteed to be unicode.
+        # Part 1: get the old text.
         old_s = w.getAllText()
+        if trace: g.trace('=====', len(s), p.h)
+        if trace and trace_time:
+            t2 = time.clock()
+            print('  part1: getAllText %4.2f sec' % (t2-t1))
         if not force and p and p == old_p and s == old_s:
-            if trace: g.trace('*pass', len(s), p.h, old_p.h)
+            if trace and trace_pass: g.trace('*pass', len(s), p.h, old_p.h)
+            return
+        # Part 2: set the new text.
+        # w.setAllText destroys all color tags, so do a full recolor.
+        if 0 < c.max_pre_loaded_body_chars < len(s):
+            # Don't load the text if not wanted.
+            if trace and trace_time:
+                t3 = time.clock()
+                print('  part2: setAllText %4.2f sec' % (t3-t2))
         else:
-            # w.setAllText destroys all color tags, so do a full recolor.
-            if trace: g.trace('*reload', len(s), p.h, old_p and old_p.h)
-            w.setAllText(s) # ***** Very slow
-            if traceTime:
-                delta_t = time.time() - t1
-                if delta_t > 0.1: g.trace('part1: %2.3f sec' % (delta_t))
-            # Part 2:
-            if traceTime: t2 = time.time()
+            w.setAllText(s, h = p.h)
+            if trace and trace_time:
+                t3 = time.clock()
+                print('  part2: setAllText %4.2f sec' % (t3-t2))
+            # Part 3: colorize.
             # We can't call c.recolor_now here.
             colorizer = c.frame.body.colorizer
             if hasattr(colorizer, 'setHighlighter'):
@@ -1740,11 +1755,10 @@ class LeoTree(object):
                     self.frame.body.recolor(p)
             else:
                 self.frame.body.recolor(p)
-            if traceTime:
-                delta_t = time.time() - t2
-                tot_t = time.time() - t1
-                if delta_t > 0.1: g.trace('part2: %2.3f sec' % (delta_t))
-                if tot_t > 0.1: g.trace('total: %2.3f sec' % (tot_t))
+        if trace and trace_time:
+            t4 = time.clock()
+            print('  part3: colorize   %4.2f sec' % (t4-t3))
+            print('  total:            %4.2f sec' % (t4-t1))
         # This is now done after c.p has been changed.
             # p.restoreCursorAndScroll()
     #@+node:ekr.20140829053801.18458: *5* 3. LeoTree.change_current_position
@@ -1773,7 +1787,6 @@ class LeoTree(object):
         '''Scroll the cursor. It deserves separate timing stats.'''
         if traceTime:
             t1 = time.time()
-        c = self.c
         p.restoreCursorAndScroll()
             # Was in setBodyTextAfterSelect
         if traceTime:
@@ -1969,6 +1982,7 @@ class NullFrame(LeoFrame):
         self.iconBar = NullIconBarClass(self.c, self)
         self.isNullFrame = True
         self.outerFrame = None
+        self.ratio = self.secondary_ratio = 0.5
         self.statusLineClass = NullStatusLineClass
         self.title = title
         self.top = None # Always None.
@@ -2332,7 +2346,7 @@ class NullTree(LeoTree):
             g.trace('-' * 20, 'oops')
     #@-others
 #@+node:ekr.20070228074228.1: ** class StringTextWrapper
-class StringTextWrapper:
+class StringTextWrapper(object):
     '''A class that represents text as a Python string.'''
     #@+others
     #@+node:ekr.20070228074228.2: *3* stw.ctor
@@ -2465,7 +2479,7 @@ class StringTextWrapper:
         '''StringTextWrapper.'''
         self.setSelectionRange(0, 'end', insert=insert)
     #@+node:ekr.20140903172510.18600: *4* stw.setAllText
-    def setAllText(self, s):
+    def setAllText(self, s, h=None):
         '''StringTextWrapper.'''
         self.s = s
         i = len(self.s)
@@ -2480,13 +2494,9 @@ class StringTextWrapper:
     #@+node:ekr.20070228111853: *4* stw.setSelectionRange
     def setSelectionRange(self, i, j, insert=None):
         '''StringTextWrapper.'''
-        i1, j1, insert1 = i, j, insert
         i, j = self.toPythonIndex(i), self.toPythonIndex(j)
         self.sel = i, j
-        if insert is not None:
-            self.ins = self.toPythonIndex(insert)
-        else:
-            self.ins = j
+        self.ins = j if insert is None else self.toPythonIndex(insert)
         if self.trace: g.trace('i', i, 'j', j, 'insert', repr(insert))
     #@+node:ekr.20140903172510.18581: *4* stw.toPythonIndex
     def toPythonIndex(self, index):

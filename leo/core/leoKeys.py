@@ -2,6 +2,8 @@
 #@+node:ekr.20061031131434: * @file leoKeys.py
 """Gui-independent keystroke handling for Leo."""
 # pylint: disable=eval-used
+# pylint: disable=deprecated-method
+    # The new methods may not exist in Python 2.
 #@+<< imports >>
 #@+node:ekr.20061031131434.1: ** << imports >> (leoKeys)
 import leo.core.leoGlobals as g
@@ -134,7 +136,7 @@ import time
 #@-<< about key dicts >>
 #@+others
 #@+node:ekr.20061031131434.4: ** class AutoCompleterClass
-class AutoCompleterClass:
+class AutoCompleterClass(object):
     '''A class that inserts autocompleted and calltip text in text widgets.
     This class shows alternatives in the tabbed log pane.
 
@@ -190,7 +192,7 @@ class AutoCompleterClass:
         state = k.unboundKeyAction
         w = event and event.w or c.get_focus()
         self.force = force
-        if not state in ('insert', 'overwrite'):
+        if state not in ('insert', 'overwrite'):
             if trace: g.trace('not in insert/overwrite mode')
             return
         # First, handle the invocation character as usual.
@@ -824,7 +826,7 @@ class AutoCompleterClass:
     #@+node:ekr.20061031131434.39: *4* ac.insert_general_char
     def insert_general_char(self, ch):
         trace = False and not g.unitTesting
-        c, k = self.c, self.k; w = self.w
+        k, w = self.k, self.w
         if trace: g.trace(repr(ch))
         if g.isWordChar(ch):
             self.insert_string(ch)
@@ -926,7 +928,7 @@ class AutoCompleterClass:
             if ch:
                 n = d.get(ch, 0)
                 d[ch] = n + 1
-        aList = ['%s %d' % (ch, d.get(ch)) for ch in sorted(d)]
+        aList = ['%s %d' % (ch, d.get(ch2)) for ch2 in sorted(d)]
         if len(aList) > 1:
             tabList = aList
         else:
@@ -951,7 +953,7 @@ class AutoCompleterClass:
         return s
     #@-others
 #@+node:ekr.20110312162243.14260: ** class ContextSniffer
-class ContextSniffer:
+class ContextSniffer(object):
     """ Class to analyze surrounding context and guess class
 
     For simple dynamic code completion engines.
@@ -989,7 +991,7 @@ class ContextSniffer:
         vars.append(klass)
     #@-others
 #@+node:ekr.20140813052702.18194: ** class FileNameChooser
-class FileNameChooser:
+class FileNameChooser(object):
     '''A class encapsulation file selection & completion logic.'''
     # pylint: disable=no-self-argument
     # The first argument is fnc.
@@ -1172,7 +1174,7 @@ class FileNameChooser:
             g.es('', s, tabName=fnc.tabName)
     #@-others
 #@+node:ekr.20140816165728.18940: ** class GetArg
-class GetArg:
+class GetArg(object):
     '''
     A class encapsulating all k.getArg logic.
 
@@ -1229,7 +1231,7 @@ class GetArg:
     def do_back_space(ga, tabList, completion=True):
         '''Handle a backspace and update the completion list.'''
         trace = False and not g.unitTesting
-        c, k = ga.c, ga.k
+        k = ga.k
         ga.tabList = tabList[:] if tabList else []
         if trace: g.trace('len(ga.tabList)', len(ga.tabList))
         # Update the label.
@@ -1262,7 +1264,7 @@ class GetArg:
         '''Handle tab completion when the user hits a tab.'''
         trace = False and not g.unitTesting
         # g.trace('\n'+'\n'.join([z for z in tabList if z.startswith('@')]))
-        c, k = ga.c, ga.k
+        c = ga.c
         if completion:
             tabList = ga.tabList = tabList[:] if tabList else []
             if trace: g.trace('len(ga.tabList)', len(ga.tabList))
@@ -1453,7 +1455,7 @@ class GetArg:
     def do_end(ga, event, char, stroke):
         '''A return or escape has been seen.'''
         trace = False and not g.unitTesting
-        c, k = ga.c, ga.k
+        k = ga.k
         if trace:
             g.trace('char', repr(char), stroke, k.getArgEscapes)
             if ga.after_get_arg_state:
@@ -1599,7 +1601,7 @@ class GetArg:
                 s3 = commandName
                 data.append((s1, s2, s3),)
                 n = max(n, len(s1))
-        aList = ['%*s %s %s' % (-n, s1, s2, s3) for s1, s2, s3 in data]
+        aList = ['%*s %s %s' % (-n, z1, z2, z3) for z1, z2, z3 in data]
         if legend:
             aList.extend([
                 '',
@@ -1637,7 +1639,7 @@ class GetArg:
             return ' '
     #@-others
 #@+node:ekr.20061031131434.74: ** class KeyHandlerClass
-class KeyHandlerClass:
+class KeyHandlerClass(object):
     '''
     A class to support emacs-style commands.
     c.k is an instance of this class.
@@ -1670,8 +1672,6 @@ class KeyHandlerClass:
         self.defineExternallyVisibleIvars()
         self.defineInternalIvars()
         self.defineSettingsIvars()
-        if g.new_modes:
-            self.modeController = ModeController(c)
         self.defineTkNames()
         self.defineSpecialKeys()
         self.defineSingleLineCommands()
@@ -2314,7 +2314,7 @@ class KeyHandlerClass:
     #@+node:ekr.20130924035029.12741: *5* k.initOneAbbrev
     def initOneAbbrev(self, commandName, key):
         '''Enter key as an abbreviation for commandName in c.commandsDict.'''
-        c, k = self.c, self
+        c = self.c
         if c.commandsDict.get(key):
             g.trace('ignoring duplicate abbrev: %s', key)
         else:
@@ -2349,12 +2349,9 @@ class KeyHandlerClass:
     #@+node:ekr.20061031131434.98: *4* k.makeAllBindings
     def makeAllBindings(self):
         '''Make all key bindings in all of Leo's panes.'''
-        k = self; c = k.c
+        k = self
         k.bindingsDict = {}
-        if g.new_modes:
-            k.modeController.addModeCommands()
-        else:
-            k.addModeCommands()
+        k.addModeCommands()
         k.makeBindingsFromCommandsDict()
         k.initSpecialIvars()
         k.initAbbrev()
@@ -2426,7 +2423,7 @@ class KeyHandlerClass:
     def addToCommandHistory(self, commandName):
         '''Add a name to the command history.'''
         k = self
-        h, i = k.commandHistory, k.commandIndex
+        h = k.commandHistory
         if commandName in h:
             h.remove(commandName)
         h.append(commandName)
@@ -2526,6 +2523,9 @@ class KeyHandlerClass:
                 ins = w.getInsertPoint()
                 c.frame.log.deleteTab('Completion')
                 w.setSelectionRange(sel1, sel2, insert=ins)
+            else:
+                c.frame.log.deleteTab('Completion')
+                    # 2016/04/27
             if k.mb_help:
                 s = k.getLabel()
                 commandName = s[len(helpPrompt):].strip()
@@ -2563,7 +2563,8 @@ class KeyHandlerClass:
     def callAltXFunction(self, event):
         '''Call the function whose name is in the minibuffer.'''
         trace = False and not g.unitTesting
-        k = self; c = k.c; s = k.getLabel()
+        c, k = self.c, self
+        # s = k.getLabel()
         k.mb_tabList = []
         commandName, tail = k.getMinibufferCommandName()
         if trace: g.trace('command:', commandName, 'tail:', tail)
@@ -2841,7 +2842,7 @@ class KeyHandlerClass:
                 n = max(n, len(s1))
                 data.append((s1, s2),)
         # This isn't perfect in variable-width fonts.
-        lines = ['%*s %s\n' % (-n, s1, s2) for s1, s2 in data]
+        lines = ['%*s %s\n' % (-n, z1, z2) for z1, z2 in data]
         g.es('', ''.join(lines), tabName=tabName)
     #@+node:ekr.20061031131434.122: *4* k.repeatComplexCommand & helper
     @cmd('repeat-complex-command')
@@ -3588,17 +3589,19 @@ class KeyHandlerClass:
         if trace: g.trace(char)
         if not char: return
         c = self.c
+        if not c.config.getBool('plain-key-outline-search'):
+            return
 
         def match(p):
             '''Return True if p contains char.'''
             s = p.h.lower() if char.islower() else p.h
             return s.find(char) > -1
-            
+
         # Start at c.p, then retry everywhere.
         for p in (c.p, c.rootPosition()):
             p = p.copy()
             if p == c.p and match(p):
-                 p.moveToVisNext(c)
+                p.moveToVisNext(c)
             while p:
                 if trace: g.trace(p.h)
                 if match(p):
@@ -3607,7 +3610,7 @@ class KeyHandlerClass:
                     return
                 else:
                     p.moveToVisNext(c)
-                
+
         # Too confusing for the user.
         # re_pat = re.compile(r'^@(\w)+[ \t](.+)')
 
@@ -3919,7 +3922,12 @@ class KeyHandlerClass:
             k.setLabelBlue(modeName + ': ') # ,protect=True)
     #@+node:ekr.20120208064440.10199: *4* k.generalModeHandler (OLD)
     def generalModeHandler(self, event,
-        commandName=None, func=None, modeName=None, nextMode=None, prompt=None):
+        commandName=None,
+        func=None,
+        modeName=None,
+        nextMode=None,
+        prompt=None
+    ):
         '''Handle a mode defined by an @mode node in leoSettings.leo.'''
         k = self; c = k.c
         state = k.getState(modeName)
@@ -3975,48 +3983,46 @@ class KeyHandlerClass:
         if not modeName:
             g.trace('oops: no modeName')
             return
-        if g.new_modes:
-            mode = k.modeController.getMode(modeName)
-            if mode:
-                mode.initMode()
-            else:
-                g.trace('***** oops: no mode', modeName)
+        d = g.app.config.modeCommandsDict.get('enter-' + modeName)
+        if not d:
+            self.badMode(modeName)
+            return
         else:
-            d = g.app.config.modeCommandsDict.get('enter-' + modeName)
-            if not d:
-                self.badMode(modeName)
-                return
+            k.modeBindingsDict = d
+            si = d.get('*command-prompt*')
+            if si:
+                prompt = si.kind # A kludge.
             else:
-                k.modeBindingsDict = d
-                si = d.get('*command-prompt*')
-                if si:
-                    prompt = si.kind # A kludge.
-                else:
-                    prompt = modeName
-                if trace: g.trace('modeName: %s prompt: %s d.keys(): %s' % (
-                    modeName, prompt, sorted(list(d.keys()))))
-            k.inputModeName = modeName
-            k.silentMode = False
-            aList = d.get('*entry-commands*', [])
-            if aList:
-                for si in aList:
-                    assert g.isShortcutInfo(si), si
-                    commandName = si.commandName
-                    if trace: g.trace('entry command:', commandName)
-                    k.simulateCommand(commandName)
-                    # Careful, the command can kill the commander.
-                    if g.app.quitting or not c.exists: return
-                    # New in Leo 4.5: a startup command can immediately transfer to another mode.
-                    if commandName.startswith('enter-'):
-                        if trace: g.trace('redirect to mode', commandName)
-                        return
-            # Create bindings after we know whether we are in silent mode.
-            w = k.modeWidget if k.silentMode else k.w
-            k.createModeBindings(modeName, d, w)
-            k.showStateAndMode(prompt=prompt)
+                prompt = modeName
+            if trace: g.trace('modeName: %s prompt: %s d.keys(): %s' % (
+                modeName, prompt, sorted(list(d.keys()))))
+        k.inputModeName = modeName
+        k.silentMode = False
+        aList = d.get('*entry-commands*', [])
+        if aList:
+            for si in aList:
+                assert g.isShortcutInfo(si), si
+                commandName = si.commandName
+                if trace: g.trace('entry command:', commandName)
+                k.simulateCommand(commandName)
+                # Careful, the command can kill the commander.
+                if g.app.quitting or not c.exists: return
+                # New in Leo 4.5: a startup command can immediately transfer to another mode.
+                if commandName.startswith('enter-'):
+                    if trace: g.trace('redirect to mode', commandName)
+                    return
+        # Create bindings after we know whether we are in silent mode.
+        w = k.modeWidget if k.silentMode else k.w
+        k.createModeBindings(modeName, d, w)
+        k.showStateAndMode(prompt=prompt)
     #@+node:ekr.20120208064440.10201: *4* k.NEWgeneralModeHandler (NEW MODES)
     def NEWgeneralModeHandler(self, event,
-        commandName=None, func=None, modeName=None, nextMode=None, prompt=None):
+        commandName=None,
+        func=None,
+        modeName=None,
+        nextMode=None,
+        prompt=None
+    ):
         '''Handle a mode defined by an @mode node in leoSettings.leo.'''
         k = self; c = k.c
         state = k.getState(modeName)
@@ -4364,9 +4370,9 @@ class KeyHandlerClass:
     def inState(self, kind=None):
         k = self
         if kind:
-            return k.state.kind == kind and k.state.n != None
+            return k.state.kind == kind and k.state.n is not None
         else:
-            return k.state.kind and k.state.n != None
+            return k.state.kind and k.state.n is not None
     #@+node:ekr.20080511122507.4: *4* k.setDefaultInputState
     def setDefaultInputState(self):
         k = self; state = k.defaultUnboundKeyAction
@@ -4379,13 +4385,13 @@ class KeyHandlerClass:
         k.setInputState(state)
     #@+node:ekr.20061031131434.133: *4* k.setInputState
     def setInputState(self, state, set_border=False):
-        c, k = self.c, self
+        k = self
         k.unboundKeyAction = state
     #@+node:ekr.20061031131434.199: *4* k.setState
     def setState(self, kind, n, handler=None):
         trace = False and not g.unitTesting
         k = self
-        if kind and n != None:
+        if kind and n is not None:
             if trace: g.trace('**** setting %s %s %s' % (
                 kind, n, handler and handler.__name__), g.callers())
             k.state.kind = kind
@@ -4403,7 +4409,6 @@ class KeyHandlerClass:
         c, k = self.c, self
         state = k.unboundKeyAction
         mode = k.getStateKind()
-        inOutline = False
         if not g.app.gui: return
         if not w:
             w = g.app.gui.get_focus(c)
@@ -4509,7 +4514,7 @@ class KeyHandlerClass:
         # of -1. These unusual cases will be described when they come up; they are always
         # to make the individual command more convenient to use.
         #@-<< about repeat counts >>
-        c, k = self.c, self
+        k = self
         state = k.getState('u-arg')
         stroke = event and event.stroke or None
         if state == 0:
@@ -4578,39 +4583,8 @@ class KeyHandlerClass:
             c.macroCommands.startKbdMacro(event)
             c.macroCommands.callLastKeyboardMacro(event)
     #@-others
-#@+node:ekr.20120208064440.10148: ** class ModeController
-class ModeController:
-
-    def __init__(self, c):
-        self.c = c
-        self.d = {} # Keys are command names, values are modes.
-        self.k = c.k
-        g.trace(self)
-
-    def __repr__(self):
-        return '<ModeController %s>' % self.c.shortFileName()
-
-    __str__ = __repr__
-    #@+others
-    #@+node:ekr.20120208064440.10161: *3* addModeCommands (ModeController)
-    def addModeCommands(self):
-        g.trace(self, self.d)
-        for mode in self.d.values():
-            mode.createModeCommand()
-    #@+node:ekr.20120208064440.10163: *3* getMode (ModeController)
-    def getMode(self, modeName):
-        g.trace(self)
-        mode = self.d.get(modeName)
-        g.trace(modeName, mode)
-        return mode
-    #@+node:ekr.20120208064440.10164: *3* makeMode (ModeController)
-    def makeMode(self, name, aList):
-        mode = ModeInfo(self.c, name, aList)
-        g.trace(self, mode.name, mode)
-        self.d[mode.name] = mode
-    #@-others
 #@+node:ekr.20120208064440.10150: ** class ModeInfo
-class ModeInfo:
+class ModeInfo(object):
 
     def __repr__(self):
         return '<ModeInfo %s>' % self.name
@@ -4695,8 +4669,7 @@ class ModeInfo:
                     if trace: g.trace(modeName, d2)
     #@+node:ekr.20120208064440.10195: *3* createModeCommand (ModeInfo) (not used)
     def createModeCommand(self):
-        g.trace(self)
-        c, k = self.c, self.k
+        c = self.c
         key = 'enter-' + self.name.replace(' ', '-')
 
         def enterModeCallback(event=None, self=self):
@@ -4717,7 +4690,7 @@ class ModeInfo:
     def init(self, name, dataList):
         '''aList is a list of tuples (commandName,si).'''
         trace = False and not g.unitTesting
-        c, d, k, modeName = self.c, self.d, self.c.k, self.name
+        c, d, modeName = self.c, self.d, self.name
         for name, si in dataList:
             assert g.isShortcutInfo(si), si
             if not name:

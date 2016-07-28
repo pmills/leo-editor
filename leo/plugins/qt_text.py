@@ -6,16 +6,14 @@
 import leo.core.leoGlobals as g
 import time
 from leo.core.leoQt import isQt5, QtCore, QtGui, Qsci, QtWidgets
-from leo.core.leoQt import Qsci
 #@+others
 #@+node:ekr.20140901062324.18719: **   class QTextMixin
-class QTextMixin:
+class QTextMixin(object):
     '''A minimal mixin class for QTextEditWrapper and QScintillaWrapper classes.'''
     #@+others
     #@+node:ekr.20140901062324.18732: *3* qtm.ctor & helper
     def __init__(self, c=None):
         '''Ctor for QTextMixin class'''
-        name = 'QTextMixin'
         self.c = c
         self.changingText = False # A lockout for onTextChanged.
         self.enabled = True
@@ -248,25 +246,6 @@ class QTextMixin:
         i = self.toPythonIndex(index)
         row, col = g.convertPythonIndexToRowCol(s, i)
         return i, row, col
-    #@+node:ekr.20140901062324.18713: *4* qtm.Idle time (removed)
-    if 0:
-
-        def after_idle(self, func, threadCount):
-            # g.trace(func.__name__,'threadCount',threadCount)
-            return func(threadCount)
-
-        def after(self, n, func, threadCount):
-
-            def after_callback(func=func, threadCount=threadCount):
-                # g.trace(func.__name__,threadCount)
-                return func(threadCount)
-
-            QtCore.QTimer.singleShot(n, after_callback)
-
-        def scheduleIdleTimeRoutine(self, function, *args, **keys):
-            g.trace()
-            # if not g.app.unitTesting:
-                # self.widget.after_idle(function,*args,**keys)
     #@+node:ekr.20140901062324.18729: *4* qtm.rememberSelectionAndScroll
     def rememberSelectionAndScroll(self):
         trace = (False or g.trace_scroll) and not g.unitTesting
@@ -379,7 +358,7 @@ class QLineEditWrapper(QTextMixin):
         '''QHeadlineWrapper.'''
         pass
     #@+node:ekr.20110605121601.18125: *4* qlew.setAllText
-    def setAllText(self, s):
+    def setAllText(self, s, h=None):
         '''Set all text of a Qt headline widget.'''
         if self.check():
             w = self.widget
@@ -870,7 +849,6 @@ class NumberBar(QtWidgets.QFrame):
     #@+node:ekr.20150403094706.7: *3* NumberBar.paintBlock
     def paintBlock(self, bold, n, painter, top_left, scroll_y):
         '''Paint n, right justified in the line number field.'''
-        c = self.c
         if bold:
             self.setBold(painter, True)
         s = str(n)
@@ -1047,7 +1025,7 @@ class QScintillaWrapper(QTextMixin):
                 QtCore.QTimer.singleShot(delay, func)
             #@+node:ekr.20140902084950.18636: *5* addFlashCallback
             def addFlashCallback(self=self):
-                n, i = self.flashCount, self.flashIndex
+                i = self.flashIndex
                 w = self.widget
                 self.setSelectionRange(i, i + 1)
                 if self.flashBg:
@@ -1071,7 +1049,7 @@ class QScintillaWrapper(QTextMixin):
             # Numbered color names don't work in Ubuntu 8.10, so...
             if bg and bg[-1].isdigit() and bg[0] != '#': bg = bg[: -1]
             if fg and fg[-1].isdigit() and fg[0] != '#': fg = fg[: -1]
-            w = self.widget # A QsciScintilla widget.
+            # w = self.widget # A QsciScintilla widget.
             self.flashCount = flashes
             self.flashIndex1 = self.getInsertPoint()
             self.flashIndex = self.toPythonIndex(i)
@@ -1111,13 +1089,11 @@ class QScintillaWrapper(QTextMixin):
         return i, j
     #@+node:ekr.20140901062324.18599: *4* qsciw.getX/YScrollPosition (to do)
     def getXScrollPosition(self):
-        w = self.widget
-        # g.trace(g.callers())
+        # w = self.widget
         return 0 # Not ready yet.
 
     def getYScrollPosition(self):
-        w = self.widget
-        # g.trace(g.callers())
+        # w = self.widget
         return 0 # Not ready yet.
     #@+node:ekr.20110605121601.18111: *4* qsciw.hasSelection
     def hasSelection(self):
@@ -1176,7 +1152,7 @@ class QScintillaWrapper(QTextMixin):
         row, col = g.convertPythonIndexToRowCol(s, i)
         w.ensureLineVisible(row)
     #@+node:ekr.20110605121601.18113: *4* qsciw.setAllText
-    def setAllText(self, s):
+    def setAllText(self, s, h=None):
         '''Set the text of a QScintilla widget.'''
         w = self.widget
         assert isinstance(w, Qsci.QsciScintilla), w
@@ -1347,7 +1323,7 @@ class QTextEditWrapper(QTextMixin):
             QtCore.QTimer.singleShot(delay, func)
 
         def addFlashCallback(self=self, w=w):
-            n, i = self.flashCount, self.flashIndex
+            i = self.flashIndex
             cursor = w.textCursor() # Must be the widget's cursor.
             cursor.setPosition(i)
             cursor.movePosition(e.Right, e.KeepAnchor, 1)
@@ -1560,19 +1536,20 @@ class QTextEditWrapper(QTextMixin):
         if trace: g.trace(self.getInsertPoint())
         self.widget.ensureCursorVisible()
     #@+node:ekr.20110605121601.18092: *4* qtew.setAllText
-    def setAllText(self, s):
+    def setAllText(self, s, h=None):
         '''Set the text of body pane.'''
         trace = False and not g.unitTesting
-        traceTime = False and not g.unitTesting
+        trace_time = True and not g.unitTesting
         c, w = self.c, self.widget
-        if trace: g.trace(len(s), c.p and c.p.h)
+        if h is None: h = c.p and c.p.h or '<no p>'
+        if trace and not trace_time: g.trace(len(s), h)
         colorizer = c.frame.body.colorizer
         highlighter = colorizer.highlighter
         # Be careful: Scintilla doesn't have a colorer.
         colorer = highlighter and highlighter.colorer
         if colorer: colorer.initFlag = True
         try:
-            if traceTime:
+            if trace and trace_time:
                 t1 = time.time()
             self.changingText = True # Disable onTextChanged.
             colorizer.changingText = True # Disable colorizer.
@@ -1582,10 +1559,9 @@ class QTextEditWrapper(QTextMixin):
             # w.update()
                 # 2014/08/30: w.update does not ensure that all text is loaded
                 # before the user starts editing it!
-            if traceTime:
+            if trace and trace_time:
                 delta_t = time.time() - t1
-                if False or delta_t > 0.1:
-                    g.trace('w.setPlainText: %2.3f sec.' % (delta_t))
+                g.trace('%4.2f sec. %6s chars %s' % (delta_t, len(s), h))
         finally:
             self.changingText = False
             colorizer.changingText = False

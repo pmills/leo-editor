@@ -198,7 +198,7 @@ if encOK:
             if v is c.p.v:
                 if sn_decode(v.b) != nf.toPlainText():
                     # only when needed to avoid scroll jumping
-                    nf.setPlainText(sn_decode(v.b))
+                    nf.setPlainText(g.toUnicode(sn_decode(v.b)))  # PMM what about here?
                 nf.setWindowTitle(p.h)
                 nf.dirty = False
 
@@ -226,7 +226,7 @@ if encOK:
         ### c = event['c']
         ### p = c.p
         nf = mknote(c,p, focusin=focusin, focusout=focusout)
-        nf.setPlainText(sn_decode(v.b))
+        nf.setPlainText(g.toUnicode(sn_decode(v.b)))  # PMM
         if rekey:
             g.es("Key updated, data decoded with new key shown in window")
 #@+node:tbrown.20100120100336.7830: *3* g.command('stickynoteenckey')
@@ -237,7 +237,7 @@ if encOK:
     def sn_encode(s):
         pad = ' '*(16-len(s)%16)
         return '\n'.join(textwrap.wrap(
-            base64.b64encode(AES.new(__ENCKEY[0]).encrypt(s+pad)),
+            g.toUnicode(base64.b64encode(AES.new(__ENCKEY[0]).encrypt(s+pad))),  # PMM. "wrap" needs unicode not bytes
             break_long_words = True
         ))
 
@@ -250,7 +250,7 @@ if encOK:
         if str(txt).startswith('v0:'):
             txt = QString(txt[3:])
         else:
-            txt = g.toUnicode(txt)
+            txt = g.toUnicode(txt).encode()  # PMM encrypt seems to need bytes
 
         # arbitrary kludge to convert string to 256 bits - don't change
         sha = SHA.new()
